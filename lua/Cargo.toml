@@ -1,0 +1,19 @@
+#
+# Build on MacOS：
+# $ cargo rustc --release --package lua -- -C link-arg=-undefined -C link-arg=dynamic_lookup
+#
+[package]
+name = "lua"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "dt_core_lua"
+crate-type = ["cdylib"]
+
+[dependencies]
+common = { path = "../common" }
+serde_json = { workspace = true }
+mlua = { version = "0.9.6", features = ["lua54", "module", "serialize"] }
