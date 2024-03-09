@@ -6,7 +6,7 @@ use serde_json::{Map, Value};
 const NAME_REGEX_STR: &'static str = r"^[#$a-zA-Z][a-zA-Z0-9_]{0,63}$";
 const NAME_RE: Lazy<Regex> = Lazy::new(|| Regex::new(NAME_REGEX_STR).unwrap());
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 enum TypeConstraint {
     String,
     Number,             // Integer + Float
@@ -15,7 +15,6 @@ enum TypeConstraint {
     Bool,
     Object,
     Array,
-    ELSE,
 }
 
 type PropsConstraintMap = Lazy<HashMap<&'static str, TypeConstraint>>;
@@ -80,7 +79,7 @@ const PRESET_PROPS_APP_INSTALL: PropsConstraintMap = Lazy::new(|| HashMap::from(
 ]));
 const PRESET_PROPS_SESSION_START: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#is_first_time", TypeConstraint::Bool), ("#resume_from_background", TypeConstraint::Bool),
-    ("#start_reason", TypeConstraint::Bool)
+    ("#start_reason", TypeConstraint::String)
 ]));
 const PRESET_PROPS_D_APP_INSTALL: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("$network_id", TypeConstraint::String), ("$network_name", TypeConstraint::String),
@@ -232,7 +231,7 @@ fn verify_preset_properties(
     props_tuple: &(PropsConstraintMap, PropsConstraintMap)
 ) -> bool {
     for (key, value) in properties {
-        if let Some(constraint) = find_constraint_in_preset_event(key.as_str(), props_tuple) {
+        if let Some(constraint) = find_constraint_in_preset_event(key.as_str(), props_tuple, &PRESET_PROPS_COMMON) {
             if !check_type_constraint(value, constraint) {
                 println!(
                     "The type of value for property \"{}\" is not valid (Given: {}, Expected: {:?})!",
@@ -253,9 +252,10 @@ fn verify_preset_properties(
 
 fn find_constraint_in_preset_event<'a>(
     prop_name: &str,
-    (props1, props2): &'a (PropsConstraintMap, PropsConstraintMap)
+    (props1, props2): &'a (PropsConstraintMap, PropsConstraintMap),
+    common_pcm: &'a PropsConstraintMap
 ) -> Option<&'a TypeConstraint> {
-    PRESET_PROPS_COMMON.get(prop_name).or(props1.get(prop_name).or(props2.get(prop_name)))
+    common_pcm.get(prop_name).or(props1.get(prop_name).or(props2.get(prop_name)))
 }
 
 fn verify_custom_properties(event_name: &String, properties: &Map<String, Value>) -> bool {
