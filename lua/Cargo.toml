@@ -1,6 +1,6 @@
 #
-# Build on MacOS：
-# $ cargo rustc --release --package lua -- -C link-arg=-undefined -C link-arg=dynamic_lookup
+# Build on macOS for lua 5.4 lib (see features section below for different options):
+# $ cargo rustc --release --package lua --features "lua54" -- -C link-arg=-undefined -C link-arg=dynamic_lookup
 #
 [package]
 name = "lua"
@@ -13,7 +13,15 @@ edition = "2021"
 name = "dt_core_lua"
 crate-type = ["cdylib"]
 
+[features]
+lua54 = ["mlua/lua54"]
+lua53 = ["mlua/lua53"]
+lua52 = ["mlua/lua52"]
+lua51 = ["mlua/lua51"]
+luajit = ["mlua/luajit"]
+luau = ["mlua/luau"]
+
 [dependencies]
 common = { path = "../common" }
 serde_json = { workspace = true }
-mlua = { version = "0.9.6", features = ["lua54", "module", "serialize"] }
+mlua = { version = "0.9.6", features = ["module"] }
