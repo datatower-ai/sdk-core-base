@@ -1,5 +1,3 @@
-extern crate alloc;
-
 use mlua::prelude::*;
 use mlua::{Table, Value};
 use serde_json::Map;
@@ -7,33 +5,12 @@ use serde_json::Map;
 #[mlua::lua_module]
 fn dt_core_lua(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
-    exports.set("hello", lua.create_function(call_rust)?)?;
-    exports.set("call_with_table", lua.create_function(call_with_table)?)?;
     exports.set("verify_event", lua.create_function(verify_event)?)?;
     Ok(exports)
 }
 
-fn call_rust(_: &Lua, name: mlua::String) -> LuaResult<()> {
-    println!("Just called a Rust function from {:?}, {}!", name, common::add(2, 3));
-    Ok(())
-}
-
-fn call_with_table(_: &Lua, table: Table) -> LuaResult<()> {
-    println!("Got table: {:?}", table);
-    let my_table = MyTable(table);
-    for pair in my_table.0.pairs() {
-        let (key, value): (Value, Value) = pair?;
-        println!("MyTable, key: {:?}, value: {:?}", key, value);
-    }
-
-    Ok(())
-}
-
 fn verify_event(_: &Lua, table: Table) -> LuaResult<bool> {
-    //let (event_name, key, value) = tuple;
-    //Ok(common::util::data_verification::is_valid(event_name.to_str().unwrap(), key.to_str().unwrap(), MyValue(value)))
     let map: Map<String, serde_json::Value> = MyTable(table).into();
-    println!("verify_event, {}", serde_json::json!(map));
     Ok(common::util::data_verification::verify_event(&map))
 }
 
@@ -49,7 +26,7 @@ impl Into<Map<String, serde_json::Value>> for MyTable<'_> {
                 if let Some(sjv) = sjv {
                     result.insert(key.to_str().unwrap().to_string(), sjv);
                 } else {
-                    println!("Such value is unsupported: {:?}", value);
+                    println!("[DT Core] Such value is unsupported: {:?}", value);
                 }
             }
         }
@@ -120,7 +97,7 @@ impl Into<Option<serde_json::Value>> for MyValue<'_> {
                 }
             },
             _ => {
-                println!("Given value is not support, {:?}", self.0);
+                println!("[DT Core] Given value is not support, {:?}", self.0);
                 None
             }
         }

@@ -137,12 +137,12 @@ pub fn verify_event(event_map: &Map<String, Value>) -> bool {
         if let Some(value) = event_map.get(prop) {
             if let Some(constraint) = META_PROPS.get(prop.as_str()) {
                 if !check_type_constraint(value, constraint) {
-                    println!("Type of value of meta property is not valid! Expected: {:?}, got: {}", constraint, value);
+                    println!("[DT Core] Type of value of meta property is not valid! Expected: {:?}, got: {}", constraint, value);
                     return false;
                 }
             }
         } else {
-            println!("Meta property \"{}\" is required, but missing!", prop);
+            println!("[DT Core] Meta property \"{}\" is required, but missing!", prop);
             return false;
         }
     }
@@ -156,22 +156,22 @@ pub fn verify_event(event_map: &Map<String, Value>) -> bool {
     }
 
     let Some(Value::String(event_name)) = event_map.get("#event_name") else {
-        println!("#event_name is missing or it's type is invalid!");
+        println!("[DT Core] #event_name is missing or it's type is invalid!");
         return false;
     };
 
     if !NAME_RE.is_match(event_name) {
-        println!("#event_name must be a valid variable name!");
+        println!("[DT Core] #event_name must be a valid variable name!");
         return false;
     }
 
     let Some(Value::String(event_type)) = event_map.get("#event_type") else {
-        println!("#event_type is missing or it's type is invalid!");
+        println!("[DT Core] #event_type is missing or it's type is invalid!");
         return false;
     };
 
     let Some(Value::Object(properties)) = event_map.get("properties") else {
-        println!("properties is missing or it's type is invalid!");
+        println!("[DT Core] properties is missing or it's type is invalid!");
         return false;
     };
 
@@ -179,7 +179,7 @@ pub fn verify_event(event_map: &Map<String, Value>) -> bool {
         if let Some(props_tuple) = PRESET_EVENTS.get(event_name.as_str()) {
             verify_preset_properties(event_name, properties, props_tuple)
         } else {
-            println!("event_name (\"{}\") is out of scope!", event_name);
+            println!("[DT Core] event_name (\"{}\") is out of scope!", event_name);
             false
         }
     } else {
@@ -210,17 +210,17 @@ fn check_meta_is_string_and_nonempty(event_map: &Map<String, Value>, key: String
     if let Some(value) = event_map.get(&key) {
         if let Value::String(value) = value {
             if value.len() == 0 {
-                println!("{} cannot be empty!", key);
+                println!("[DT Core] {} cannot be empty!", key);
                 false
             } else {
                 true
             }
         } else {
-            println!("{} should be a string!", key);
+            println!("[DT Core] {} should be a string!", key);
             false
         }
     } else {
-        println!("{} is required, but missing", key);
+        println!("[DT Core] {} is required, but missing", key);
         false
     }
 }
@@ -275,7 +275,7 @@ fn verify_custom_properties(event_name: &String, properties: &Map<String, Value>
 
 fn verify_prop_name(name: &String) -> bool {
     if !NAME_RE.is_match(name) {
-        println!("Property name (\"{}\") is invalid!", name);
+        println!("[DT Core] Property name (\"{}\") is invalid!", name);
         false
     } else {
         true
@@ -288,7 +288,7 @@ fn verify_sp_event_4_list(properties: &Map<String, Value>) -> bool {
             return false;
         }
         let Value::Array(_) = v else {
-            println!("Type of value in this event should be List");
+            println!("[DT Core] Type of value in this event should be List");
             return false;
         };
     }
@@ -301,7 +301,7 @@ fn verify_sp_event_4_num(properties: &Map<String, Value>) -> bool {
             return false;
         }
         let Value::Number(_) = v else {
-            println!("Type of value in this event should be Number");
+            println!("[DT Core] Type of value in this event should be Number");
             return false;
         };
     }
