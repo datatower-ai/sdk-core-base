@@ -1,11 +1,11 @@
-mod log;
+pub mod log;
 
-pub(crate) const MEM_KEY: &str = "consumer";
+pub(crate) const MEM_KEY: &'static str = "consumer";
 
-trait Consumer {
-    fn add(mut self: &mut Self, event: serde_json::Map<String, serde_json::Value>) -> bool;
+pub trait Consumer {
+    fn add(self: &mut Self, event: serde_json::Map<String, serde_json::Value>) -> bool;
 
-    fn flush(mut self: &mut Self);
+    fn flush(self: &mut Self);
 
-    fn close(self: Self);
+    fn close(self: &mut Self);
 }

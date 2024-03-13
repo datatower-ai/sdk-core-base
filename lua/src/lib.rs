@@ -1,17 +1,67 @@
 use mlua::prelude::*;
 use mlua::{Table, Value};
 use serde_json::Map;
+use common::consumer::log::LogConsumer;
 
 #[mlua::lua_module]
 fn dt_core_lua(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
+    exports.set("init", lua.create_function(init)?)?;
+    exports.set("add_event", lua.create_function(add_event)?)?;
     exports.set("verify_event", lua.create_function(verify_event)?)?;
+    exports.set("flush", lua.create_function(flush)?)?;
+    exports.set("close", lua.create_function(close)?)?;
     Ok(exports)
+}
+
+fn init(_: &Lua, table: Table) -> LuaResult<bool> {
+    let Ok(path) = table.get("path") else {
+        eprintln!("[DT Core] Failed to initialize: missing \"path\"!");
+        return Ok(false);
+    };
+
+    let max_batch_len: mlua::Result<mlua::ffi::lua_Integer> = table.get("max_batch_len");
+    let Ok(max_batch_len) = max_batch_len else {
+        eprintln!("[DT Core] Failed to initialize: missing \"max_batch_len\"!");
+        return Ok(false);
+    };
+
+    let name_prefix: Option<String> = if let Ok(name_prefix) = table.get("name_prefix") {
+        Some(name_prefix)
+    } else {
+        None
+    };
+    let max_file_size_bytes: mlua::Result<mlua::ffi::lua_Integer> = table.get("max_file_size_bytes");
+    let max_file_size_bytes: Option<u64> = if let Ok(max_file_size_bytes) = max_file_size_bytes {
+        Some(max_file_size_bytes as u64)
+    } else {
+        None
+    };
+
+    let consumer = LogConsumer::new(
+        path, max_batch_len as u32, name_prefix, max_file_size_bytes
+    );
+    Ok(common::init_consumer(consumer))
 }
 
 fn verify_event(_: &Lua, table: Table) -> LuaResult<bool> {
     let map: Map<String, serde_json::Value> = MyTable(table).into();
     Ok(common::util::data_verification::verify_event(&map))
+}
+
+fn add_event(_: &Lua, table: Table) -> LuaResult<bool> {
+    let map: Map<String, serde_json::Value> = MyTable(table).into();
+    Ok(common::add(map))
+}
+
+fn flush(_: &Lua, _: ()) -> LuaResult<()> {
+    common::flush();
+    Ok(())
+}
+
+fn close(_: &Lua, _: ()) -> LuaResult<()> {
+    common::close();
+    Ok(())
 }
 
 struct MyTable<'a>(Table<'a>);
@@ -26,7 +76,7 @@ impl Into<Map<String, serde_json::Value>> for MyTable<'_> {
                 if let Some(sjv) = sjv {
                     result.insert(key.to_str().unwrap().to_string(), sjv);
                 } else {
-                    println!("[DT Core] Such value is unsupported: {:?}", value);
+                    eprintln!("[DT Core] Such value is unsupported: {:?}", value);
                 }
             }
         }
@@ -97,7 +147,7 @@ impl Into<Option<serde_json::Value>> for MyValue<'_> {
                 }
             },
             _ => {
-                println!("[DT Core] Given value is not support, {:?}", self.0);
+                eprintln!("[DT Core] Given value is not support, {:?}", self.0);
                 None
             }
         }

@@ -1,6 +1,9 @@
 #
 # Build on macOS for lua 5.4 lib (see features section below for different options):
-# $ cargo rustc --release --package lua --features "lua54" -- -C link-arg=-undefined -C link-arg=dynamic_lookup
+# $ cargo rustc --release --package lua --features lua54 -- -C link-arg=-undefined -C link-arg=dynamic_lookup
+#
+# Build on macOS for lua 5.4 and x86_64-linux-gnu:
+# $ cargo rustc --release --package lua --features lua54 --target x86_64-unknown-linux-gnu
 #
 [package]
 name = "lua"

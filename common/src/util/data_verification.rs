@@ -40,27 +40,27 @@ const PRESET_PROPS_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#is_foreground", TypeConstraint::Bool), ("#android_id", TypeConstraint::String),
     ("#gaid", TypeConstraint::String), ("#mcc", TypeConstraint::String), ("#mnc", TypeConstraint::String),
     ("#os_country_code", TypeConstraint::String), ("#os_lang_code", TypeConstraint::String),
-    ("#event_time", TypeConstraint::Integer), ("#bundle_id", TypeConstraint::String),
-    ("#app_version_code", TypeConstraint::Integer), ("#app_version_name", TypeConstraint::String),
+    ("#event_time", TypeConstraint::Number), ("#bundle_id", TypeConstraint::String),
+    ("#app_version_code", TypeConstraint::Number), ("#app_version_name", TypeConstraint::String),
     ("#sdk_type", TypeConstraint::String), ("#sdk_version_name", TypeConstraint::String),
     ("#os", TypeConstraint::String), ("#os_version_name", TypeConstraint::String),
-    ("#os_version_code", TypeConstraint::Integer), ("#device_brand", TypeConstraint::String),
+    ("#os_version_code", TypeConstraint::Number), ("#device_brand", TypeConstraint::String),
     ("#device_model", TypeConstraint::String), ("#build_device", TypeConstraint::String),
-    ("#screen_height", TypeConstraint::Integer), ("#screen_width", TypeConstraint::Integer),
+    ("#screen_height", TypeConstraint::Number), ("#screen_width", TypeConstraint::Number),
     ("#memory_used", TypeConstraint::String), ("#storage_used", TypeConstraint::String),
     ("#network_type", TypeConstraint::String), ("#simulator", TypeConstraint::Bool),
-    ("#fps", TypeConstraint::Integer), ("$ip", TypeConstraint::String), ("$country_code", TypeConstraint::String),
-    ("$server_time", TypeConstraint::Integer)
+    ("#fps", TypeConstraint::Number), ("$ip", TypeConstraint::String), ("$country_code", TypeConstraint::String),
+    ("$server_time", TypeConstraint::Number)
 ]));
 const PRESET_PROPS_AD: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#ad_seq", TypeConstraint::String), ("#ad_id", TypeConstraint::String),
-    ("#ad_type_code", TypeConstraint::String), ("#ad_platform_code", TypeConstraint::String),
+    ("#ad_type_code", TypeConstraint::Number), ("#ad_platform_code", TypeConstraint::Number),
     ("#ad_entrance", TypeConstraint::String), ("#ad_result", TypeConstraint::Bool),
-    ("#ad_duration", TypeConstraint::Integer), ("#ad_location", TypeConstraint::String),
-    ("#errorCode", TypeConstraint::Integer), ("#errorMessage", TypeConstraint::String),
+    ("#ad_duration", TypeConstraint::Number), ("#ad_location", TypeConstraint::String),
+    ("#errorCode", TypeConstraint::Number), ("#errorMessage", TypeConstraint::String),
     ("#ad_value", TypeConstraint::String), ("#ad_currency", TypeConstraint::String),
     ("#ad_precision", TypeConstraint::String), ("#ad_country_code", TypeConstraint::String),
-    ("#ad_mediation_code", TypeConstraint::String), ("#ad_mediation_id", TypeConstraint::String),
+    ("#ad_mediation_code", TypeConstraint::Number), ("#ad_mediation_id", TypeConstraint::String),
     ("#ad_conversion_source", TypeConstraint::String), ("#ad_click_gap", TypeConstraint::String),
     ("#ad_return_gap", TypeConstraint::String), ("#error_code", TypeConstraint::String),
     ("#error_message", TypeConstraint::String), ("#load_result", TypeConstraint::String),
@@ -69,12 +69,12 @@ const PRESET_PROPS_AD: PropsConstraintMap = Lazy::new(|| HashMap::from([
 const PRESET_PROPS_IAS: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#ias_seq", TypeConstraint::String), ("#ias_original_order", TypeConstraint::String),
     ("#ias_order", TypeConstraint::String), ("#ias_sku", TypeConstraint::String),
-    ("#ias_price", TypeConstraint::Float), ("#ias_currency", TypeConstraint::String),
-    ("$ias_price_exchange", TypeConstraint::Float)
+    ("#ias_price", TypeConstraint::Number), ("#ias_currency", TypeConstraint::String),
+    ("$ias_price_exchange", TypeConstraint::Number)
 ]));
 const PRESET_PROPS_APP_INSTALL: PropsConstraintMap = Lazy::new(|| HashMap::from([
-    ("#referrer_url", TypeConstraint::String), ("#referrer_click_time", TypeConstraint::Integer),
-    ("#app_install_time", TypeConstraint::Integer), ("#instant_experience_launched", TypeConstraint::Bool),
+    ("#referrer_url", TypeConstraint::String), ("#referrer_click_time", TypeConstraint::Number),
+    ("#app_install_time", TypeConstraint::Number), ("#instant_experience_launched", TypeConstraint::Bool),
     ("#failed_reason", TypeConstraint::String), ("#cnl", TypeConstraint::String)
 ]));
 const PRESET_PROPS_SESSION_START: PropsConstraintMap = Lazy::new(|| HashMap::from([
@@ -87,21 +87,21 @@ const PRESET_PROPS_D_APP_INSTALL: PropsConstraintMap = Lazy::new(|| HashMap::fro
     ("$channel_id", TypeConstraint::String), ("$channel_sub_id", TypeConstraint::String),
     ("$channel_ssub_id", TypeConstraint::String), ("$channel_name", TypeConstraint::String),
     ("$channel_sub_name", TypeConstraint::String), ("$channel_ssub_name", TypeConstraint::String),
-    ("$channel_platform_id", TypeConstraint::Integer), ("$channel_platform_name", TypeConstraint::String),
+    ("$channel_platform_id", TypeConstraint::Number), ("$channel_platform_name", TypeConstraint::String),
     ("$attribution_source", TypeConstraint::String), ("$fraud_network_id", TypeConstraint::String),
     ("$original_tracker_id", TypeConstraint::String), ("$original_tracker_name", TypeConstraint::String),
     ("$original_network_id", TypeConstraint::String), ("$original_network_name", TypeConstraint::String)
 ]));
 const PRESET_PROPS_SESSION_END: PropsConstraintMap = Lazy::new(|| HashMap::from([
-    ("#session_duration", TypeConstraint::Integer)
+    ("#session_duration", TypeConstraint::Number)
 ]));
 const PRESET_PROPS_D_AD_CONVERSION: PropsConstraintMap = Lazy::new(|| HashMap::from([
-    ("$earnings", TypeConstraint::Float)
+    ("$earnings", TypeConstraint::Number)
 ]));
 const PRESET_PROPS_IAP_PURCHASE_SUCCESS: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#iap_order", TypeConstraint::String), ("#iap_sku", TypeConstraint::String),
-    ("#iap_price", TypeConstraint::Float), ("#iap_currency", TypeConstraint::String),
-    ("$iap_price_exchange", TypeConstraint::Float)
+    ("#iap_price", TypeConstraint::Number), ("#iap_currency", TypeConstraint::String),
+    ("$iap_price_exchange", TypeConstraint::Number)
 ]));
 const PRESET_PROPS_D_IAS_SUBSCRIBE_NOTIFY: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("$original_ios_notification_type", TypeConstraint::String)
@@ -137,12 +137,12 @@ pub fn verify_event(event_map: &Map<String, Value>) -> bool {
         if let Some(value) = event_map.get(prop) {
             if let Some(constraint) = META_PROPS.get(prop.as_str()) {
                 if !check_type_constraint(value, constraint) {
-                    println!("[DT Core] Type of value of meta property is not valid! Expected: {:?}, got: {}", constraint, value);
+                    eprintln!("[DT Core] Type of value of meta property is not valid! Expected: {:?}, got: {}", constraint, value);
                     return false;
                 }
             }
         } else {
-            println!("[DT Core] Meta property \"{}\" is required, but missing!", prop);
+            eprintln!("[DT Core] Meta property \"{}\" is required, but missing!", prop);
             return false;
         }
     }
@@ -156,22 +156,22 @@ pub fn verify_event(event_map: &Map<String, Value>) -> bool {
     }
 
     let Some(Value::String(event_name)) = event_map.get("#event_name") else {
-        println!("[DT Core] #event_name is missing or it's type is invalid!");
+        eprintln!("[DT Core] #event_name is missing or it's type is invalid!");
         return false;
     };
 
     if !NAME_RE.is_match(event_name) {
-        println!("[DT Core] #event_name must be a valid variable name!");
+        eprintln!("[DT Core] #event_name must be a valid variable name!");
         return false;
     }
 
     let Some(Value::String(event_type)) = event_map.get("#event_type") else {
-        println!("[DT Core] #event_type is missing or it's type is invalid!");
+        eprintln!("[DT Core] #event_type is missing or it's type is invalid!");
         return false;
     };
 
     let Some(Value::Object(properties)) = event_map.get("properties") else {
-        println!("[DT Core] properties is missing or it's type is invalid!");
+        eprintln!("[DT Core] properties is missing or it's type is invalid!");
         return false;
     };
 
@@ -179,7 +179,7 @@ pub fn verify_event(event_map: &Map<String, Value>) -> bool {
         if let Some(props_tuple) = PRESET_EVENTS.get(event_name.as_str()) {
             verify_preset_properties(event_name, properties, props_tuple)
         } else {
-            println!("[DT Core] event_name (\"{}\") is out of scope!", event_name);
+            eprintln!("[DT Core] event_name (\"{}\") is out of scope!", event_name);
             false
         }
     } else {
@@ -210,17 +210,17 @@ fn check_meta_is_string_and_nonempty(event_map: &Map<String, Value>, key: String
     if let Some(value) = event_map.get(&key) {
         if let Value::String(value) = value {
             if value.len() == 0 {
-                println!("[DT Core] {} cannot be empty!", key);
+                eprintln!("[DT Core] {} cannot be empty!", key);
                 false
             } else {
                 true
             }
         } else {
-            println!("[DT Core] {} should be a string!", key);
+            eprintln!("[DT Core] {} should be a string!", key);
             false
         }
     } else {
-        println!("[DT Core] {} is required, but missing", key);
+        eprintln!("[DT Core] {} is required, but missing", key);
         false
     }
 }
@@ -233,15 +233,15 @@ fn verify_preset_properties(
     for (key, value) in properties {
         if let Some(constraint) = find_constraint_in_preset_event(key.as_str(), props_tuple, &PRESET_PROPS_COMMON) {
             if !check_type_constraint(value, constraint) {
-                println!(
-                    "The type of value for property \"{}\" is not valid (Given: {}, Expected: {:?})!",
+                eprintln!(
+                    "[DT Core] The type of value for property \"{}\" is not valid (Given: {}, Expected: {:?})!",
                     key, value, constraint
                 );
                 return false;
             }
         } else {
-            println!(
-                "key of property (\"{}\") is out of scope for preset event (\"{}\")!",
+            eprintln!(
+                "[DT Core] key of property (\"{}\") is out of scope for preset event (\"{}\")!",
                 key, event_name
             );
             return false
@@ -275,7 +275,7 @@ fn verify_custom_properties(event_name: &String, properties: &Map<String, Value>
 
 fn verify_prop_name(name: &String) -> bool {
     if !NAME_RE.is_match(name) {
-        println!("[DT Core] Property name (\"{}\") is invalid!", name);
+        eprintln!("[DT Core] Property name (\"{}\") is invalid!", name);
         false
     } else {
         true
@@ -284,11 +284,14 @@ fn verify_prop_name(name: &String) -> bool {
 
 fn verify_sp_event_4_list(properties: &Map<String, Value>) -> bool {
     for (k, v) in properties {
+        if k.starts_with("#") || k.starts_with("$") {
+            return true;
+        }
         if !verify_prop_name(k) {
             return false;
         }
         let Value::Array(_) = v else {
-            println!("[DT Core] Type of value in this event should be List");
+            eprintln!("[DT Core] Type of value in this event should be List");
             return false;
         };
     }
@@ -297,11 +300,14 @@ fn verify_sp_event_4_list(properties: &Map<String, Value>) -> bool {
 
 fn verify_sp_event_4_num(properties: &Map<String, Value>) -> bool {
     for (k, v) in properties {
+        if k.starts_with("#") || k.starts_with("$") {
+            return true;
+        }
         if !verify_prop_name(k) {
             return false;
         }
         let Value::Number(_) = v else {
-            println!("[DT Core] Type of value in this event should be Number");
+            eprintln!("[DT Core] Type of value in this event should be Number");
             return false;
         };
     }
