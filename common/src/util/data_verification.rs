@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use regex::Regex;
 use once_cell::unsync::Lazy;
 use serde_json::{Map, Value};
+use crate::log_error;
 
 const NAME_REGEX_STR: &'static str = r"^[#$a-zA-Z][a-zA-Z0-9_]{0,63}$";
 const NAME_RE: Lazy<Regex> = Lazy::new(|| Regex::new(NAME_REGEX_STR).unwrap());
@@ -137,12 +138,12 @@ pub fn verify_event(event_map: &Map<String, Value>) -> bool {
         if let Some(value) = event_map.get(prop) {
             if let Some(constraint) = META_PROPS.get(prop.as_str()) {
                 if !check_type_constraint(value, constraint) {
-                    eprintln!("[DT Core] Type of value of meta property is not valid! Expected: {:?}, got: {}", constraint, value);
+                    log_error!("Type of value of meta property is not valid! Expected: {:?}, got: {}", constraint, value);
                     return false;
                 }
             }
         } else {
-            eprintln!("[DT Core] Meta property \"{}\" is required, but missing!", prop);
+            log_error!("Meta property \"{}\" is required, but missing!", prop);
             return false;
         }
     }
@@ -156,22 +157,22 @@ pub fn verify_event(event_map: &Map<String, Value>) -> bool {
     }
 
     let Some(Value::String(event_name)) = event_map.get("#event_name") else {
-        eprintln!("[DT Core] #event_name is missing or it's type is invalid!");
+        log_error!("#event_name is missing or it's type is invalid!");
         return false;
     };
 
     if !NAME_RE.is_match(event_name) {
-        eprintln!("[DT Core] #event_name must be a valid variable name!");
+        log_error!("#event_name must be a valid variable name!");
         return false;
     }
 
     let Some(Value::String(event_type)) = event_map.get("#event_type") else {
-        eprintln!("[DT Core] #event_type is missing or it's type is invalid!");
+        log_error!("#event_type is missing or it's type is invalid!");
         return false;
     };
 
     let Some(Value::Object(properties)) = event_map.get("properties") else {
-        eprintln!("[DT Core] properties is missing or it's type is invalid!");
+        log_error!("properties is missing or it's type is invalid!");
         return false;
     };
 
@@ -179,7 +180,7 @@ pub fn verify_event(event_map: &Map<String, Value>) -> bool {
         if let Some(props_tuple) = PRESET_EVENTS.get(event_name.as_str()) {
             verify_preset_properties(event_name, properties, props_tuple)
         } else {
-            eprintln!("[DT Core] event_name (\"{}\") is out of scope!", event_name);
+            log_error!("event_name (\"{}\") is out of scope!", event_name);
             false
         }
     } else {
@@ -210,17 +211,17 @@ fn check_meta_is_string_and_nonempty(event_map: &Map<String, Value>, key: String
     if let Some(value) = event_map.get(&key) {
         if let Value::String(value) = value {
             if value.len() == 0 {
-                eprintln!("[DT Core] {} cannot be empty!", key);
+                log_error!("{} cannot be empty!", key);
                 false
             } else {
                 true
             }
         } else {
-            eprintln!("[DT Core] {} should be a string!", key);
+            log_error!("{} should be a string!", key);
             false
         }
     } else {
-        eprintln!("[DT Core] {} is required, but missing", key);
+        log_error!("{} is required, but missing", key);
         false
     }
 }
@@ -233,15 +234,15 @@ fn verify_preset_properties(
     for (key, value) in properties {
         if let Some(constraint) = find_constraint_in_preset_event(key.as_str(), props_tuple, &PRESET_PROPS_COMMON) {
             if !check_type_constraint(value, constraint) {
-                eprintln!(
-                    "[DT Core] The type of value for property \"{}\" is not valid (Given: {}, Expected: {:?})!",
+                log_error!(
+                    "The type of value for property \"{}\" is not valid (Given: {}, Expected: {:?})!",
                     key, value, constraint
                 );
                 return false;
             }
         } else {
-            eprintln!(
-                "[DT Core] key of property (\"{}\") is out of scope for preset event (\"{}\")!",
+            log_error!(
+                "key of property (\"{}\") is out of scope for preset event (\"{}\")!",
                 key, event_name
             );
             return false
@@ -275,7 +276,7 @@ fn verify_custom_properties(event_name: &String, properties: &Map<String, Value>
 
 fn verify_prop_name(name: &String) -> bool {
     if !NAME_RE.is_match(name) {
-        eprintln!("[DT Core] Property name (\"{}\") is invalid!", name);
+        log_error!("Property name (\"{}\") is invalid!", name);
         false
     } else {
         true
@@ -291,7 +292,7 @@ fn verify_sp_event_4_list(properties: &Map<String, Value>) -> bool {
             return false;
         }
         let Value::Array(_) = v else {
-            eprintln!("[DT Core] Type of value in this event should be List");
+            log_error!("Type of value in this event should be List");
             return false;
         };
     }
@@ -307,7 +308,7 @@ fn verify_sp_event_4_num(properties: &Map<String, Value>) -> bool {
             return false;
         }
         let Value::Number(_) = v else {
-            eprintln!("[DT Core] Type of value in this event should be Number");
+            log_error!("Type of value in this event should be Number");
             return false;
         };
     }

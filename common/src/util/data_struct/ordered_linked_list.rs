@@ -1,4 +1,3 @@
-use std::fmt::Display;
 use std::ptr::NonNull;
 
 type Link<T, O> = Option<NonNull<Node<T, O>>>;
@@ -30,10 +29,12 @@ impl<T, O: Ord + Default + Copy> OrderedLinkedList<T, O> {
         }
     }
 
+    #[allow(dead_code)]
     pub fn push(&mut self, elem: T) {
         self.push_by(elem, O::default());
     }
 
+    #[allow(dead_code)]
     pub fn push_end(&mut self, elem: T) {
         let order = if let Some(end) = self.tail {
             unsafe { (*end.as_ref()).order }
@@ -111,6 +112,7 @@ impl<T, O: Ord + Default + Copy> OrderedLinkedList<T, O> {
         self.pop_aux(None)
     }
 
+    #[allow(dead_code)]
     pub fn pop_by(&mut self, target_order: O) -> PoppedResult<T, O> {
         self.pop_aux(Some(target_order))
     }
@@ -139,6 +141,7 @@ impl<T, O: Ord + Default + Copy> OrderedLinkedList<T, O> {
         }
     }
 
+    #[allow(dead_code)]
     pub fn len(&self) -> usize {
         self.len
     }

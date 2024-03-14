@@ -5,6 +5,7 @@ use std::path::Path;
 use regex::Regex;
 use serde_json::{Map, Value};
 use crate::consumer::Consumer;
+use crate::{log_error, log_info};
 use crate::util::data_verification::verify_event;
 use crate::util::datetime::get_hour_since_epoch;
 
@@ -12,7 +13,6 @@ use crate::util::datetime::get_hour_since_epoch;
  * Should be run in a single thread for current implementation.
  */
 #[derive(Debug)]
-#[cfg(feature = "log-consumer")]
 pub struct LogConsumer {
     // Sets from outer
     path: String,
@@ -118,14 +118,14 @@ impl LogConsumer {
             let mut n = 0;
             while let Some(s) = self.batch.pop() {
                 if let Err(e) = writeln!(file, "{}", s) {
-                    eprintln!("[DT Core] Couldn't write to file: {}", e);
+                    log_error!("Couldn't write to file: {}", e);
                 } else {
                     n += 1;
                 }
             }
             file.sync_all().expect("File sync failed");
             self.crt_size_bytes = file.metadata().unwrap().len();
-            println!("[DT Core] Flushed {} events!", n)
+            log_info!("Flushed {} events!", n)
         }
 
         // Once threading support needed, wrap this with a mutex!
@@ -148,7 +148,7 @@ impl LogConsumer {
 impl Consumer for LogConsumer {
     fn add(self: &mut Self, event: Map<String, Value>) -> bool {
         if !verify_event(&event) {
-            eprintln!("[DT Core] Verification failed for this event: {:?}", event);
+            log_error!("Verification failed for this event: {:?}", event);
             return false
         }
 
@@ -166,7 +166,7 @@ impl Consumer for LogConsumer {
             self.batch.push(json);
             self.crt_size_bytes += json_size;
         } else {
-            eprintln!("[DT Core] Failed to jsonify this event: {:?}", event);
+            log_error!("Failed to jsonify this event: {:?}", event);
             return false;
         }
 

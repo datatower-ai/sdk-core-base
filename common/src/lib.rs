@@ -10,7 +10,7 @@ pub mod consumer;
 pub fn init_consumer(consumer: impl Consumer + 'static) -> bool {
     let mut mem = mem().lock().unwrap();
     if mem.contains_key(&consumer::MEM_KEY.to_string()) {
-        eprintln!("[DT Core] Consumer can only be initialized once.");
+        log_error!("Consumer can only be initialized once.");
         false
     } else {
         mem.insert(consumer::MEM_KEY.to_string(), MemConsumer(Box::new(consumer)));
@@ -23,7 +23,7 @@ pub fn add(event: Map<String, Value>) -> bool {
     if let Some(MemConsumer(consumer)) = mem.get_mut(&consumer::MEM_KEY.to_string()) {
         consumer.add(event)
     } else {
-        eprintln!("[DT Core] Consumer should be initialized before API calls!");
+        log_error!("Consumer should be initialized before API calls!");
         false
     }
 }
@@ -33,7 +33,7 @@ pub fn flush() {
     if let Some(MemConsumer(consumer)) = mem.get_mut(&consumer::MEM_KEY.to_string()) {
         consumer.flush();
     } else {
-        eprintln!("[DT Core] Consumer should be initialized before API calls!");
+        log_error!("Consumer should be initialized before API calls!");
     }
 }
 
@@ -42,6 +42,6 @@ pub fn close() {
     if let Some(MemConsumer(mut consumer)) = mem.remove(&consumer::MEM_KEY.to_string()) {
         consumer.close();
     } else {
-        eprintln!("[DT Core] Consumer should be initialized before API calls!");
+        log_error!("Consumer should be initialized before API calls!");
     }
 }

@@ -2,6 +2,7 @@ use mlua::prelude::*;
 use mlua::{Table, Value};
 use serde_json::Map;
 use common::consumer::log::LogConsumer;
+use common::log_error;
 
 #[mlua::lua_module]
 fn dt_core_lua(lua: &Lua) -> LuaResult<LuaTable> {
@@ -11,18 +12,19 @@ fn dt_core_lua(lua: &Lua) -> LuaResult<LuaTable> {
     exports.set("verify_event", lua.create_function(verify_event)?)?;
     exports.set("flush", lua.create_function(flush)?)?;
     exports.set("close", lua.create_function(close)?)?;
+    exports.set("enable_log", lua.create_function(toggle_logger)?)?;
     Ok(exports)
 }
 
 fn init(_: &Lua, table: Table) -> LuaResult<bool> {
     let Ok(path) = table.get("path") else {
-        eprintln!("[DT Core] Failed to initialize: missing \"path\"!");
+        log_error!("Failed to initialize: missing \"path\"!");
         return Ok(false);
     };
 
     let max_batch_len: mlua::Result<mlua::ffi::lua_Integer> = table.get("max_batch_len");
     let Ok(max_batch_len) = max_batch_len else {
-        eprintln!("[DT Core] Failed to initialize: missing \"max_batch_len\"!");
+        log_error!("Failed to initialize: missing \"max_batch_len\"!");
         return Ok(false);
     };
 
@@ -64,6 +66,13 @@ fn close(_: &Lua, _: ()) -> LuaResult<()> {
     Ok(())
 }
 
+fn toggle_logger(_: &Lua, enable: bool) -> LuaResult<()> {
+    unsafe {
+        common::util::logger::LOG_ENABLED = enable;
+    }
+    Ok(())
+}
+
 struct MyTable<'a>(Table<'a>);
 
 impl Into<Map<String, serde_json::Value>> for MyTable<'_> {
@@ -76,7 +85,7 @@ impl Into<Map<String, serde_json::Value>> for MyTable<'_> {
                 if let Some(sjv) = sjv {
                     result.insert(key.to_str().unwrap().to_string(), sjv);
                 } else {
-                    eprintln!("[DT Core] Such value is unsupported: {:?}", value);
+                    log_error!("Such value is unsupported: {:?}", value);
                 }
             }
         }
@@ -147,7 +156,7 @@ impl Into<Option<serde_json::Value>> for MyValue<'_> {
                 }
             },
             _ => {
-                eprintln!("[DT Core] Given value is not support, {:?}", self.0);
+                log_error!("Given value is not support, {:?}", self.0);
                 None
             }
         }

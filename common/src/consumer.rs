@@ -1,4 +1,9 @@
+
+#[cfg(feature = "log-consumer")]
 pub mod log;
+
+#[cfg(feature = "db-cache-consumer")]
+pub mod database_cache;
 
 pub(crate) const MEM_KEY: &'static str = "consumer";
 
