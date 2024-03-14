@@ -12,6 +12,7 @@ use crate::util::datetime::get_hour_since_epoch;
  * Should be run in a single thread for current implementation.
  */
 #[derive(Debug)]
+#[cfg(feature = "log-consumer")]
 pub struct LogConsumer {
     // Sets from outer
     path: String,

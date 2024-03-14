@@ -17,6 +17,7 @@ name = "dt_core_lua"
 crate-type = ["cdylib"]
 
 [features]
+default = ["lua54"]
 lua54 = ["mlua/lua54"]
 lua53 = ["mlua/lua53"]
 lua52 = ["mlua/lua52"]
@@ -25,6 +26,6 @@ luajit = ["mlua/luajit"]
 luau = ["mlua/luau"]
 
 [dependencies]
-common = { path = "../common" }
+common = { path = "../common", default-features = false, features = ["log-consumer"] }
 serde_json = { workspace = true }
 mlua = { version = "0.9.6", features = ["module"] }
