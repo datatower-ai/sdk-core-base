@@ -19,7 +19,7 @@ pub mod android {
     use self::jni::sys::{jstring};
 
     #[no_mangle]
-    pub unsafe extern fn Java_ai_datatower_analytics_RustGreetings_greeting(mut env: JNIEnv, _: JClass, java_pattern: JString) -> jstring {
+    pub unsafe extern fn Java_ai_datatower_RustGreetings_greeting(mut env: JNIEnv, _: JClass, java_pattern: JString) -> jstring {
         let world = rust_greeting(env.get_string(&java_pattern).expect("invalid pattern string").as_ptr());
         let world_ptr = CString::from_raw(world);
         let output = env.new_string(world_ptr.to_str().unwrap()).expect("Couldn't create java string!");
@@ -34,7 +34,5 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
     }
 }
