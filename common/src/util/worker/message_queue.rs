@@ -14,11 +14,12 @@ pub trait Task {
         FLAG_DEFAULT
     }
 
+    #[allow(unused_variables)]
     fn run(self: Box<Self>, id: &usize) {}
 }
 
 impl<F> Task for F where F: FnOnce() {
-    fn run(self: Box<Self>, id: &usize) {
+    fn run(self: Box<Self>, _: &usize) {
         (*self)();
     }
 }
@@ -86,13 +87,13 @@ mod tests {
         let mut mq = MessageQueue::new();
         for i in 1..=3 {
             mq.schedule_delayed(move || {
-                println!("handler called {}", i*10);
+                //println!("handler called {}", i*10);
             }, i*10);
         }
 
         for _ in 1..=3 {
             mq.schedule(move || {
-                println!("handler called 0");
+                //println!("handler called 0");
             });
         }
 
@@ -101,7 +102,7 @@ mod tests {
                 PoppedResult::Empty => println!("EMPTY!!!"),
                 PoppedResult::Unavailable(delay) => {
                     let delay = delay - SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went back!").as_millis();
-                    println!("Delayed for {}ms", delay);
+                    //println!("Delayed for {}ms", delay);
                     sleep(Duration::from_millis(delay as u64))
                 },
                 PoppedResult::Success(handler) => {

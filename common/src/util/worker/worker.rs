@@ -18,12 +18,13 @@ struct BarrierTask {
 impl Task for BarrierTask {
     fn get_flag(&self) -> usize { FLAG_BARRIER }
 
-    fn run(self: Box<Self>, id: &usize) {
+    fn run(self: Box<Self>, _: &usize) {
         self.barrier.wait();
     }
 }
 
 
+#[allow(dead_code)]
 struct Worker {
     id: usize,
     thread: Option<JoinHandle<()>>,
@@ -38,16 +39,14 @@ impl Worker {
     }
 
     fn build_thread(id: usize, receiver: Arc<Mutex<Receiver<usize>>>, queue: Arc<Mutex<MessageQueue>>) -> JoinHandle<()> {
-        let mut pre_sig: usize = 0;
-
         thread::spawn(move || {
             loop {
                 let result = { queue.lock().unwrap().pop() };
                 match result {
                     PoppedResult::Empty => {
-                        println!("Worker#{}: Queue is empty, wait", id);
+                        //println!("Worker#{}: Queue is empty, wait", id);
                         if let Ok(sig) = receiver.lock().unwrap().recv() {
-                            println!("Worker#{}: Empty and received signal: {}", id, sig);
+                            //println!("Worker#{}: Empty and received signal: {}", id, sig);
                             if has_flag(sig, FLAG_TERMINATE) {
                                 break;
                             }
@@ -57,10 +56,9 @@ impl Worker {
                         }
                     },
                     PoppedResult::Unavailable(delay) => {
-                        println!("Worker#{}: Has task but not ready, wait for {}ms", id, delay);
-                        if let Ok(sig) = receiver.lock().unwrap().recv_timeout(Duration::from_millis(delay as u64)) {
-                            println!("Worker#{}: Unavailable and received signal: {}", id, sig);
-                            pre_sig = sig;
+                        //println!("Worker#{}: Has task but not ready, wait for {}ms", id, delay);
+                        if let Ok(_) = receiver.lock().unwrap().recv_timeout(Duration::from_millis(delay as u64)) {
+                            //println!("Worker#{}: Unavailable and received signal: {}", id, sig);
                             continue;
                         } else {
                             //break;
@@ -68,7 +66,7 @@ impl Worker {
                     },
                     PoppedResult::Success(task) => {
                         let flag = task.get_flag();
-                        println!("Worker#{}: Got a task (flag: {})", id, flag);
+                        //println!("Worker#{}: Got a task (flag: {})", id, flag);
                         task.run(&id);
                         match flag {
                             n if has_flag(n, FLAG_TERMINATE) => {
@@ -123,6 +121,7 @@ impl WorkerManager {
         let _ = self.sender.send(0);
     }
 
+    #[allow(dead_code)]
     pub fn schedule_end<T: Task + Send + 'static>(&mut self, task: T) {
         self.schedule_end_flag(task, 0);
     }
@@ -141,7 +140,7 @@ impl WorkerManager {
             self.schedule_end_flag(task, FLAG_BARRIER);
         }
         barrier.wait();
-        println!("WorkerManager({}): Rendezvoused", self.name)
+        //println!("WorkerManager({}): Rendezvoused", self.name)
     }
 
     #[allow(dead_code)]
@@ -150,18 +149,18 @@ impl WorkerManager {
     }
 
     pub fn shutdown(&mut self) {
-        println!("WorkerManager({}): Sending terminate message to all workers.", self.name);
+        //println!("WorkerManager({}): Sending terminate message to all workers.", self.name);
         for _ in 0..self.size {
             self.schedule_end_flag(Terminate {}, FLAG_TERMINATE);
         }
 
-        println!("WorkerManager({}): Shutting down all workers.", self.name);
+        //println!("WorkerManager({}): Shutting down all workers.", self.name);
 
         for worker in &mut self.workers {
-            println!("WorkerManager({}): Shutting down worker {}", self.name, worker.id);
+            //println!("WorkerManager({}): Shutting down worker {}", self.name, worker.id);
             if let Some(thread) = worker.thread.take() {
                 thread.join().unwrap();
-                println!("WorkerManager({}): Terminated Worker#{}", self.name, worker.id);
+                //println!("WorkerManager({}): Terminated Worker#{}", self.name, worker.id);
             }
         }
     }
@@ -189,15 +188,15 @@ mod test {
         schedule_num(&mut wm, 1000);
         schedule_num(&mut wm, 0);
         schedule_num(&mut wm, 3);
-        println!("size: {}", { wm.queue_len() });
+        //println!("size: {}", { wm.queue_len() });
         wm.place_barrier();
-        println!("After barrier");
+        //println!("After barrier");
         drop(wm);
     }
 
     fn schedule_num(wm: &mut WorkerManager, num: u128) {
         wm.schedule_delayed(move || {
-            println!("===> {}", num)
+            //println!("===> {}", num)
         }, num);
     }
 
@@ -207,9 +206,9 @@ mod test {
         schedule_num(&mut wm, 10);
         schedule_num(&mut wm, 0);
         schedule_num(&mut wm, 0);
-        println!("before barrier");
+        //println!("before barrier");
         wm.place_barrier();
-        println!("after barrier");
+        //println!("after barrier");
         schedule_num(&mut wm, 3);
         drop(wm);
     }
