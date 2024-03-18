@@ -74,7 +74,7 @@ const PRESET_PROPS_AD: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#ad_type_code", TypeConstraint::Integer), ("#ad_platform_code", TypeConstraint::Integer),
     ("#ad_entrance", TypeConstraint::String), ("#ad_result", TypeConstraint::Bool),
     ("#ad_duration", TypeConstraint::Integer), ("#ad_location", TypeConstraint::String),
-    ("#ad_value", TypeConstraint::String), ("#ad_currency", TypeConstraint::String),
+    ("#ad_value", TypeConstraint::Number), ("#ad_currency", TypeConstraint::String),
     ("#ad_precision", TypeConstraint::String), ("#ad_country_code", TypeConstraint::String),
     ("#ad_mediation_code", TypeConstraint::Integer), ("#ad_mediation_id", TypeConstraint::String),
     ("#ad_conversion_source", TypeConstraint::String), ("#ad_click_gap", TypeConstraint::String),
@@ -150,7 +150,7 @@ const PRESET_EVENTS: Lazy<HashMap<&str, (PropsConstraintMap, PropsConstraintMap)
     ("$ias_subscribe_notify", (PRESET_PROPS_IAS, PRESET_PROPS_D_IAS_SUBSCRIBE_NOTIFY)),
 ]));
 
-pub fn verify_event(event_map: &Map<String, Value>) -> bool {
+pub(crate) fn verify_event(event_map: &Map<String, Value>) -> bool {
     for prop in COMPULSORY_META_PROPS.iter() {
         if let Some(value) = event_map.get(prop) {
             if let Some(constraint) = META_PROPS.get(prop.as_str()) {

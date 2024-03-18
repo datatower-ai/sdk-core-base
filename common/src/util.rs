@@ -1,4 +1,3 @@
-pub mod data_verification;
 pub(crate) mod datetime;
 #[cfg(feature = "thread")]
 pub(crate) mod worker;

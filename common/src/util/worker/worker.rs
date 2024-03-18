@@ -148,10 +148,8 @@ impl WorkerManager {
     pub fn queue_len(&self) -> usize {
         self.queue.lock().unwrap().len()
     }
-}
 
-impl Drop for WorkerManager {
-    fn drop(&mut self) {
+    pub fn shutdown(&mut self) {
         println!("WorkerManager({}): Sending terminate message to all workers.", self.name);
         for _ in 0..self.size {
             self.schedule_end_flag(Terminate {}, FLAG_TERMINATE);
@@ -166,6 +164,12 @@ impl Drop for WorkerManager {
                 println!("WorkerManager({}): Terminated Worker#{}", self.name, worker.id);
             }
         }
+    }
+}
+
+impl Drop for WorkerManager {
+    fn drop(&mut self) {
+        self.shutdown()
     }
 }
 

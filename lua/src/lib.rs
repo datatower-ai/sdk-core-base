@@ -9,7 +9,6 @@ fn dt_core_lua(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
     exports.set("init", lua.create_function(init)?)?;
     exports.set("add_event", lua.create_function(add_event)?)?;
-    exports.set("verify_event", lua.create_function(verify_event)?)?;
     exports.set("flush", lua.create_function(flush)?)?;
     exports.set("close", lua.create_function(close)?)?;
     exports.set("enable_log", lua.create_function(toggle_logger)?)?;
@@ -44,11 +43,6 @@ fn init(_: &Lua, table: Table) -> LuaResult<bool> {
         path, max_batch_len as u32, name_prefix, max_file_size_bytes
     );
     Ok(common::init_consumer(consumer))
-}
-
-fn verify_event(_: &Lua, table: Table) -> LuaResult<bool> {
-    let map: Map<String, serde_json::Value> = MyTable(table).into();
-    Ok(common::util::data_verification::verify_event(&map))
 }
 
 fn add_event(_: &Lua, table: Table) -> LuaResult<bool> {

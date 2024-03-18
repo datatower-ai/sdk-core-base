@@ -1,7 +1,6 @@
 #[derive(Debug)]
 struct DatabaseCacheConsumer {
     path: String,
-
 }
 
 impl DatabaseCacheConsumer {

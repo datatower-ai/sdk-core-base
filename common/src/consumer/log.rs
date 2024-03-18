@@ -6,7 +6,7 @@ use regex::Regex;
 use serde_json::{Map, Value};
 use crate::consumer::Consumer;
 use crate::{log_error, log_info};
-use crate::util::data_verification::verify_event;
+use crate::event::processing::process_event;
 use crate::util::datetime::get_hour_since_epoch;
 
 /**
@@ -146,8 +146,8 @@ impl LogConsumer {
 }
 
 impl Consumer for LogConsumer {
-    fn add(self: &mut Self, event: Map<String, Value>) -> bool {
-        if !verify_event(&event) {
+    fn add(self: &mut Self, mut event: Map<String, Value>) -> bool {
+        if !process_event(&mut event) {
             log_error!("Verification failed for this event: {:?}", event);
             return false
         }

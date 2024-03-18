@@ -5,6 +5,9 @@ pub mod log;
 #[cfg(feature = "db-cache-consumer")]
 pub mod database_cache;
 
+#[cfg(feature = "async-upload")]
+pub mod async_upload;
+
 pub(crate) const MEM_KEY: &'static str = "consumer";
 
 pub trait Consumer {

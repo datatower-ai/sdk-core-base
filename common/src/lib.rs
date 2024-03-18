@@ -6,6 +6,7 @@ use crate::consumer::Consumer;
 pub mod util;
 mod base;
 pub mod consumer;
+pub mod event;
 
 pub fn init_consumer(consumer: impl Consumer + 'static) -> bool {
     let mut mem = mem().lock().unwrap();
