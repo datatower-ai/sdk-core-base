@@ -38,8 +38,8 @@ const COMPULSORY_META_PROPS: Lazy<Vec<String>> = Lazy::new(|| vec!(
 const PRESET_PROPS_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#bundle_id", TypeConstraint::String),
     ("#zone_offset", TypeConstraint::Integer), ("$ip", TypeConstraint::String),
-    ("$country_code", TypeConstraint::String), ("#country", TypeConstraint::String),
-    ("#province", TypeConstraint::String), ("#city", TypeConstraint::String),
+    ("$country_code", TypeConstraint::String), ("$country", TypeConstraint::String),
+    ("$province", TypeConstraint::String), ("$city", TypeConstraint::String),
     ("$server_time", TypeConstraint::Integer), ("$uid", TypeConstraint::String),
     ("#session_id", TypeConstraint::String), ("#device_manufacturer", TypeConstraint::String),
     ("#is_foreground", TypeConstraint::Bool), ("#mcc", TypeConstraint::String),
@@ -78,7 +78,7 @@ const PRESET_PROPS_AD: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#ad_precision", TypeConstraint::String), ("#ad_country_code", TypeConstraint::String),
     ("#ad_mediation_code", TypeConstraint::Integer), ("#ad_mediation_id", TypeConstraint::String),
     ("#ad_conversion_source", TypeConstraint::String), ("#ad_click_gap", TypeConstraint::String),
-    ("#ad_return_gap", TypeConstraint::String), ("#error_code", TypeConstraint::String),
+    ("#ad_return_gap", TypeConstraint::String), ("#error_code", TypeConstraint::Integer),
     ("#error_message", TypeConstraint::String), ("#load_result", TypeConstraint::String),
     ("#load_duration", TypeConstraint::String)
 ]));
