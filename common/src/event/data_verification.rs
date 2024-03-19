@@ -4,7 +4,7 @@ use once_cell::unsync::Lazy;
 use serde_json::{Map, Value};
 use crate::log_error;
 
-const NAME_REGEX_STR: &'static str = r"^[#$a-zA-Z][a-zA-Z0-9_]{0,63}$";
+const NAME_REGEX_STR: &'static str = r"^[a-zA-Z#][a-zA-Z\d_#]{0,49}$";
 const NAME_RE: Lazy<Regex> = Lazy::new(|| Regex::new(NAME_REGEX_STR).unwrap());
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -36,11 +36,7 @@ const COMPULSORY_META_PROPS: Lazy<Vec<String>> = Lazy::new(|| vec!(
 ));
 
 const PRESET_PROPS_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::from([
-    ("#bundle_id", TypeConstraint::String),
-    ("#zone_offset", TypeConstraint::Integer), ("$ip", TypeConstraint::String),
-    ("$country_code", TypeConstraint::String), ("$country", TypeConstraint::String),
-    ("$province", TypeConstraint::String), ("$city", TypeConstraint::String),
-    ("$server_time", TypeConstraint::Integer), ("$uid", TypeConstraint::String),
+    ("#bundle_id", TypeConstraint::String), ("#zone_offset", TypeConstraint::Integer),
     ("#session_id", TypeConstraint::String), ("#device_manufacturer", TypeConstraint::String),
     ("#is_foreground", TypeConstraint::Bool), ("#mcc", TypeConstraint::String),
     ("#mnc", TypeConstraint::String), ("#os_country_code", TypeConstraint::String),
@@ -56,18 +52,9 @@ const PRESET_PROPS_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#mp_platform", TypeConstraint::String)
 ]));
 const PRESET_PROPS_USER_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::from([
-    ("$uid", TypeConstraint::String), ("$active_time", TypeConstraint::Integer),
-    ("$reg_time", TypeConstraint::Integer), ("$active_server_time", TypeConstraint::Integer),
-    ("$network_id", TypeConstraint::String), ("$network_name", TypeConstraint::String),
-    ("$tracker_id", TypeConstraint::String), ("$tracker_name", TypeConstraint::String),
-    ("$channel_id", TypeConstraint::String), ("$channel_name", TypeConstraint::String),
-    ("$channel_sub_id", TypeConstraint::String), ("$channel_sub_name", TypeConstraint::String),
-    ("$channel_ssub_id", TypeConstraint::String), ("$channel_ssub_name", TypeConstraint::String),
-    ("$channel_platform_id", TypeConstraint::Integer), ("$channel_platform_name", TypeConstraint::String),
-    ("$active_country_code", TypeConstraint::String), ("#active_device_model", TypeConstraint::String),
-    ("#active_network_type", TypeConstraint::String), ("#active_os_version_name", TypeConstraint::String),
-    ("#active_os", TypeConstraint::String), ("#active_os_lang_code", TypeConstraint::String),
-    ("#firebase_iid", TypeConstraint::String),
+    ("#active_device_model", TypeConstraint::String), ("#active_network_type", TypeConstraint::String),
+    ("#active_os_version_name", TypeConstraint::String), ("#active_os", TypeConstraint::String),
+    ("#active_os_lang_code", TypeConstraint::String), ("#firebase_iid", TypeConstraint::String),
 ]));
 const PRESET_PROPS_AD: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#ad_seq", TypeConstraint::String), ("#ad_id", TypeConstraint::String),
@@ -85,7 +72,7 @@ const PRESET_PROPS_AD: PropsConstraintMap = Lazy::new(|| HashMap::from([
 const PRESET_PROPS_IAS: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#ias_original_order", TypeConstraint::String), ("#ias_order", TypeConstraint::String),
     ("#ias_sku", TypeConstraint::String), ("#ias_price", TypeConstraint::Number),
-    ("#ias_currency", TypeConstraint::String), ("$ias_price_exchange", TypeConstraint::Number)
+    ("#ias_currency", TypeConstraint::String)
 ]));
 const PRESET_PROPS_APP_INSTALL: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#referrer_url", TypeConstraint::String), ("#referrer_click_time", TypeConstraint::Integer),
@@ -96,30 +83,12 @@ const PRESET_PROPS_SESSION_START: PropsConstraintMap = Lazy::new(|| HashMap::fro
     ("#is_first_time", TypeConstraint::Bool), ("#resume_from_background", TypeConstraint::Bool),
     ("#start_reason", TypeConstraint::String), ("#background_duration", TypeConstraint::Integer)
 ]));
-const PRESET_PROPS_D_APP_INSTALL: PropsConstraintMap = Lazy::new(|| HashMap::from([
-    ("$network_id", TypeConstraint::String), ("$network_name", TypeConstraint::String),
-    ("$tracker_id", TypeConstraint::String), ("$tracker_name", TypeConstraint::String),
-    ("$channel_id", TypeConstraint::String), ("$channel_sub_id", TypeConstraint::String),
-    ("$channel_ssub_id", TypeConstraint::String), ("$channel_name", TypeConstraint::String),
-    ("$channel_sub_name", TypeConstraint::String), ("$channel_ssub_name", TypeConstraint::String),
-    ("$channel_platform_id", TypeConstraint::Number), ("$channel_platform_name", TypeConstraint::String),
-    ("$attribution_source", TypeConstraint::String), ("$fraud_network_id", TypeConstraint::String),
-    ("$original_tracker_id", TypeConstraint::String), ("$original_tracker_name", TypeConstraint::String),
-    ("$original_network_id", TypeConstraint::String), ("$original_network_name", TypeConstraint::String)
-]));
 const PRESET_PROPS_SESSION_END: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#session_duration", TypeConstraint::Integer)
 ]));
-const PRESET_PROPS_D_AD_CONVERSION: PropsConstraintMap = Lazy::new(|| HashMap::from([
-    ("$earnings", TypeConstraint::Number)
-]));
 const PRESET_PROPS_IAP_PURCHASE_SUCCESS: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#iap_order", TypeConstraint::String), ("#iap_sku", TypeConstraint::String),
-    ("#iap_price", TypeConstraint::Number), ("#iap_currency", TypeConstraint::String),
-    ("$iap_price_exchange", TypeConstraint::Number)
-]));
-const PRESET_PROPS_D_IAS_SUBSCRIBE_NOTIFY: PropsConstraintMap = Lazy::new(|| HashMap::from([
-    ("$original_ios_notification_type", TypeConstraint::String)
+    ("#iap_price", TypeConstraint::Number), ("#iap_currency", TypeConstraint::String)
 ]));
 
 const EMPTY_PROPS_LIST: PropsConstraintMap = Lazy::new(|| HashMap::new());
@@ -129,7 +98,6 @@ const EMPTY_PROPS_LIST_TUPLE: (PropsConstraintMap, PropsConstraintMap) = (PRESET
 const PRESET_EVENTS: Lazy<HashMap<&str, (PropsConstraintMap, PropsConstraintMap)>> = Lazy::new(|| HashMap::from([
     ("#app_install", (PRESET_PROPS_APP_INSTALL, EMPTY_PROPS_LIST)),
     ("#session_start", (PRESET_PROPS_SESSION_START, EMPTY_PROPS_LIST)),
-    ("$app_install", (PRESET_PROPS_D_APP_INSTALL, EMPTY_PROPS_LIST)),
     ("#session_end", (PRESET_PROPS_SESSION_END, EMPTY_PROPS_LIST)),
     ("#ad_load_begin", (PRESET_PROPS_AD, EMPTY_PROPS_LIST)),
     ("#ad_load_end", (PRESET_PROPS_AD, EMPTY_PROPS_LIST)),
@@ -142,12 +110,10 @@ const PRESET_EVENTS: Lazy<HashMap<&str, (PropsConstraintMap, PropsConstraintMap)
     ("#ad_return_app", (PRESET_PROPS_AD, EMPTY_PROPS_LIST)),
     ("#ad_rewarded", (PRESET_PROPS_AD, EMPTY_PROPS_LIST)),
     ("#ad_conversion", (PRESET_PROPS_AD, EMPTY_PROPS_LIST)),
-    ("$ad_conversion", (PRESET_PROPS_AD, PRESET_PROPS_D_AD_CONVERSION)),
     ("#ad_paid", (PRESET_PROPS_AD, EMPTY_PROPS_LIST)),
     ("#iap_purchase_success", (PRESET_PROPS_IAP_PURCHASE_SUCCESS, EMPTY_PROPS_LIST)),
     ("#ias_subscribe_success", (PRESET_PROPS_IAS, EMPTY_PROPS_LIST)),
     ("#ias_subscribe_notify", (PRESET_PROPS_IAS, EMPTY_PROPS_LIST)),
-    ("$ias_subscribe_notify", (PRESET_PROPS_IAS, PRESET_PROPS_D_IAS_SUBSCRIBE_NOTIFY)),
 ]));
 
 pub(crate) fn verify_event(event_map: &Map<String, Value>) -> bool {
@@ -194,7 +160,7 @@ pub(crate) fn verify_event(event_map: &Map<String, Value>) -> bool {
     };
 
     if event_type == "track" {
-        if event_name.starts_with("#") || event_name.starts_with("$") {
+        if is_preset(event_name) {
             if let Some(props_tuple) = PRESET_EVENTS.get(event_name.as_str()) {
                 verify_preset_event(event_name, properties, props_tuple)
             } else {
@@ -210,6 +176,10 @@ pub(crate) fn verify_event(event_map: &Map<String, Value>) -> bool {
         log_error!("event_type (\"{}\") is invalid!", event_type);
         false
     }
+}
+
+fn is_preset(name: &String) -> bool {
+    name.starts_with("#")
 }
 
 fn check_type_constraint(value: &Value, target: &TypeConstraint) -> bool {
@@ -273,7 +243,7 @@ fn verify_properties(
         return false;
     }
 
-    if key.starts_with("#") || key.starts_with("$") {
+    if is_preset(key) {
         if let Some(constraint) = find_constraint_in_preset_event(key.as_str(), props_tuple, &PRESET_PROPS_COMMON) {
             if !check_type_constraint(value, constraint) {
                 log_error!(
@@ -285,14 +255,14 @@ fn verify_properties(
                 true
             }
         } else {
-            // Property (starts with # or $) is out of scope.
+            // Property (starts with #) is out of scope.
             log_error!(
-                "key of property (\"{}\") is out of scope for event (\"{}\")!", key, event_name
+                "Key of property (\"{}\") is out of scope for event (\"{}\")!", key, event_name
             );
             false
         }
     } else {
-        // Custom properties (not starts with # or $) are allowed for all events.
+        // Custom properties (not starts with #) are allowed for all events.
         true
     }
 }
@@ -332,7 +302,7 @@ fn verify_custom_properties(event_name: &String, properties: &Map<String, Value>
 
 fn verify_all_custom_props_are_list(properties: &Map<String, Value>) -> bool {
     for (k, v) in properties {
-        if k.starts_with("#") || k.starts_with("$") {
+        if is_preset(k) {
             return true;
         }
         let Value::Array(_) = v else {
@@ -345,7 +315,7 @@ fn verify_all_custom_props_are_list(properties: &Map<String, Value>) -> bool {
 
 fn verify_all_custom_props_are_num(properties: &Map<String, Value>) -> bool {
     for (k, v) in properties {
-        if k.starts_with("#") || k.starts_with("$") {
+        if is_preset(k) {
             return true;
         }
         let Value::Number(_) = v else {
@@ -549,7 +519,23 @@ mod test {
             "properties": {
                 "#resume_from_background": true,
                 "a": [1, 2, 3],
-                "$custom": "123"            // <- custom "preset" props
+                "$custom": "123"            // <- custom "preset" props with $
+            }
+        });
+        verify(j, false);
+
+        let j = json!({
+            "#app_id": "123",
+            "#event_time": 123,
+            "#dt_id": "ddd",
+            "#bundle_id": "com.xx",
+            "#event_name": "#session_start",
+            "#event_type": "track",
+            "#event_syn": "eeeee",
+            "properties": {
+                "#resume_from_background": true,
+                "a": [1, 2, 3],
+                "#custom": "123"            // <- custom "preset" props with #
             }
         });
         verify(j, false);
@@ -662,7 +648,6 @@ mod test {
             "#event_syn": "eeeee",
             "properties": {
                 "a": "1",
-                "$active_country_code": "ccc",
                 "#firebase_iid": "123"
             }
         });
