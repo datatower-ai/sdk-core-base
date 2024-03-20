@@ -148,6 +148,10 @@ impl WorkerManager {
         self.queue.lock().unwrap().len()
     }
 
+    pub fn size(&self) -> usize {
+        self.size
+    }
+
     pub fn shutdown(&mut self) {
         //println!("WorkerManager({}): Sending terminate message to all workers.", self.name);
         for _ in 0..self.size {

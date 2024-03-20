@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::sync::{Mutex, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock};
 use crate::consumer::Consumer;
 
 pub(crate) enum MemValue {
@@ -16,11 +16,11 @@ pub(crate) enum MemValue {
 unsafe impl Send for MemValue {}
 unsafe impl Sync for MemValue {}
 
-pub(crate) type MemMap = Mutex<HashMap<String, MemValue>>;
+pub(crate) type MemMap = Arc<Mutex<Box<HashMap<String, MemValue>>>>;
 
 pub(crate) fn mem() -> &'static MemMap {
     static MEM: OnceLock<MemMap> = OnceLock::new();
     MEM.get_or_init(|| {
-        Mutex::new(HashMap::new())
+        Arc::new(Mutex::new(Box::new(HashMap::new())))
     })
 }

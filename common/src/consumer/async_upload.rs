@@ -1,4 +1,4 @@
-use std::cmp::min;
+use std::cmp::{max, min};
 use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
 use std::thread::sleep;
@@ -10,47 +10,70 @@ use crate::{log_error};
 use crate::util::worker::worker::WorkerManager;
 
 struct AsyncUploadConsumer {
-    cache: Arc<Mutex<VecDeque<String>>>,
-    upload_wm: WorkerManager,
+    cache: Arc<Mutex<VecDeque<Map<String, Value>>>>,
+    worker_manager: WorkerManager,
+    flushed_count: Arc<Mutex<USizeHolder>>,
+    max_batch_size: usize
 }
+
+struct USizeHolder(usize);
 
 impl AsyncUploadConsumer {
-    fn new(num_upload_threads: usize) -> Self {
+    fn new(num_threads: usize, max_batch_size: usize) -> Self {
         AsyncUploadConsumer {
             cache: Arc::new(Mutex::new(VecDeque::new())),
-            upload_wm: WorkerManager::new(
+            worker_manager: WorkerManager::new(
                 String::from("AsyncUploadConsumer#uploader"),
-                min(1, num_upload_threads)
+                min(1, num_threads)
             ),
+            flushed_count: Arc::new(Mutex::new(USizeHolder(0))),
+            max_batch_size,
         }
     }
-}
 
-impl Consumer for AsyncUploadConsumer {
-    fn add(self: &mut Self, mut event: Map<String, Value>) -> bool {
-        if !process_event(&mut event) {
+    fn add_to_cache(self: &mut Self, mut event: Map<String, Value>) -> bool{
+        if process_event(&mut event) {
+            {
+                self.cache.lock().unwrap().push_back(event);
+            }
+
+            let fc = self.flushed_count.clone();
+            if let Ok(mut count) = fc.lock() {
+                if count.0 < self.worker_manager.size() {
+                    count.0 += 1;
+                    self.flush();
+                } else {
+                    // Eliminates unnecessary duplicated flush() calls.
+                }
+            } else {
+                self.flush();
+            }
+
+            true
+        } else {
             log_error!("Verification failed for this event: {:?}", event);
             return false;
         }
-
-        if let Ok(json_str) = serde_json::to_string(&event) {
-            self.cache.lock().unwrap().push_back(json_str);
-
-            self.flush();
-            true
-        } else {
-            log_error!("Failed to jsonify the given event: {:?}", event);
-            false
-        }
     }
 
-    fn flush(self: &mut Self) {
+    fn upload_cache(self: &mut Self) {
         let cache = self.cache.clone();
+        let count = self.flushed_count.clone();
+        let max_batch_size = self.max_batch_size;
 
-        self.format_wm.schedule(move || {
-            let cache: Vec<String> = if let Ok(mut cache) = cache.lock() {
-                let mut tmp = Vec::with_capacity(cache.len());
-                loop {
+        self.worker_manager.schedule(move || {
+            if let Ok(mut count) = count.lock() {
+                count.0 = max(0, count.0 - 1);
+            }
+
+            let cache: Vec<Map<String, Value>> = if let Ok(mut cache) = cache.lock() {
+                if cache.is_empty() {
+                    return;
+                }
+
+                let size = min(cache.len(), max_batch_size);
+                let mut tmp = Vec::with_capacity(size);
+                for _ in 0..size {
                     if let Some(event) = cache.pop_front() {
                         tmp.push(event)
                     } else {
@@ -59,22 +82,39 @@ impl Consumer for AsyncUploadConsumer {
                 }
                 tmp
             } else {
-                vec![]
-            };
-
-            if cache.is_empty() {
+                // nothing to sent
                 return;
             };
 
-            let data = format!("[{}]", cache.join(","));
+            let data_json = cache.iter()
+                .filter_map(|it| {
+                    if let Ok(json) = serde_json::to_string(it) {
+                        Some(json)
+                    } else {
+                        log_error!("Failed to jsonify the given event: {:?}", it);
+                        None
+                    }
+                }).collect::<Vec<String>>()
+                .join(",");
+            let data = format!("[{}]", data_json);
             println!("data: ({}) {}", cache.len(), data);
             // upload!
-            sleep(Duration::from_millis(30));
+            sleep(Duration::from_millis(100));
         });
+    }
+}
+
+impl Consumer for AsyncUploadConsumer {
+    fn add(self: &mut Self, event: Map<String, Value>) -> bool {
+        self.add_to_cache(event)
+    }
+
+    fn flush(self: &mut Self) {
+        self.upload_cache()
     }
 
     fn close(self: &mut Self) {
-        self.format_wm.shutdown();
+        self.worker_manager.shutdown();
     }
 }
 
@@ -95,22 +135,21 @@ mod test {
 
     #[test]
     fn it_works() {
-        let mut c = AsyncUploadConsumer::new(2);
-
+        let mut c = AsyncUploadConsumer::new(2, 20);
         for i in 0..=50 {
             let j = json!({
-            "#app_id": "123",
-            "#event_time": i,
-            "#dt_id": "ddd",
-            "#bundle_id": "com.xx",
-            "#event_name": "test_event",
-            "#event_type": "track",
-            "#event_syn": "eeeee",
-            "properties": {
-                "#sdk_version_name": "1.2.3",
-                "a": [1, 2, 3]
-            }
-        });
+                "#app_id": "123",
+                "#event_time": i,
+                "#dt_id": "ddd",
+                "#bundle_id": "com.xx",
+                "#event_name": "test_event",
+                "#event_type": "track",
+                "#event_syn": "eeeee",
+                "properties": {
+                    "#sdk_version_name": "1.2.3",
+                    "a": [1, 2, 3]
+                }
+            });
             match j {
                 Value::Object(m) => {
                     c.add(m);

@@ -1,11 +1,11 @@
 
-#[cfg(feature = "log-consumer")]
+#[cfg(feature = "log-consumer-server")]
 pub mod log;
 
-#[cfg(feature = "db-cache-consumer")]
+#[cfg(feature = "db-cache-consumer-client")]
 pub mod database_cache;
 
-#[cfg(feature = "async-upload")]
+#[cfg(feature = "async-upload-server")]
 pub mod async_upload;
 
 pub(crate) const MEM_KEY: &'static str = "consumer";

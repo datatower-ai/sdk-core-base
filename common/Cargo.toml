@@ -7,25 +7,23 @@ build = "build/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["async-upload"]
-log-consumer = []
-db-cache-consumer = ["thread", "database", "network"]
-async-upload = ["thread", "network"]
+default = ["async-upload-server"]
+log-consumer-server = ["cat_server"]
+db-cache-consumer-client = ["thread", "database", "network", "cat_client"]
+async-upload-server = ["thread", "network", "cat_server"]
 thread = []         # with modules of thread
-database = []       # with database cache
-network = []        # with networking (upload)
+database = ["rusqlite"]       # with database cache
+network = ["reqwest"]        # with networking (upload)
+cat_client = []             # Category: Client SDK, c2s
+cat_server = []             # Category: Server SDK, s2s
+
+[build-dependencies]
+cfg-if = "1.0.0"
 
 [dependencies]
 serde_json = { workspace = true }
 regex = "1.10.3"
 once_cell = "1.19.0"
 log = "0.4.21"
-
-[build-dependencies]
-cfg-if = "1.0.0"
-
-[target.'cfg(feature = "database")'.dependencies]
-rusqlite = { version = "0.31.0", features = ["bundled", "serde_json"] }
-
-[target.'cfg(feature = "network")'.dependencies]
-reqwest = { version = "0.11.26", features = ["blocking", "json"] }
+rusqlite = { version = "0.31.0", features = ["bundled", "serde_json"], optional = true }
+reqwest = { version = "0.11.26", features = ["blocking", "json"], optional = true }

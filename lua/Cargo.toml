@@ -26,6 +26,6 @@ luajit = ["mlua/luajit"]
 luau = ["mlua/luau"]
 
 [dependencies]
-common = { path = "../common", default-features = false, features = ["log-consumer"] }
+common = { path = "../common", default-features = false, features = ["log-consumer-server"] }
 serde_json = { workspace = true }
 mlua = { version = "0.9.6", features = ["module"] }
