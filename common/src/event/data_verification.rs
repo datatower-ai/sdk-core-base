@@ -26,7 +26,7 @@ const META_PROPS: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#dt_id", TypeConstraint::String), ("#acid", TypeConstraint::String),
     ("#event_name", TypeConstraint::String), ("#event_type", TypeConstraint::String),
     ("#event_time", TypeConstraint::Integer), ("#event_syn", TypeConstraint::String),
-    ("properties", TypeConstraint::Object)
+    ("properties", TypeConstraint::Object), ("#debug", TypeConstraint::Bool),
 ]));
 const COMPULSORY_META_PROPS: Lazy<Vec<String>> = Lazy::new(|| vec!(
     String::from("#app_id"), String::from("#bundle_id"),
