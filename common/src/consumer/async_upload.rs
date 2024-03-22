@@ -13,7 +13,7 @@ use crate::util::error::Result;
 struct AsyncUploadConsumer {
     cache: Arc<Mutex<VecDeque<Map<String, Value>>>>,
     worker_manager: WorkerManager,
-    flushed_count: Arc<Mutex<USizeHolder>>,
+    flushing_process_count: Arc<Mutex<USizeHolder>>,
     max_batch_size: usize
 }
 
@@ -27,7 +27,7 @@ impl AsyncUploadConsumer {
                 String::from("AsyncUploadConsumer#uploader"),
                 min(1, num_threads)
             ),
-            flushed_count: Arc::new(Mutex::new(USizeHolder(0))),
+            flushing_process_count: Arc::new(Mutex::new(USizeHolder(0))),
             max_batch_size,
         }
     }
@@ -39,7 +39,7 @@ impl AsyncUploadConsumer {
             self.cache.lock().unwrap().push_back(event);
         }
 
-        let fc = self.flushed_count.clone();
+        let fc = self.flushing_process_count.clone();
         if let Ok(mut count) = fc.lock() {
             if count.0 < self.worker_manager.size() {
                 count.0 += 1;
@@ -56,7 +56,7 @@ impl AsyncUploadConsumer {
 
     fn upload_cache(self: &mut Self) {
         let cache = self.cache.clone();
-        let count = self.flushed_count.clone();
+        let count = self.flushing_process_count.clone();
         let max_batch_size = self.max_batch_size;
 
         self.worker_manager.schedule(move || {

@@ -2,7 +2,8 @@ use std::sync::{OnceLock};
 use std::time::Duration;
 use reqwest::blocking::Client;
 use serde_json::{Map, Value};
-use crate::log_error;
+use crate::util::error::macros::network_error;
+use crate::util::error::{Result, DTError};
 
 #[cfg(all(feature = "network"))]
 #[derive(Debug)]
@@ -33,7 +34,7 @@ impl HttpService {
         url: &String, data: String,
         app_id: &String, data_count: usize, token: &String,
         sdk_type: &String, sdk_version: &String
-    ) -> bool {
+    ) -> Result<Map<String, Value>> {
         let response = self.client
             .post(url)
             .header("app_id", app_id)
@@ -48,31 +49,26 @@ impl HttpService {
             Ok(response) => {
                 let status_code = response.status();
                 if status_code != 200 {
-                    log_error!("Upload failed with status code: \"{}\"", status_code);
-                    false
+                    network_error!("Upload failed with status code: \"{}\"", status_code)
                 } else {
                     if let Ok(response) = response.json::<Map<String, Value>>() {
-                        println!("response: {:?}", response);
-                        if let Some(code) = response.get("code") {
-                            if code == 0 {
-                                true
-                            } else {
-                                log_error!("Failed to upload, \"{:?}\", {:?}", code, response.get("msg").unwrap_or(&Value::String(String::new())));
-                                false
-                            }
-                        } else {
-                            log_error!("Server response is invalid, \"{:?}\"", response);
-                            false
-                        }
+                        // if let Some(code) = response.get("code") {
+                        //     if code == 0 {
+                        //         true
+                        //     } else {
+                        //         network_error!("Failed to upload, \"{:?}\", {:?}", code, response.get("msg").unwrap_or(&Value::String(String::new())))
+                        //     }
+                        // } else {
+                        //     network_error!("Server response is invalid, \"{:?}\"", response)
+                        // }
+                        Ok(response)
                     } else {
-                        log_error!("Failed to parse response, \"{}\"", status_code);
-                        false
+                        network_error!("Failed to parse response, \"{}\", \"{:?}\"", status_code, response.bytes().unwrap_or("UNKNOWN".into()))
                     }
                 }
             },
             Err(e) => {
-                log_error!("Network Failed! reason: {}", e);
-                false
+                network_error!("Network Failed! reason: {}", e)
             }
         }
     }
@@ -88,7 +84,7 @@ mod test {
             crate::util::logger::LOG_ENABLED = true;
         }
         let hs = HttpService::get();
-        hs.post_event(
+        let response = hs.post_event(
             &String::from("https://test.roiquery.com/sync"),
             String::from("[]"),
             &String::from(""),
@@ -97,5 +93,9 @@ mod test {
             &String::from(""),
             &String::from("")
         );
+        match response {
+            Ok(response) => println!("{response:?}"),
+            Err(e) => println!("{e}")
+        }
     }
 }

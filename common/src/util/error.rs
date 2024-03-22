@@ -9,6 +9,7 @@ pub enum DTError {
     VerifyError(String),
     InternalError(String),
     RuntimeError(String),
+    NetworkError(String),
     WithContext{
         context: String,
         cause: Box<DTError>
@@ -21,6 +22,7 @@ impl fmt::Display for DTError {
             DTError::VerifyError(msg) => write!(f, "{msg}"),
             DTError::InternalError(msg) => write!(f, "Internal Error! {msg}"),
             DTError::RuntimeError(msg) => write!(f, "{msg}"),
+            DTError::NetworkError(msg) => write!(f, "{msg}"),
             DTError::WithContext {context, cause} => {
                 writeln!(f, "{context}")?;
                 write!(f, "with: {cause}")
@@ -35,6 +37,7 @@ impl Error for DTError {
             DTError::VerifyError(_) => None,
             DTError::InternalError(_) => None,
             DTError::RuntimeError(_) => None,
+            DTError::NetworkError(_) => None,
             DTError::WithContext {cause, .. } => Some(cause),
         }
     }
@@ -59,6 +62,12 @@ pub(crate) mod macros {
         };
     }
 
+    macro_rules! network_error {
+        ($($arg:tt)*) => {
+            Err(DTError::NetworkError(format!($($arg)*)))
+        };
+    }
+
     macro_rules! error_with {
         ($err:ident, $($arg:tt)*) => {
             Err(DTError::WithContext {
@@ -71,5 +80,6 @@ pub(crate) mod macros {
     pub(crate) use verify_error;
     pub(crate) use internal_error;
     pub(crate) use runtime_error;
+    pub(crate) use network_error;
     pub(crate) use error_with;
 }

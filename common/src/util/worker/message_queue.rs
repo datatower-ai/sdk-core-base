@@ -38,6 +38,7 @@ impl MessageQueue {
         }
     }
 
+    #[allow(dead_code)]
     pub fn schedule<T>(&mut self, handler: T)
         where T: Task + Send + 'static
     {
