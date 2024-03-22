@@ -1,0 +1,6 @@
+# https://blog.dynos01.com/rust-cross-compilation-statically-link/
+[target.aarch64-pc-windows-msvc]
+image = "aarch64-pc-windows-msvc-cross:local"
+
+[target.x86_64-pc-windows-msvc]
+image = "x86_64-pc-windows-msvc-cross:local"

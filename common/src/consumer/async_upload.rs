@@ -8,6 +8,7 @@ use crate::consumer::Consumer;
 use crate::event::processing::process_event;
 use crate::{log_error};
 use crate::util::worker::worker::WorkerManager;
+use crate::util::error::Result;
 
 struct AsyncUploadConsumer {
     cache: Arc<Mutex<VecDeque<Map<String, Value>>>>,
@@ -31,29 +32,26 @@ impl AsyncUploadConsumer {
         }
     }
 
-    fn add_to_cache(self: &mut Self, mut event: Map<String, Value>) -> bool{
-        if process_event(&mut event) {
-            {
-                self.cache.lock().unwrap().push_back(event);
-            }
+    fn add_to_cache(self: &mut Self, mut event: Map<String, Value>) -> Result<()> {
+        process_event(&mut event)?;
 
-            let fc = self.flushed_count.clone();
-            if let Ok(mut count) = fc.lock() {
-                if count.0 < self.worker_manager.size() {
-                    count.0 += 1;
-                    self.flush();
-                } else {
-                    // Eliminates unnecessary duplicated flush() calls.
-                }
-            } else {
-                self.flush();
-            }
-
-            true
-        } else {
-            log_error!("Verification failed for this event: {:?}", event);
-            return false;
+        {
+            self.cache.lock().unwrap().push_back(event);
         }
+
+        let fc = self.flushed_count.clone();
+        if let Ok(mut count) = fc.lock() {
+            if count.0 < self.worker_manager.size() {
+                count.0 += 1;
+                let _ = self.flush();
+            } else {
+                // Eliminates unnecessary duplicated flush() calls.
+            }
+        } else {
+            let _ = self.flush();
+        }
+
+        Ok(())
     }
 
     fn upload_cache(self: &mut Self) {
@@ -105,16 +103,16 @@ impl AsyncUploadConsumer {
 }
 
 impl Consumer for AsyncUploadConsumer {
-    fn add(self: &mut Self, event: Map<String, Value>) -> bool {
+    fn add(self: &mut Self, event: Map<String, Value>) -> Result<()> {
         self.add_to_cache(event)
     }
 
-    fn flush(self: &mut Self) -> crate::util::error::Result<()> {
+    fn flush(self: &mut Self) -> Result<()> {
         self.upload_cache();
         Ok(())
     }
 
-    fn close(self: &mut Self) -> crate::util::error::Result<()> {
+    fn close(self: &mut Self) -> Result<()> {
         self.worker_manager.shutdown();
         Ok(())
     }
@@ -122,7 +120,7 @@ impl Consumer for AsyncUploadConsumer {
 
 impl Drop for AsyncUploadConsumer {
     fn drop(&mut self) {
-        self.close();
+        let _ = self.close();
     }
 }
 
@@ -154,7 +152,7 @@ mod test {
             });
             match j {
                 Value::Object(m) => {
-                    c.add(m);
+                    let _ = c.add(m);
                 }
                 _ => {}
             }

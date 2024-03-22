@@ -38,5 +38,9 @@ function build_lua() {
 ####################################
 # Build
 ####################################
-build_lua lua54 &
-wait
+build_lua lua54
+build_lua lua53
+build_lua lua52
+build_lua lua51
+build_lua luajit
+build_lua luau

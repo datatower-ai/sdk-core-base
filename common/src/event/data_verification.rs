@@ -309,7 +309,7 @@ mod test {
 
     fn verify(obj: Value, target: bool) {
         let pass = verify_event(obj.as_object().unwrap());
-        assert_eq!(pass, target)
+        assert_eq!(pass.is_ok(), target)
     }
 
     #[test]
