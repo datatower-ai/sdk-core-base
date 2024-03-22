@@ -8,6 +8,8 @@ use crate::consumer::Consumer;
 use crate::{log_error, log_info};
 use crate::event::processing::process_event;
 use crate::util::datetime::get_hour_since_epoch;
+use crate::util::error::{DTError, Result};
+use crate::util::error::macros::runtime_error;
 
 /**
  * Should be run in a single thread for current implementation.
@@ -146,11 +148,8 @@ impl LogConsumer {
 }
 
 impl Consumer for LogConsumer {
-    fn add(self: &mut Self, mut event: Map<String, Value>) -> bool {
-        if !process_event(&mut event) {
-            log_error!("Verification failed for this event: {:?}", event);
-            return false
-        }
+    fn add(self: &mut Self, mut event: Map<String, Value>) -> Result<()> {
+        process_event(&mut event)?;
 
         if self.is_time_changed() {
             self.write_to_file(1);
@@ -166,24 +165,25 @@ impl Consumer for LogConsumer {
             self.batch.push(json);
             self.crt_size_bytes += json_size;
         } else {
-            log_error!("Failed to jsonify this event: {:?}", event);
-            return false;
+            return runtime_error!("Failed to jsonify this event: {event:?}");
         }
 
         if self.is_need_flush() {
             self.write_to_file(0);
         }
-        true
+        Ok(())
     }
 
-    fn flush(self: &mut Self) {
-        self.write_to_file(0)
+    fn flush(self: &mut Self) -> Result<()> {
+        self.write_to_file(0);
+        Ok(())
     }
 
-    fn close(self: &mut Self) {
+    fn close(self: &mut Self) -> Result<()> {
         if !self.batch.is_empty() {
             self.write_to_file(0);
         }
+        Ok(())
     }
 }
 
@@ -195,7 +195,7 @@ impl Default for LogConsumer {
 
 impl Drop for LogConsumer {
     fn drop(&mut self) {
-        self.close();
+        let _ = self.close();
     }
 }
 

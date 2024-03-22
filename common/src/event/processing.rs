@@ -1,10 +1,21 @@
 use std::sync::OnceLock;
 use serde_json::{Map, Value};
 use crate::event::data_verification::verify_event;
+use crate::util::error::{DTError, Result};
+use crate::util::error::macros::error_with;
 
-pub fn process_event(event_map: &mut Map<String, Value>) -> bool {
+pub fn process_event(event_map: &mut Map<String, Value>) -> Result<()> {
     inject_sdk_base_version(event_map);
-    verify_event(event_map)
+    let result = verify_event(event_map);
+
+    match result {
+        Err(e) => if let DTError::VerifyError(_) = e {
+            error_with!(e, "Verification failed for {event_map:?}")
+        } else {
+            Err(e)
+        },
+        _ => result
+    }
 }
 
 fn get_base_version() -> &'static str {

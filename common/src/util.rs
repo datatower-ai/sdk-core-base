@@ -3,3 +3,4 @@ pub(crate) mod datetime;
 pub(crate) mod worker;
 pub(crate) mod data_struct;
 pub mod logger;
+pub mod error;

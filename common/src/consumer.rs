@@ -1,3 +1,4 @@
+use crate::util::error::Result;
 
 #[cfg(feature = "log-consumer-server")]
 pub mod log;
@@ -11,9 +12,9 @@ pub mod async_upload;
 pub(crate) const MEM_KEY: &'static str = "consumer";
 
 pub trait Consumer {
-    fn add(self: &mut Self, event: serde_json::Map<String, serde_json::Value>) -> bool;
+    fn add(self: &mut Self, event: serde_json::Map<String, serde_json::Value>) -> Result<()>;
 
-    fn flush(self: &mut Self);
+    fn flush(self: &mut Self) -> Result<()>;
 
-    fn close(self: &mut Self);
+    fn close(self: &mut Self) -> Result<()>;
 }

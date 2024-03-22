@@ -109,12 +109,14 @@ impl Consumer for AsyncUploadConsumer {
         self.add_to_cache(event)
     }
 
-    fn flush(self: &mut Self) {
-        self.upload_cache()
+    fn flush(self: &mut Self) -> crate::util::error::Result<()> {
+        self.upload_cache();
+        Ok(())
     }
 
-    fn close(self: &mut Self) {
+    fn close(self: &mut Self) -> crate::util::error::Result<()> {
         self.worker_manager.shutdown();
+        Ok(())
     }
 }
 

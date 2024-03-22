@@ -1,0 +1,25 @@
+# How to build?
+#   $ cd python
+#   $ source .env/bin/activate
+#   $ maturin build --release --zig --target x86_64-unknown-linux-gnu --interpreter python3.9
+# Output: {ProjectRoot}/target/wheels/xxx.whl
+#
+# Useful links:
+# - https://github.com/PyO3/pyo3#:~:text=Using%20Rust%20from%20Python
+# - https://www.maturin.rs/distribution#use-zig:~:text=on%20GitHub%20Actions.-,Use%20Zig,-Since%20v0.12.7%20maturin
+
+[package]
+name = "python"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "dt_core_python"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.20.3", features = ["generate-import-lib"] }
+common = { path = "../common", default-features = false, features = ["log-consumer-server"] }
+serde_json = "1.0.114"
+pythonize = "0.20.0"

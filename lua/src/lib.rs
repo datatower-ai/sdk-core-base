@@ -42,21 +42,35 @@ fn init(_: &Lua, table: Table) -> LuaResult<bool> {
     let consumer = LogConsumer::new(
         path, max_batch_len as u32, name_prefix, max_file_size_bytes
     );
-    Ok(common::init_consumer(consumer))
+    if let Err(e) = common::init_consumer(consumer) {
+        log_error!("{e}");
+        Ok(false)
+    } else {
+        Ok(true)
+    }
 }
 
 fn add_event(_: &Lua, table: Table) -> LuaResult<bool> {
     let map: Map<String, serde_json::Value> = MyTable(table).into();
-    Ok(common::add(map))
+    if let Err(e) = common::add(map) {
+        log_error!("{e}");
+        Ok(false)
+    } else {
+        Ok(true)
+    }
 }
 
 fn flush(_: &Lua, _: ()) -> LuaResult<()> {
-    common::flush();
+    if let Err(e) = common::flush() {
+        log_error!("{e}");
+    }
     Ok(())
 }
 
 fn close(_: &Lua, _: ()) -> LuaResult<()> {
-    common::close();
+    if let Err(e) = common::close() {
+        log_error!("{e}");
+    }
     Ok(())
 }
 

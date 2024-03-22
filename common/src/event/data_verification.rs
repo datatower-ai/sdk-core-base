@@ -2,7 +2,8 @@ use std::collections::HashMap;
 use regex::Regex;
 use once_cell::unsync::Lazy;
 use serde_json::{Map, Value};
-use crate::log_error;
+use crate::util::error::{DTError, Result};
+use crate::util::error::macros::verify_error;
 
 const NAME_REGEX_STR: &'static str = r"^[a-zA-Z#][a-zA-Z\d_#]{0,49}$";
 const NAME_RE: Lazy<Regex> = Lazy::new(|| Regex::new(NAME_REGEX_STR).unwrap());
@@ -116,47 +117,38 @@ const PRESET_EVENTS: Lazy<HashMap<&str, (PropsConstraintMap, PropsConstraintMap)
     ("#ias_subscribe_notify", (PRESET_PROPS_IAS, EMPTY_PROPS_LIST)),
 ]));
 
-pub(crate) fn verify_event(event_map: &Map<String, Value>) -> bool {
+pub(crate) fn verify_event(event_map: &Map<String, Value>) -> Result<()> {
     for prop in COMPULSORY_META_PROPS.iter() {
         if let Some(value) = event_map.get(prop) {
             if let Some(constraint) = META_PROPS.get(prop.as_str()) {
                 if !check_type_constraint(value, constraint) {
-                    log_error!("Type of value of meta property is not valid! Expected: {:?}, got: {}", constraint, value);
-                    return false;
+                    return verify_error!(
+                        "Type of value of meta property is not valid! Expected: {:?}, got: {}", constraint, value
+                    );
                 }
             }
         } else {
-            log_error!("Meta property \"{}\" is required, but missing!", prop);
-            return false;
+            return verify_error!("Meta property \"{}\" is required, but missing!", prop);
         }
     }
 
-    if !check_meta_is_string_and_nonempty(event_map, String::from("#app_id")) {
-        return false;
-    }
-
-    if !check_meta_is_string_and_nonempty(event_map, String::from("#dt_id")) {
-        return false;
-    }
+    check_meta_is_string_and_nonempty(event_map, String::from("#app_id"))?;
+    check_meta_is_string_and_nonempty(event_map, String::from("#dt_id"))?;
 
     let Some(Value::String(event_name)) = event_map.get("#event_name") else {
-        log_error!("#event_name is missing or it's type is invalid!");
-        return false;
+        return verify_error!("#event_name is missing or it's type is invalid!");
     };
 
     if !NAME_RE.is_match(event_name) {
-        log_error!("#event_name must be a valid variable name!");
-        return false;
+        return verify_error!("#event_name must be a valid variable name!");
     }
 
     let Some(Value::String(event_type)) = event_map.get("#event_type") else {
-        log_error!("#event_type is missing or it's type is invalid!");
-        return false;
+        return verify_error!("#event_type is missing or it's type is invalid!");
     };
 
     let Some(Value::Object(properties)) = event_map.get("properties") else {
-        log_error!("properties is missing or it's type is invalid!");
-        return false;
+        return verify_error!("properties is missing or it's type is invalid!");
     };
 
     if event_type == "track" {
@@ -164,8 +156,7 @@ pub(crate) fn verify_event(event_map: &Map<String, Value>) -> bool {
             if let Some(props_tuple) = PRESET_EVENTS.get(event_name.as_str()) {
                 verify_preset_event(event_name, properties, props_tuple)
             } else {
-                log_error!("event_name (\"{}\") is out of scope (preset)!", event_name);
-                false
+                return verify_error!("event_name (\"{}\") is out of scope (preset)!", event_name);
             }
         } else {
             verify_custom_properties(event_name, properties)
@@ -173,8 +164,7 @@ pub(crate) fn verify_event(event_map: &Map<String, Value>) -> bool {
     } else if event_type == "user" {
         verify_user_event(event_name, properties)
     } else {
-        log_error!("event_type (\"{}\") is invalid!", event_type);
-        false
+        return verify_error!("event_type (\"{}\") is invalid!", event_type);
     }
 }
 
@@ -201,22 +191,19 @@ fn check_type_constraint(value: &Value, target: &TypeConstraint) -> bool {
     }
 }
 
-fn check_meta_is_string_and_nonempty(event_map: &Map<String, Value>, key: String) -> bool {
+fn check_meta_is_string_and_nonempty(event_map: &Map<String, Value>, key: String) -> Result<()> {
     if let Some(value) = event_map.get(&key) {
         if let Value::String(value) = value {
             if value.len() == 0 {
-                log_error!("{} cannot be empty!", key);
-                false
+                verify_error!("{} cannot be empty!", key)
             } else {
-                true
+                Ok(())
             }
         } else {
-            log_error!("{} should be a string!", key);
-            false
+            verify_error!("{} should be a string!", key)
         }
     } else {
-        log_error!("{} is required, but missing", key);
-        false
+        verify_error!("{} is required, but missing", key)
     }
 }
 
@@ -224,46 +211,41 @@ fn verify_preset_event(
     event_name: &String,
     properties: &Map<String, Value>,
     props_tuple: &(PropsConstraintMap, PropsConstraintMap)
-) -> bool {
+) -> Result<()> {
     for (key, value) in properties {
-        if !verify_properties(event_name, key, value, props_tuple) {
-            return false;
-        }
+        verify_properties(event_name, key, value, props_tuple)?
     }
-    true
+    Ok(())
 }
 
 fn verify_properties(
     event_name: &String,
     key: &String, value: &Value,
     props_tuple: &(PropsConstraintMap, PropsConstraintMap)
-) -> bool {
+) -> Result<()> {
     if !NAME_RE.is_match(key) {
-        log_error!("Property name (\"{}\") is invalid!", key);
-        return false;
+        return verify_error!("Property name (\"{}\") is invalid!", key);
     }
 
     if is_preset(key) {
         if let Some(constraint) = find_constraint_in_preset_event(key.as_str(), props_tuple, &PRESET_PROPS_COMMON) {
             if !check_type_constraint(value, constraint) {
-                log_error!(
+                verify_error!(
                     "The type of value for property \"{}\" is not valid (Given: {}, Expected: {:?})!",
                     key, value, constraint
-                );
-                false
+                )
             } else {
-                true
+                Ok(())
             }
         } else {
             // Property (starts with #) is out of scope.
-            log_error!(
+            return verify_error!(
                 "Key of property (\"{}\") is out of scope for event (\"{}\")!", key, event_name
-            );
-            false
+            )
         }
     } else {
         // Custom properties (not starts with #) are allowed for all events.
-        true
+        Ok(())
     }
 }
 
@@ -275,11 +257,9 @@ fn find_constraint_in_preset_event<'a>(
     common_pcm.get(prop_name).or(props1.get(prop_name).or(props2.get(prop_name)))
 }
 
-fn verify_user_event(event_name: &String, properties: &Map<String, Value>) -> bool {
+fn verify_user_event(event_name: &String, properties: &Map<String, Value>) -> Result<()> {
     for (k, v) in properties {
-        if !verify_properties(event_name, k, v, &USER_PROPS_LIST_TUPLE) {
-            return false;
-        }
+        verify_properties(event_name, k, v, &USER_PROPS_LIST_TUPLE)?
     }
 
     if event_name == "#user_append" || event_name == "#user_uniq_append" {
@@ -287,43 +267,39 @@ fn verify_user_event(event_name: &String, properties: &Map<String, Value>) -> bo
     } else if event_name == "#user_add" {
         verify_all_custom_props_are_num(properties)
     } else {
-        true
+        Ok(())
     }
 }
 
-fn verify_custom_properties(event_name: &String, properties: &Map<String, Value>) -> bool {
+fn verify_custom_properties(event_name: &String, properties: &Map<String, Value>) -> Result<()> {
     for (k, v) in properties {
-        if !verify_properties(event_name, k, v, &EMPTY_PROPS_LIST_TUPLE) {
-            return false;
-        }
+        verify_properties(event_name, k, v, &EMPTY_PROPS_LIST_TUPLE)?
     }
-    true
+    Ok(())
 }
 
-fn verify_all_custom_props_are_list(properties: &Map<String, Value>) -> bool {
+fn verify_all_custom_props_are_list(properties: &Map<String, Value>) -> Result<()> {
     for (k, v) in properties {
         if is_preset(k) {
-            return true;
+            return Ok(());
         }
         let Value::Array(_) = v else {
-            log_error!("Type of value in this event should be List");
-            return false;
+            return verify_error!("Type of value in this event should be List");
         };
     }
-    true
+    Ok(())
 }
 
-fn verify_all_custom_props_are_num(properties: &Map<String, Value>) -> bool {
+fn verify_all_custom_props_are_num(properties: &Map<String, Value>) -> Result<()> {
     for (k, v) in properties {
         if is_preset(k) {
-            return true;
+            return Ok(());
         }
         let Value::Number(_) = v else {
-            log_error!("Type of value in this event should be Number");
-            return false;
+            return verify_error!("Type of value in this event should be Number");
         };
     }
-    true
+    Ok(())
 }
 
 #[cfg(test)]
