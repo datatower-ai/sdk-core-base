@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 use regex::Regex;
-use once_cell::unsync::Lazy;
+use once_cell::sync::Lazy;
 use serde_json::{Map, Value};
 use crate::util::error::{DTError, Result};
 use crate::util::error::macros::verify_error;
 
 const NAME_REGEX_STR: &'static str = r"^[a-zA-Z#][a-zA-Z\d_#]{0,49}$";
-const NAME_RE: Lazy<Regex> = Lazy::new(|| Regex::new(NAME_REGEX_STR).unwrap());
+static NAME_RE: Lazy<Regex> = Lazy::new(|| Regex::new(NAME_REGEX_STR).unwrap());
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 enum TypeConstraint {
