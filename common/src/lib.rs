@@ -14,11 +14,14 @@ pub mod consumer;
 pub mod event;
 pub(crate) mod upload;
 
-static PANIC_HOOKER: Once = Once::new();
+static INITIALIZER: Once = Once::new();
 
 pub fn init_consumer(consumer: impl Consumer + 'static) -> Result<()> {
-    PANIC_HOOKER.call_once(|| {
+    INITIALIZER.call_once(|| {
         set_panic_hook();
+        if let Err(e) = event::init() {
+            log_error!("Failed to init event processor, reason: {e}")
+        }
     });
 
     let Ok(mut mem) = mem().lock() else {

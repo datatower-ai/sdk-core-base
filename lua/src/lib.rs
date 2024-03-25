@@ -164,7 +164,7 @@ impl Into<Option<serde_json::Value>> for MyValue<'_> {
                 }
             },
             _ => {
-                log_error!("Given value is not support, {:?}", self.0);
+                log_error!("Given value is not supported, {:?}", self.0);
                 None
             }
         }

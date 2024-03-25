@@ -118,6 +118,12 @@ const PRESET_EVENTS: Lazy<HashMap<&str, (PropsConstraintMap, PropsConstraintMap)
     ("#ias_subscribe_notify", (PRESET_PROPS_IAS, EMPTY_PROPS_LIST)),
 ]));
 
+pub(super) fn init() -> Result<()> {
+    // Init the regex beforehand.
+    let _ = NAME_RE.is_match("a");
+    Ok(())
+}
+
 pub(crate) fn verify_event(event_map: &Event) -> Result<()> {
     for prop in COMPULSORY_META_PROPS.iter() {
         if let Some(value) = event_map.get(prop) {

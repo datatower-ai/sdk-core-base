@@ -91,9 +91,9 @@ mod test {
 
 
     #[test]
-    fn loop_test() {
+    fn roughen_event_loop_test() {
         let st = std::time::Instant::now();
-        for _ in 0..10 {
+        for _ in 0..1000 {
             roughen_event_test()
         }
         println!("Total: {}", st.elapsed().as_micros())
