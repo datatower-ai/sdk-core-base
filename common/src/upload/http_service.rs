@@ -1,8 +1,9 @@
 use std::sync::{OnceLock};
 use std::time::Duration;
 use reqwest::blocking::Client;
+use reqwest::StatusCode;
 use serde_json::{Map, Value};
-use crate::util::error::macros::network_error;
+use crate::util::error::macros::{internal_error, network_error, remote_error};
 use crate::util::error::{Result, DTError};
 
 #[cfg(all(feature = "network"))]
@@ -48,22 +49,12 @@ impl HttpService {
         match response {
             Ok(response) => {
                 let status_code = response.status();
-                if status_code != 200 {
+                if !status_code.is_success() {
                     network_error!("Upload failed with status code: \"{}\"", status_code)
                 } else {
-                    if let Ok(response) = response.json::<Map<String, Value>>() {
-                        // if let Some(code) = response.get("code") {
-                        //     if code == 0 {
-                        //         true
-                        //     } else {
-                        //         network_error!("Failed to upload, \"{:?}\", {:?}", code, response.get("msg").unwrap_or(&Value::String(String::new())))
-                        //     }
-                        // } else {
-                        //     network_error!("Server response is invalid, \"{:?}\"", response)
-                        // }
-                        Ok(response)
-                    } else {
-                        network_error!("Failed to parse response, \"{}\", \"{:?}\"", status_code, response.bytes().unwrap_or("UNKNOWN".into()))
+                    match response.json::<Map<String, Value>>() {
+                        Ok(response) => Ok(response),
+                        Err(e) => remote_error!("Failed to parse network response!\n\tStatus code: {},\n\tReason: {}", status_code, e)
                     }
                 }
             },
@@ -85,7 +76,7 @@ mod test {
         }
         let hs = HttpService::get();
         let response = hs.post_event(
-            &String::from("https://test.roiquery.com/sync"),
+            &String::from("https://baidu.com/"/*"https://test.roiquery.com/sync"*/),
             String::from("[]"),
             &String::from(""),
             0,
