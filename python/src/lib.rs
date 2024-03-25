@@ -91,7 +91,7 @@ fn toggle_logger(enable: bool) -> PyResult<()> {
 }
 
 #[derive(Debug)]
-struct MyMap(Map<String, Value>);
+struct MyMap(Event);
 
 impl<'py> FromPyObject<'py> for MyMap {
     fn extract(ob: &'py PyAny) -> PyResult<Self> {

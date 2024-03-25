@@ -1,9 +1,8 @@
 use std::sync::{OnceLock};
 use std::time::Duration;
 use reqwest::blocking::Client;
-use reqwest::StatusCode;
 use serde_json::{Map, Value};
-use crate::util::error::macros::{internal_error, network_error, remote_error};
+use crate::util::error::macros::{network_error, remote_error};
 use crate::util::error::{Result, DTError};
 
 #[cfg(all(feature = "network"))]

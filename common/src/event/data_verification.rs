@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use regex::Regex;
 use once_cell::sync::Lazy;
 use serde_json::{Map, Value};
+use crate::event::Event;
 use crate::util::error::{DTError, Result};
 use crate::util::error::macros::verify_error;
 
@@ -9,7 +10,7 @@ const NAME_REGEX_STR: &'static str = r"^[a-zA-Z#][a-zA-Z\d_#]{0,49}$";
 static NAME_RE: Lazy<Regex> = Lazy::new(|| Regex::new(NAME_REGEX_STR).unwrap());
 
 #[derive(Debug, PartialEq, Copy, Clone)]
-enum TypeConstraint {
+pub(crate) enum TypeConstraint {
     String,
     Number,             // Integer + Float
     Integer,
@@ -21,7 +22,7 @@ enum TypeConstraint {
 
 type PropsConstraintMap = Lazy<HashMap<&'static str, TypeConstraint>>;
 
-const META_PROPS: PropsConstraintMap = Lazy::new(|| HashMap::from([
+pub(crate) const META_PROPS: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#app_id", TypeConstraint::String), ("#bundle_id", TypeConstraint::String),
     ("#android_id", TypeConstraint::String), ("#gaid", TypeConstraint::String),
     ("#dt_id", TypeConstraint::String), ("#acid", TypeConstraint::String),
@@ -117,7 +118,7 @@ const PRESET_EVENTS: Lazy<HashMap<&str, (PropsConstraintMap, PropsConstraintMap)
     ("#ias_subscribe_notify", (PRESET_PROPS_IAS, EMPTY_PROPS_LIST)),
 ]));
 
-pub(crate) fn verify_event(event_map: &Map<String, Value>) -> Result<()> {
+pub(crate) fn verify_event(event_map: &Event) -> Result<()> {
     for prop in COMPULSORY_META_PROPS.iter() {
         if let Some(value) = event_map.get(prop) {
             if let Some(constraint) = META_PROPS.get(prop.as_str()) {
@@ -191,7 +192,7 @@ fn check_type_constraint(value: &Value, target: &TypeConstraint) -> bool {
     }
 }
 
-fn check_meta_is_string_and_nonempty(event_map: &Map<String, Value>, key: String) -> Result<()> {
+fn check_meta_is_string_and_nonempty(event_map: &Event, key: String) -> Result<()> {
     if let Some(value) = event_map.get(&key) {
         if let Value::String(value) = value {
             if value.len() == 0 {

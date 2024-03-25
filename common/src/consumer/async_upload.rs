@@ -3,15 +3,14 @@ use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
 use std::thread::sleep;
 use std::time::Duration;
-use serde_json::{Map, Value};
 use crate::consumer::Consumer;
-use crate::event::processing::process_event;
 use crate::{log_error};
+use crate::event::BoxedEvent;
 use crate::util::worker::worker::WorkerManager;
 use crate::util::error::Result;
 
 struct AsyncUploadConsumer {
-    cache: Arc<Mutex<VecDeque<Map<String, Value>>>>,
+    cache: Arc<Mutex<VecDeque<BoxedEvent>>>,
     worker_manager: WorkerManager,
     flushing_process_count: Arc<Mutex<USizeHolder>>,
     max_batch_size: usize
@@ -32,9 +31,7 @@ impl AsyncUploadConsumer {
         }
     }
 
-    fn add_to_cache(self: &mut Self, mut event: Map<String, Value>) -> Result<()> {
-        process_event(&mut event)?;
-
+    fn add_to_cache(self: &mut Self, event: BoxedEvent) -> Result<()> {
         {
             self.cache.lock().unwrap().push_back(event);
         }
@@ -64,7 +61,7 @@ impl AsyncUploadConsumer {
                 count.0 = max(0, count.0 - 1);
             }
 
-            let cache: Vec<Map<String, Value>> = if let Ok(mut cache) = cache.lock() {
+            let cache: Vec<BoxedEvent> = if let Ok(mut cache) = cache.lock() {
                 if cache.is_empty() {
                     return;
                 }
@@ -103,7 +100,7 @@ impl AsyncUploadConsumer {
 }
 
 impl Consumer for AsyncUploadConsumer {
-    fn add(self: &mut Self, event: Map<String, Value>) -> Result<()> {
+    fn add(self: &mut Self, event: BoxedEvent) -> Result<()> {
         self.add_to_cache(event)
     }
 
@@ -152,7 +149,7 @@ mod test {
             });
             match j {
                 Value::Object(m) => {
-                    let _ = c.add(m);
+                    let _ = c.add(Box::new(m));
                 }
                 _ => {}
             }

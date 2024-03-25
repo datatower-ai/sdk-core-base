@@ -46,6 +46,7 @@ impl Error for DTError {
     }
 }
 
+#[allow(unused)]
 pub(crate) mod macros {
     macro_rules! verify_error {
         ($($arg:tt)*) => {

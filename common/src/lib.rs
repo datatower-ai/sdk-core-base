@@ -1,16 +1,17 @@
 use std::backtrace::Backtrace;
 use std::sync::Once;
-use serde_json::{Map, Value};
 use crate::base::mem;
 use crate::base::MemValue::Consumer as MemConsumer;
 use crate::consumer::Consumer;
+use crate::event::Event;
+use crate::event::processing::process_event;
 use crate::util::error::{DTError, Result};
 use crate::util::error::macros::{internal_error, runtime_error};
 
 pub mod util;
 mod base;
 pub mod consumer;
-pub(crate) mod event;
+pub mod event;
 pub(crate) mod upload;
 
 static PANIC_HOOKER: Once = Once::new();
@@ -45,12 +46,13 @@ fn set_panic_hook() {
     }));
 }
 
-pub fn add(event: Map<String, Value>) -> Result<()> {
+pub fn add(event: Event) -> Result<()> {
     let Ok(mut mem) = mem().lock() else {
         return internal_error!("lock is reentered!");
     };
     if let Some(MemConsumer(consumer)) = mem.get_mut(&consumer::MEM_KEY.to_string()) {
-        consumer.add(event)
+        let event = process_event(event)?;
+        consumer.add(Box::new(event))
     } else {
         runtime_error!("Consumer should be initialized before API calls!")
     }

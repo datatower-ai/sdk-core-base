@@ -3,10 +3,9 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
 use regex::Regex;
-use serde_json::{Map, Value};
 use crate::consumer::Consumer;
 use crate::{log_error, log_info};
-use crate::event::processing::process_event;
+use crate::event::BoxedEvent;
 use crate::util::datetime::get_hour_since_epoch;
 use crate::util::error::{DTError, Result};
 use crate::util::error::macros::runtime_error;
@@ -148,9 +147,7 @@ impl LogConsumer {
 }
 
 impl Consumer for LogConsumer {
-    fn add(self: &mut Self, mut event: Map<String, Value>) -> Result<()> {
-        process_event(&mut event)?;
-
+    fn add(self: &mut Self, event: BoxedEvent) -> Result<()> {
         if self.is_time_changed() {
             self.write_to_file(1);
         }

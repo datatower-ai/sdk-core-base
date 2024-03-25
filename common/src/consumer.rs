@@ -1,3 +1,4 @@
+use crate::event::BoxedEvent;
 use crate::util::error::Result;
 
 #[cfg(feature = "log-consumer-server")]
@@ -12,7 +13,7 @@ pub mod async_upload;
 pub(crate) const MEM_KEY: &'static str = "consumer";
 
 pub trait Consumer {
-    fn add(self: &mut Self, event: serde_json::Map<String, serde_json::Value>) -> Result<()>;
+    fn add(self: &mut Self, event: BoxedEvent) -> Result<()>;
 
     fn flush(self: &mut Self) -> Result<()>;
 
