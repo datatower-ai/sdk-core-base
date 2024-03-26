@@ -29,14 +29,15 @@ fn get_base_version() -> &'static str {
 }
 
 fn inject_sdk_base_version(event_map: &mut Event) {
+    let key: String = String::from("#sdk_version_name");
     if let Some(Value::Object(properties)) = event_map.get_mut(&String::from("properties")) {
-        let sdk_version = if let Some(Value::String(version)) = properties.remove(&String::from("#sdk_version_name")) {
-            version
+        if let Some(Value::String(version)) = properties.get(&key) {
+            let new_version = format!("{}_{}", version, get_base_version());
+            properties.insert(key, Value::String(new_version))
         } else {
-            String::new()
+            let new_version = format!("unknown_{}", get_base_version());
+            properties.insert(key, Value::String(new_version))
         };
-        let new_version = format!("{}_{}", sdk_version, get_base_version());
-        properties.insert(String::from("#sdk_version_name"), Value::String(new_version));
     }
 }
 
