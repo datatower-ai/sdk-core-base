@@ -9,7 +9,7 @@ use crate::util::error::DTError::InternalError;
 use crate::util::error::macros::error_with;
 
 pub fn process_event(event_map: Event) -> Result<Event> {
-    let mut event = roughen_event(event_map)?;
+    let mut event = eventify(event_map)?;
     fulfill_metas(&mut event);
     inject_sdk_base_info(&mut event);
     let verify_result = verify_event(&mut event);
@@ -24,7 +24,27 @@ pub fn process_event(event_map: Event) -> Result<Event> {
     }
 }
 
-fn roughen_event(mut event: Event) -> Result<Event> {
+fn is_need_eventify(event: &Event) -> bool {
+    if event.len() > META_PROPS.len() {
+        // Guarantees to contain non-meta properties.
+        return true;
+    }
+
+    for key in event.keys() {
+        if !META_PROPS.contains_key(key) {
+            // contains non-meta properties
+            return true;
+        }
+    }
+    false
+}
+
+/// flatten map / event -> event
+fn eventify(mut event: Event) -> Result<Event> {
+    if !is_need_eventify(&event) {
+        return Ok(event);
+    }
+
     let mut result: Map<String, Value> = Map::with_capacity(META_PROPS.len());
     // Takes meta out.
     for k in META_PROPS.keys() {
@@ -81,7 +101,7 @@ fn inject_sdk_base_info(event_map: &mut Event) {
 #[cfg(test)]
 mod test {
     use serde_json::json;
-    use super::{inject_sdk_base_info, roughen_event};
+    use super::{inject_sdk_base_info, eventify};
 
     #[test]
     fn inject_sdk_base_info() {
@@ -133,7 +153,7 @@ mod test {
         });
         let j = j.as_object_mut().unwrap().to_owned();
         let st = std::time::Instant::now();
-        match roughen_event(j) {
+        match eventify(j) {
             Ok(x) => println!("{:?}", x),
             Err(e) => eprintln!("{e}"),
         }
