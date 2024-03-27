@@ -67,6 +67,7 @@ class DTAnalytics:
 class DTLogConsumer(Consumer):
     def __init__(self, path, max_batch_len, name_prefix, max_file_size_bytes):
         self.__config = {
+            "consumer": "log",
             "path": path,
             "max_batch_len": max_batch_len,
             "name_prefix": name_prefix,

@@ -1,8 +1,8 @@
 use mlua::prelude::*;
 use mlua::{Table, Value};
 use serde_json::Map;
-use common::consumer::log::LogConsumer;
 use common::log_error;
+use common::util::result::{dissolve, dissolve_bool};
 
 #[mlua::lua_module]
 fn dt_core_lua(lua: &Lua) -> LuaResult<LuaTable> {
@@ -16,62 +16,20 @@ fn dt_core_lua(lua: &Lua) -> LuaResult<LuaTable> {
 }
 
 fn init(_: &Lua, table: Table) -> LuaResult<bool> {
-    let Ok(path) = table.get("path") else {
-        log_error!("Failed to initialize: missing \"path\"!");
-        return Ok(false);
-    };
-
-    let max_batch_len: mlua::Result<mlua::ffi::lua_Integer> = table.get("max_batch_len");
-    let Ok(max_batch_len) = max_batch_len else {
-        log_error!("Failed to initialize: missing \"max_batch_len\"!");
-        return Ok(false);
-    };
-
-    let name_prefix: Option<String> = if let Ok(name_prefix) = table.get("name_prefix") {
-        Some(name_prefix)
-    } else {
-        None
-    };
-    let max_file_size_bytes: mlua::Result<mlua::ffi::lua_Integer> = table.get("max_file_size_bytes");
-    let max_file_size_bytes: Option<u64> = if let Ok(max_file_size_bytes) = max_file_size_bytes {
-        Some(max_file_size_bytes as u64)
-    } else {
-        None
-    };
-
-    let consumer = LogConsumer::new(
-        path, max_batch_len as u32, name_prefix, max_file_size_bytes
-    );
-    if let Err(e) = common::init_consumer(consumer) {
-        log_error!("{e}");
-        Ok(false)
-    } else {
-        Ok(true)
-    }
+    dissolve_bool(common::init_by_config(MyTable(table).into()))
 }
 
 fn add_event(_: &Lua, table: Table) -> LuaResult<bool> {
     let map: Map<String, serde_json::Value> = MyTable(table).into();
-    if let Err(e) = common::add(map) {
-        log_error!("{e}");
-        Ok(false)
-    } else {
-        Ok(true)
-    }
+    dissolve_bool(common::add(map))
 }
 
 fn flush(_: &Lua, _: ()) -> LuaResult<()> {
-    if let Err(e) = common::flush() {
-        log_error!("{e}");
-    }
-    Ok(())
+    dissolve(common::flush())
 }
 
 fn close(_: &Lua, _: ()) -> LuaResult<()> {
-    if let Err(e) = common::close() {
-        log_error!("{e}");
-    }
-    Ok(())
+    dissolve(common::close())
 }
 
 fn toggle_logger(_: &Lua, enable: bool) -> LuaResult<()> {

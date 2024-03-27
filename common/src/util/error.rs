@@ -15,6 +15,7 @@ pub enum DTError {
         cause: Box<DTError>
     },
     RemoteError(String),        // due to remote reason.
+    HostError(String),          // Errors causing by host/port.
 }
 
 impl fmt::Display for DTError {
@@ -29,6 +30,7 @@ impl fmt::Display for DTError {
                 write!(f, "with: {cause}")
             },
             DTError::RemoteError(msg) => write!(f, "[Remote] {msg}"),
+            DTError::HostError(msg) => writeln!(f, "{msg}")
         }
     }
 }
@@ -42,6 +44,7 @@ impl Error for DTError {
             DTError::NetworkError(_) => None,
             DTError::WithContext {cause, .. } => Some(cause),
             DTError::RemoteError(_) => None,
+            DTError::HostError(_) => None,
         }
     }
 }
@@ -87,10 +90,17 @@ pub(crate) mod macros {
         };
     }
 
+    macro_rules! host_error {
+        ($($arg:tt)*) => {
+            Err(DTError::HostError(format!($($arg)*)))
+        };
+    }
+
     pub(crate) use verify_error;
     pub(crate) use internal_error;
     pub(crate) use runtime_error;
     pub(crate) use network_error;
     pub(crate) use error_with;
     pub(crate) use remote_error;
+    pub(crate) use host_error;
 }

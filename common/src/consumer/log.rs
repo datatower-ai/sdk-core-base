@@ -3,12 +3,13 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
 use regex::Regex;
+use serde_json::{Map, Value};
 use crate::consumer::Consumer;
 use crate::{log_error, log_info};
 use crate::event::BoxedEvent;
 use crate::util::datetime::get_hour_since_epoch;
 use crate::util::error::{DTError, Result};
-use crate::util::error::macros::runtime_error;
+use crate::util::error::macros::{host_error, runtime_error};
 
 /**
  * Should be run in a single thread for current implementation.
@@ -41,6 +42,37 @@ impl LogConsumer {
             revision, file_time, crt_size_bytes,
             batch: Vec::new(),
         }
+    }
+
+    pub fn from_config(config: &mut Map<String, Value>) -> Result<Box<dyn Consumer>> {
+        let Some(Value::String(path)) = config.remove("path") else {
+            return host_error!("Failed to initialize: missing \"path\"!");
+        };
+
+        let max_batch_len = config.remove("max_batch_len");
+        let Some(Value::Number(max_batch_len)) = max_batch_len else {
+            return host_error!("Failed to initialize: missing \"max_batch_len\"!");
+        };
+        let Some(max_batch_len) = max_batch_len.as_u64() else {
+            return host_error!("Failed to initialize: \"max_batch_len\" should be a positive number!");
+        };
+
+        let name_prefix: Option<String> = if let Some(Value::String(name_prefix)) = config.remove("name_prefix") {
+            Some(name_prefix)
+        } else {
+            None
+        };
+        let max_file_size_bytes = config.remove("max_file_size_bytes");
+        let max_file_size_bytes: Option<u64> = if let Some(Value::Number(max_file_size_bytes)) = max_file_size_bytes {
+            max_file_size_bytes.as_u64()
+        } else {
+            None
+        };
+
+        let consumer = LogConsumer::new(
+            path, max_batch_len as u32, name_prefix, max_file_size_bytes
+        );
+        Ok(Box::new(consumer))
     }
 
     pub fn get_init_revision(path: &String, name_prefix: &Option<String>, file_time: &u64) -> (u16, u64) {
