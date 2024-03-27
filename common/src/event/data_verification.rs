@@ -22,7 +22,7 @@ pub(crate) enum TypeConstraint {
 
 type PropsConstraintMap = Lazy<HashMap<&'static str, TypeConstraint>>;
 
-pub(crate) const META_PROPS: PropsConstraintMap = Lazy::new(|| HashMap::from([
+pub(super) const META_PROPS: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#app_id", TypeConstraint::String), ("#bundle_id", TypeConstraint::String),
     ("#android_id", TypeConstraint::String), ("#gaid", TypeConstraint::String),
     ("#dt_id", TypeConstraint::String), ("#acid", TypeConstraint::String),
@@ -30,7 +30,7 @@ pub(crate) const META_PROPS: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#event_time", TypeConstraint::Integer), ("#event_syn", TypeConstraint::String),
     ("properties", TypeConstraint::Object), ("#debug", TypeConstraint::Bool),
 ]));
-const COMPULSORY_META_PROPS: Lazy<Vec<String>> = Lazy::new(|| vec!(
+pub(super) const COMPULSORY_META_PROPS: Lazy<Vec<String>> = Lazy::new(|| vec!(
     String::from("#app_id"), String::from("#bundle_id"),
     String::from("#dt_id"), String::from("#event_time"),
     String::from("#event_name"), String::from("#event_type"),
