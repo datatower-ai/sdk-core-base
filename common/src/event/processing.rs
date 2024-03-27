@@ -10,10 +10,11 @@ use crate::util::error::macros::error_with;
 
 pub fn process_event(event_map: Event) -> Result<Event> {
     let mut event = roughen_event(event_map)?;
-    inject_sdk_base_version(&mut event);
-    let result = verify_event(&mut event);
+    fulfill_metas(&mut event);
+    inject_sdk_base_info(&mut event);
+    let verify_result = verify_event(&mut event);
 
-    match result {
+    match verify_result {
         Err(e) => if let DTError::VerifyError(_) = e {
             error_with!(e, "Verification failed for {event:?}")
         } else {
@@ -23,6 +24,20 @@ pub fn process_event(event_map: Event) -> Result<Event> {
     }
 }
 
+fn roughen_event(mut event: Event) -> Result<Event> {
+    let mut result: Map<String, Value> = Map::with_capacity(META_PROPS.len());
+    // Takes meta out.
+    for k in META_PROPS.keys() {
+        let k = *k;
+        if let Some(v) = event.remove(k) {
+            result.insert(String::from(k), v);
+        }
+    }
+    // Makes event as a nested properties.
+    result.insert(String::from("properties"), Value::Object(event));
+    Ok(result)
+}
+
 fn get_base_version() -> &'static str {
     static SDK_BASE_VERSION: OnceLock<&'static str> = OnceLock::new();
     SDK_BASE_VERSION.get_or_init(|| {
@@ -30,7 +45,19 @@ fn get_base_version() -> &'static str {
     })
 }
 
-fn inject_sdk_base_version(event_map: &mut Event) {
+fn fulfill_metas(event: &mut Event) {
+    if !event.contains_key("#event_time") {
+        let time = SystemTime::now().duration_since(UNIX_EPOCH)
+            .expect("Time went backwards").as_millis() as u64;
+        event.insert(String::from("#event_time"), Value::Number(Number::from(time)));
+    }
+
+    if !event.contains_key("#event_syn") {
+        event.insert(String::from("#event_syn"), Value::String(uuid::Uuid::new_v4().to_string()));
+    }
+}
+
+fn inject_sdk_base_info(event_map: &mut Event) {
     let version_key: String = String::from("#sdk_version_name");
     let type_key: String = String::from("#sdk_type");
 
@@ -51,37 +78,13 @@ fn inject_sdk_base_version(event_map: &mut Event) {
     }
 }
 
-fn roughen_event(mut event: Event) -> Result<Event> {
-    let mut result: Map<String, Value> = Map::with_capacity(META_PROPS.len());
-    // Takes meta out.
-    for k in META_PROPS.keys() {
-        let k = *k;
-        if let Some(v) = event.remove(k) {
-            result.insert(String::from(k), v);
-        }
-    }
-    // Makes event as a nested properties.
-    result.insert(String::from("properties"), Value::Object(event));
-
-    if !result.contains_key("#event_time") {
-        let time = SystemTime::now().duration_since(UNIX_EPOCH)
-            .expect("Time went backwards").as_millis() as u64;
-        result.insert(String::from("#event_time"), Value::Number(Number::from(time)));
-    }
-
-    if !result.contains_key("#event_syn") {
-        result.insert(String::from("#event_syn"), Value::String(uuid::Uuid::new_v4().to_string()));
-    }
-    Ok(result)
-}
-
 #[cfg(test)]
 mod test {
     use serde_json::json;
-    use super::{inject_sdk_base_version, roughen_event};
+    use super::{inject_sdk_base_info, roughen_event};
 
     #[test]
-    fn its_work() {
+    fn inject_sdk_base_info() {
         let mut j = json!({
             "#app_id": "123",
             "#event_time": 123,
@@ -96,7 +99,7 @@ mod test {
             }
         });
         let j = j.as_object_mut().unwrap();
-        inject_sdk_base_version(j);
+        inject_sdk_base_info(j);
         println!("After injected: {:?}", j);
     }
 
