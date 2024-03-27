@@ -6,6 +6,7 @@ use common::log_error;
 
 /// A Python module implemented in Rust.
 #[pymodule]
+#[pyo3(name="dt_core_base_py")]
 fn dt_core_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(init, m)?)?;
     m.add_function(wrap_pyfunction!(add_event, m)?)?;
@@ -17,6 +18,10 @@ fn dt_core_python(_py: Python, m: &PyModule) -> PyResult<()> {
 
 #[pyfunction]
 fn init(config: MyMap) -> PyResult<bool> {
+    Python::with_gil(|py| {
+        assert!(py.version_info() >= (3, 7, 0), "Only supports Python version 3.7.0 and up!")
+    });
+
     let mut config = config.0;
     let Some(Value::String(path)) = config.remove("path") else {
         log_error!("Failed to initialize: missing \"path\"!");
@@ -91,7 +96,7 @@ fn toggle_logger(enable: bool) -> PyResult<()> {
 }
 
 #[derive(Debug)]
-struct MyMap(Event);
+struct MyMap(Map<String, Value>);
 
 impl<'py> FromPyObject<'py> for MyMap {
     fn extract(ob: &'py PyAny) -> PyResult<Self> {
