@@ -3,7 +3,9 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use serde_json::{Map, Number, Value};
 use crate::event::data_verification::{META_PROPS, verify_event};
 use crate::event::Event;
+use crate::log_error;
 use crate::util::error::{DTError, Result};
+use crate::util::error::DTError::InternalError;
 use crate::util::error::macros::error_with;
 
 pub fn process_event(event_map: Event) -> Result<Event> {
@@ -29,15 +31,23 @@ fn get_base_version() -> &'static str {
 }
 
 fn inject_sdk_base_version(event_map: &mut Event) {
-    let key: String = String::from("#sdk_version_name");
+    let version_key: String = String::from("#sdk_version_name");
+    let type_key: String = String::from("#sdk_type");
+
     if let Some(Value::Object(properties)) = event_map.get_mut(&String::from("properties")) {
-        if let Some(Value::String(version)) = properties.get(&key) {
+        if let Some(Value::String(version)) = properties.get(&version_key) {
             let new_version = format!("{}_{}", version, get_base_version());
-            properties.insert(key, Value::String(new_version))
+            properties.insert(version_key, Value::String(new_version));
         } else {
+            log_error!("{}", InternalError(String::from("⚠ CAUTION! Forget to set #sdk_version_name?")));
             let new_version = format!("unknown_{}", get_base_version());
-            properties.insert(key, Value::String(new_version))
+            properties.insert(version_key, Value::String(new_version));
         };
+
+        if let Some(Value::String(_)) = properties.get(&type_key) {} else {
+            log_error!("{}", InternalError(String::from("⚠ CAUTION! Forget to set #sdk_type?")));
+            properties.insert(type_key, Value::String(String::from("dt_core_base")));
+        }
     }
 }
 
