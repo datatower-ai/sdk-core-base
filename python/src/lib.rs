@@ -13,6 +13,7 @@ fn dt_core_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(close, m)?)?;
     m.add_function(wrap_pyfunction!(toggle_logger, m)?)?;
     m.add_function(wrap_pyfunction!(set_static_common_properties, m)?)?;
+    m.add_function(wrap_pyfunction!(clear_static_common_properties, m)?)?;
     Ok(())
 }
 
@@ -51,6 +52,11 @@ fn toggle_logger(enable: bool) -> PyResult<()> {
 #[pyfunction]
 fn set_static_common_properties(props: MyMap) -> PyResult<()> {
     dissolve(common::set_static_common_props(props.0))
+}
+
+#[pyfunction]
+fn clear_static_common_properties() -> PyResult<()> {
+    dissolve(common::clear_static_common_props())
 }
 
 #[derive(Debug)]
