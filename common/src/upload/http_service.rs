@@ -66,13 +66,12 @@ impl HttpService {
 
 #[cfg(test)]
 mod test {
+    use std::sync::atomic::Ordering;
     use crate::upload::http_service::HttpService;
 
     #[test]
     fn it_works() {
-        unsafe {
-            crate::util::logger::LOG_ENABLED = true;
-        }
+        crate::util::logger::LOG_ENABLED.store(true, Ordering::Relaxed);
         let hs = HttpService::get();
         let response = hs.post_event(
             &String::from("https://baidu.com/"/*"https://test.roiquery.com/sync"*/),

@@ -33,9 +33,7 @@ fn close(_: &Lua, _: ()) -> LuaResult<()> {
 }
 
 fn toggle_logger(_: &Lua, enable: bool) -> LuaResult<()> {
-    unsafe {
-        common::util::logger::LOG_ENABLED = enable;
-    }
+    common::util::logger::LOG_ENABLED.replace(enable);
     Ok(())
 }
 

@@ -1,3 +1,4 @@
+use std::sync::atomic::Ordering;
 use pyo3::prelude::*;
 use pythonize::depythonize;
 use serde_json::{Map, Value};
@@ -43,9 +44,7 @@ fn close() -> PyResult<()> {
 
 #[pyfunction]
 fn toggle_logger(enable: bool) -> PyResult<()> {
-    unsafe {
-        common::util::logger::LOG_ENABLED = enable;
-    }
+    common::util::logger::LOG_ENABLED.store(enable, Ordering::Relaxed);
     Ok(())
 }
 
