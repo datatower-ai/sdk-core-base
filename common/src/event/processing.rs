@@ -1,6 +1,7 @@
 use std::sync::OnceLock;
 use std::time::{SystemTime, UNIX_EPOCH};
 use serde_json::{Map, Number, Value};
+use crate::event::common_properties::fulfill_by_comm_props;
 use crate::event::data_verification::{COMPULSORY_META_PROPS, META_PROPS, verify_event};
 use crate::event::Event;
 use crate::log_error;
@@ -12,6 +13,7 @@ pub fn process_event(event_map: Event) -> Result<Event> {
     let mut event = eventify(event_map)?;
     fulfill_metas(&mut event);
     inject_sdk_base_info(&mut event);
+    fulfill_by_comm_props(&mut event)?;
     let verify_result = verify_event(&mut event);
 
     match verify_result {

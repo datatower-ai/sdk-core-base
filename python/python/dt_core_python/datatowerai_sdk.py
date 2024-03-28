@@ -2,7 +2,14 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 import sys
 
-from .dt_core_base_py import init as dt_init, add_event as dt_add_event, flush as dt_flush, close as dt_close, toggle_logger
+from .dt_core_base_py import (
+    init as dt_init,
+    add_event as dt_add_event,
+    flush as dt_flush,
+    close as dt_close,
+    toggle_logger,
+    set_static_common_properties as dt_set_scp
+)
 
 version = sys.version_info
 if version >= (3, 8):
@@ -75,6 +82,9 @@ class DTAnalytics:
 
     def close(self):
         dt_close()
+
+    def set_static_common_properties(self, properties: Dict[str, Any]):
+        dt_set_scp(properties)
 
 
 class DTLogConsumer(Consumer):

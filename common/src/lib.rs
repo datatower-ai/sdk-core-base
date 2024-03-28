@@ -5,6 +5,7 @@ use crate::base::mem;
 use crate::base::MemValue::Consumer as MemConsumer;
 use crate::consumer::Consumer;
 use crate::consumer::log::LogConsumer;
+use crate::event::common_properties::{clear_static_comm_props, Props, set_static_comm_props};
 use crate::event::Event;
 use crate::event::processing::process_event;
 use crate::util::error::{DTError, Result};
@@ -96,4 +97,12 @@ pub fn close() -> Result<()> {
     } else {
         runtime_error!("Consumer should be initialized before API calls!")
     }
+}
+
+pub fn set_static_common_props(props: Props) -> Result<()> {
+    set_static_comm_props(props)
+}
+
+pub fn clear_static_common_props() -> Result<()> {
+    clear_static_comm_props()
 }

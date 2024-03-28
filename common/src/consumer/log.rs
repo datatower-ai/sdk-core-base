@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -23,7 +24,7 @@ pub struct LogConsumer {
     max_file_size_bytes: Option<u64>,       // Affects number of files created within interval.
     // Internally reserved
     crt_size_bytes: u64,
-    batch: Vec<String>,
+    batch: VecDeque<String>,
     file_time: u64,
     revision: u16,                  // for multiple log file created in a single time interval
 }
@@ -40,7 +41,7 @@ impl LogConsumer {
         LogConsumer {
             path, max_batch_len, name_prefix, max_file_size_bytes,
             revision, file_time, crt_size_bytes,
-            batch: Vec::new(),
+            batch: VecDeque::new(),
         }
     }
 
@@ -149,7 +150,7 @@ impl LogConsumer {
                 .unwrap();
 
             let mut n = 0;
-            while let Some(s) = self.batch.pop() {
+            while let Some(s) = self.batch.pop_front() {
                 if let Err(e) = writeln!(file, "{}", s) {
                     log_error!("Couldn't write to file: {}", e);
                 } else {
@@ -191,7 +192,7 @@ impl Consumer for LogConsumer {
                     self.write_to_file(2);
                 }
             }
-            self.batch.push(json);
+            self.batch.push_back(json);
             self.crt_size_bytes += json_size;
         } else {
             return runtime_error!("Failed to jsonify this event: {event:?}");
