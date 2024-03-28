@@ -19,7 +19,7 @@ name = "dt_core_python"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.20.3", features = ["generate-import-lib"] }
+pyo3 = { version = "0.20.3", features = ["generate-import-lib", "abi3", "abi3-py37"] }
 common = { path = "../common", default-features = false, features = ["log-consumer-server"] }
 serde_json = "1.0.114"
 pythonize = "0.20.0"

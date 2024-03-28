@@ -1,11 +1,24 @@
 from abc import ABC, abstractmethod
-from typing import Any, Final, Optional
-import importlib.metadata
+from typing import Any, Dict, List, Optional
+import sys
 
 from .dt_core_base_py import init as dt_init, add_event as dt_add_event, flush as dt_flush, close as dt_close, toggle_logger
 
-__SDK_NAME__: Final[str] = "dt_python_sdk"
-__VERSION__ = importlib.metadata.version("dt_core_python")
+version = sys.version_info
+if version >= (3, 8):
+    import importlib.metadata
+    __VERSION__ = importlib.metadata.version("dt_core_python")
+else:
+    try:
+        from importlib_metadata import version as metadata_version
+        __VERSION__ = metadata_version("dt_core_python")
+    except ModuleNotFoundError as e:
+        print(f"ModuleNotFoundError: {e.msg}")
+        print("Please run `pip install importlib_metadata` to install such prerequisite!")
+        sys.exit(1)
+
+
+__SDK_NAME__ = "dt_python_sdk"
 
 
 class Consumer(ABC):
@@ -19,7 +32,7 @@ class DTAnalytics:
         toggle_logger(debug)
         dt_init(consumer._get_config())
 
-    def __add(self, dt_id: str, acid: Optional[str], event_name: str, event_type: str, properties: dict[str, Any]) -> bool:
+    def __add(self, dt_id: str, acid: Optional[str], event_name: str, event_type: str, properties: Dict[str, Any]) -> bool:
         event = dict(properties)
         event["#dt_id"] = dt_id
         if acid is not None:
@@ -30,19 +43,19 @@ class DTAnalytics:
         event["#sdk_version_name"] = __VERSION__
         return dt_add_event(event)
 
-    def track(self, dt_id: str, acid: Optional[str], event_name: str, properties: dict[str, Any]) -> bool:
+    def track(self, dt_id: str, acid: Optional[str], event_name: str, properties: Dict[str, Any]) -> bool:
         return self.__add(dt_id, acid, event_name, "track", properties)
 
-    def user_set(self, dt_id: str, acid: Optional[str], properties: dict[str, Any]) -> bool:
+    def user_set(self, dt_id: str, acid: Optional[str], properties: Dict[str, Any]) -> bool:
         return self.__add(dt_id, acid, "#user_set", "user", properties)
 
-    def user_set_once(self, dt_id: str, acid: Optional[str], properties: dict[str, Any]) -> bool:
+    def user_set_once(self, dt_id: str, acid: Optional[str], properties: Dict[str, Any]) -> bool:
         return self.__add(dt_id, acid, "#user_set_once", "user", properties)
 
-    def user_add(self, dt_id: str, acid: Optional[str], properties: dict[str, Any]) -> bool:
+    def user_add(self, dt_id: str, acid: Optional[str], properties: Dict[str, Any]) -> bool:
         return self.__add(dt_id, acid, "#user_add", "user", properties)
 
-    def user_unset(self, dt_id: str, acid: Optional[str], properties: list[str]) -> bool:
+    def user_unset(self, dt_id: str, acid: Optional[str], properties: List[str]) -> bool:
         props_dict = {}
         for prop in properties:
             props_dict[prop] = 0
@@ -51,10 +64,10 @@ class DTAnalytics:
     def user_delete(self, dt_id: str, acid: Optional[str]) -> bool:
         return self.__add(dt_id, acid, "#user_delete", "user", {})
 
-    def user_append(self, dt_id: str, acid: Optional[str], properties: dict[str, Any]) -> bool:
+    def user_append(self, dt_id: str, acid: Optional[str], properties: Dict[str, Any]) -> bool:
         return self.__add(dt_id, acid, "#user_append", "user", properties)
 
-    def user_uniq_append(self, dt_id: str, acid: Optional[str], properties: dict[str, Any]) -> bool:
+    def user_uniq_append(self, dt_id: str, acid: Optional[str], properties: Dict[str, Any]) -> bool:
         return self.__add(dt_id, acid, "#user_uniq_append", "user", properties)
 
     def flush(self):
