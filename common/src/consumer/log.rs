@@ -205,12 +205,14 @@ impl Consumer for LogConsumer {
     }
 
     fn flush(self: &mut Self) -> Result<()> {
-        self.write_to_file(0);
+        while !self.batch.is_empty() {
+            self.write_to_file(0);
+        }
         Ok(())
     }
 
     fn close(self: &mut Self) -> Result<()> {
-        if !self.batch.is_empty() {
+        while !self.batch.is_empty() {
             self.write_to_file(0);
         }
         Ok(())
