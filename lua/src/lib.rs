@@ -38,6 +38,15 @@ fn toggle_logger(_: &Lua, enable: bool) -> LuaResult<()> {
     Ok(())
 }
 
+fn set_static_common_properties(_: &Lua, table: Table) -> LuaResult<()> {
+    let map: Map<String, serde_json::Value> = MyTable(table).into();
+    dissolve(common::set_static_common_props(map))
+}
+
+fn clear_static_common_properties(_: &Lua) -> LuaResult<()> {
+    dissolve(common::clear_static_common_props())
+}
+
 struct MyTable<'a>(Table<'a>);
 
 impl Into<Map<String, serde_json::Value>> for MyTable<'_> {
