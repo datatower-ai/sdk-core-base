@@ -4,6 +4,21 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+class MainDemo {
+    public static void main(String[] args) {
+        DTLogConsumer consumer = new DTLogConsumer("log", 200, null, 10*1024*1024);
+        DTAnalytics dt = new DTAnalytics(consumer, "/Users/linkailong/RustroverProjects/sdk-core-base/target/release/libdt_core_java.dylib", true);
+
+        HashMap<String, Object> properties = new HashMap<>();
+        properties.put("#app_id", "appidid");
+        properties.put("#bundle_id", "com.example");
+        properties.put("prooo", "hool");
+        dt.track("xxx", null, "event_test_java_sdk", properties);
+        dt.flush();
+        dt.close();
+    }
+}
+
 class DTBase {
     static native boolean init(Map<String, Object> config);
     static native boolean addEvent(Map<String, Object> event);
@@ -147,21 +162,5 @@ class DTLogConsumer extends Consumer {
     @Override
     Map<String, Object> getConfigMap() {
         return Collections.unmodifiableMap(configMap);
-    }
-}
-
-class MainDemo {
-    public static void main(String[] args) {
-        System.out.println("xxxxx");
-        DTLogConsumer consumer = new DTLogConsumer("log", 200, null, 10*1024*1024);
-        DTAnalytics dt = new DTAnalytics(consumer, "/Users/linkailong/RustroverProjects/sdk-core-base/target/release/libdt_core_java.dylib", true);
-
-        HashMap<String, Object> properties = new HashMap<>();
-        properties.put("#app_id", "appidid");
-        properties.put("#bundle_id", "com.example");
-        properties.put("prooo", "hool");
-        dt.track("xxx", null, "event_test_java_sdk", properties);
-        dt.flush();
-        dt.close();
     }
 }
