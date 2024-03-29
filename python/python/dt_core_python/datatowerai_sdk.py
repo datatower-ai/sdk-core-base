@@ -15,16 +15,17 @@ from .dt_core_base_py import (
 version = sys.version_info
 if version >= (3, 8):
     import importlib.metadata
+
     __VERSION__ = importlib.metadata.version("dt_core_python")
 else:
     try:
         from importlib_metadata import version as metadata_version
+
         __VERSION__ = metadata_version("dt_core_python")
     except ModuleNotFoundError as e:
         print(f"ModuleNotFoundError: {e.msg}")
         print("Please run `pip install importlib_metadata` to install such prerequisite!")
         sys.exit(1)
-
 
 __SDK_NAME__ = "dt_python_sdk"
 
@@ -42,7 +43,8 @@ class DTAnalytics:
 
         self.__dynamic_getter = None
 
-    def __add(self, dt_id: str, acid: Optional[str], event_name: str, event_type: str, properties: Dict[str, Any]) -> bool:
+    def __add(self, dt_id: str, acid: Optional[str], event_name: str, event_type: str,
+              properties: Dict[str, Any]) -> bool:
         event = dict(properties)
         event["#dt_id"] = dt_id
         if acid is not None:
@@ -103,6 +105,7 @@ class DTAnalytics:
 
     def clear_dynamic_common_properties(self):
         self.__dynamic_getter = None
+
 
 class DTLogConsumer(Consumer):
     def __init__(self, path, max_batch_len, name_prefix, max_file_size_bytes):

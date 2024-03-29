@@ -1,3 +1,4 @@
+use std::sync::atomic::Ordering;
 use mlua::prelude::*;
 use mlua::{Table, Value};
 use serde_json::Map;
@@ -33,7 +34,7 @@ fn close(_: &Lua, _: ()) -> LuaResult<()> {
 }
 
 fn toggle_logger(_: &Lua, enable: bool) -> LuaResult<()> {
-    common::util::logger::LOG_ENABLED.replace(enable);
+    common::util::logger::LOG_ENABLED.store(enable, Ordering::Relaxed);
     Ok(())
 }
 
