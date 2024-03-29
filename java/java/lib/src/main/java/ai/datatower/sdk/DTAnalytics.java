@@ -1,28 +1,37 @@
+package ai.datatower.sdk;
+
 import java.util.*;
-import java.util.function.Function;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+
+class DTBase {
+    static native boolean init(Map<String, Object> config);
+    static native boolean addEvent(Map<String, Object> event);
+    static native void flush();
+    static native void close();
+    static native void toggleLogger(boolean enable);
+    static native void setStaticCommonProperties(Map<String, Object> properties);
+    static native void clearStaticCommonProperties();
+
+    static AtomicBoolean loaded = new AtomicBoolean(false);
+
+    static void load(String filename) {
+        if (loaded.get()) return;
+        System.load(filename);
+        loaded.set(true);
+    }
+}
 
 class DTAnalytics {
     private static final String SDK_TYPE = "dt_server_sdk_java";
     private static final String SDK_VERSION = "1.0.0";
-    
-    private static native boolean dtInit(Map<String, Object> config);
-    private static native boolean dtAddEvent(Map<String, Object> event);
-    private static native void dtFlush();
-    private static native void dtClose();
-    private static native void dtToggleLogger(boolean enable);
-    private static native void dtSetStaticCommonProperties(Map<String, Object> properties);
-    private static native void dtClearStaticCommonProperties();
-
-    static {
-        System.loadLibrary("dt_core_java");
-    }
 
     private Supplier<Map<String, Object>> dynamicCommonPropertiesSupplier;
 
-    public DTAnalytics(Consumer consumer, boolean isDebug) {
-        DTAnalytics.dtToggleLogger(isDebug);
-        DTAnalytics.dtInit(consumer.getConfigMap());
+    public DTAnalytics(Consumer consumer, String soFileName, boolean isDebug) {
+        DTBase.load(soFileName);
+        DTBase.toggleLogger(isDebug);
+        DTBase.init(consumer.getConfigMap());
     }
     
     public boolean track(String dtId, String acId, String eventName, Map<String, Object> properties) {
@@ -70,19 +79,19 @@ class DTAnalytics {
     }
 
     public void setStaticCommonProperties(Map<String, Object> properties) {
-        DTAnalytics.dtSetStaticCommonProperties(properties);
+        DTBase.setStaticCommonProperties(properties);
     }
 
     public void clearStaticCommonProperties() {
-        DTAnalytics.dtClearStaticCommonProperties();
+        DTBase.clearStaticCommonProperties();
     }
     
     public void flush() {
-        DTAnalytics.dtFlush();
+        DTBase.flush();
     }
 
     public void close() {
-        DTAnalytics.dtClose();
+        DTBase.close();
     }
     
     private boolean add(String dtId, String acId, String eventName, String eventType, Map<String, Object> properties) {
@@ -104,20 +113,7 @@ class DTAnalytics {
         event.put("#sdk_type", DTAnalytics.SDK_TYPE);
         event.put("#sdk_version_name", DTAnalytics.SDK_VERSION);
         
-        return DTAnalytics.dtAddEvent(event);
-    }
-    
-    public static void main(String[] args) {
-        DTLogConsumer consumer = new DTLogConsumer("log", 200, null, 10*1024*1024);
-        DTAnalytics dt = new DTAnalytics(consumer, true);
-        
-        HashMap<String, Object> properties = new HashMap<>();
-        properties.put("#app_id", "appidid");
-        properties.put("#bundle_id", "com.example");
-        properties.put("prooo", "hool");
-        dt.track("xxx", null, "event_test_java_sdk", properties);
-        dt.flush();
-        dt.close();
+        return DTBase.addEvent(event);
     }
 }
 
@@ -131,7 +127,7 @@ class DTLogConsumer extends Consumer {
     /**
      * The Consumer that will put events to log files.
      * This Consumer is designed to run with FileScout.
-     * 
+     *
      * @param path The folder to store log files.
      * @param maxBatchLen Number of events to flush into log file at once.
      * @param namePrefix [Nullable] The prefix of log file name.
@@ -151,5 +147,21 @@ class DTLogConsumer extends Consumer {
     @Override
     Map<String, Object> getConfigMap() {
         return Collections.unmodifiableMap(configMap);
+    }
+}
+
+class MainDemo {
+    public static void main(String[] args) {
+        System.out.println("xxxxx");
+        DTLogConsumer consumer = new DTLogConsumer("log", 200, null, 10*1024*1024);
+        DTAnalytics dt = new DTAnalytics(consumer, "/Users/linkailong/RustroverProjects/sdk-core-base/target/release/libdt_core_java.dylib", true);
+
+        HashMap<String, Object> properties = new HashMap<>();
+        properties.put("#app_id", "appidid");
+        properties.put("#bundle_id", "com.example");
+        properties.put("prooo", "hool");
+        dt.track("xxx", null, "event_test_java_sdk", properties);
+        dt.flush();
+        dt.close();
     }
 }

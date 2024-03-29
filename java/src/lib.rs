@@ -12,7 +12,7 @@ type JniError = jni::errors::Error;
 type JniResult<T> = Result<T, JniError>;
 
 #[no_mangle]
-pub extern "system" fn Java_DTAnalytics_dtInit<'local>(mut env: JNIEnv<'local>, _class: JClass<'local>, config: JObject<'local>) -> jboolean {
+pub extern "system" fn ai_datatower_sdk_DTBase_dtInit<'local>(mut env: JNIEnv<'local>, _class: JClass<'local>, config: JObject<'local>) -> jboolean {
     let raw_config = env.get_map(&config).expect("Couldn't get config map");
     let Ok(config) = jmap2map(&mut env, raw_config) else {
         log_error!("Failed to parse config map");
@@ -25,7 +25,7 @@ pub extern "system" fn Java_DTAnalytics_dtInit<'local>(mut env: JNIEnv<'local>, 
 }
 
 #[no_mangle]
-pub extern "system" fn Java_DTAnalytics_dtAddEvent<'local>(mut env: JNIEnv<'local>, _class: JClass<'local>, event: JObject<'local>) -> jboolean {
+pub extern "system" fn ai_datatower_sdk_DTBase_dtAddEvent<'local>(mut env: JNIEnv<'local>, _class: JClass<'local>, event: JObject<'local>) -> jboolean {
     let event = env.get_map(&event).expect("Couldn't get event/properties");
     let Ok(event) = jmap2map(&mut env, event) else {
         log_error!("Failed to parse event/properties");
@@ -38,22 +38,22 @@ pub extern "system" fn Java_DTAnalytics_dtAddEvent<'local>(mut env: JNIEnv<'loca
 }
 
 #[no_mangle]
-pub extern "system" fn Java_DTAnalytics_dtFlush<'local>(_env: JNIEnv<'local>, _class: JClass<'local>) {
+pub extern "system" fn ai_datatower_sdk_DTBase_dtFlush<'local>(_env: JNIEnv<'local>, _class: JClass<'local>) {
     dissolve::<(), DTError>(common::flush()).unwrap();
 }
 
 #[no_mangle]
-pub extern "system" fn Java_DTAnalytics_dtClose<'local>(_env: JNIEnv<'local>, _class: JClass<'local>) {
+pub extern "system" fn ai_datatower_sdk_DTBase_dtClose<'local>(_env: JNIEnv<'local>, _class: JClass<'local>) {
     dissolve::<(), DTError>(common::flush()).unwrap();
 }
 
 #[no_mangle]
-pub extern "system" fn Java_DTAnalytics_dtToggleLogger<'local>(_env: JNIEnv<'local>, _class: JClass<'local>, enable: jboolean) {
+pub extern "system" fn ai_datatower_sdk_DTBase_dtToggleLogger<'local>(_env: JNIEnv<'local>, _class: JClass<'local>, enable: jboolean) {
     common::util::logger::LOG_ENABLED.store(enable != 0, Relaxed);
 }
 
 #[no_mangle]
-pub extern "system" fn Java_DTAnalytics_dtSetStaticCommonProperties<'local>(mut env: JNIEnv<'local>, _class: JClass<'local>, properties: JObject<'local>) {
+pub extern "system" fn ai_datatower_sdk_DTBase_dtSetStaticCommonProperties<'local>(mut env: JNIEnv<'local>, _class: JClass<'local>, properties: JObject<'local>) {
     let event = env.get_map(&properties).expect("Couldn't get event/properties");
     let Ok(properties) = jmap2map(&mut env, event) else {
         log_error!("Failed to parse event/properties");
@@ -63,7 +63,7 @@ pub extern "system" fn Java_DTAnalytics_dtSetStaticCommonProperties<'local>(mut 
 }
 
 #[no_mangle]
-pub extern "system" fn Java_DTAnalytics_dtClearStaticCommonProperties<'local>(_env: JNIEnv<'local>, _class: JClass<'local>) {
+pub extern "system" fn ai_datatower_sdk_DTBase_dtClearStaticCommonProperties<'local>(_env: JNIEnv<'local>, _class: JClass<'local>) {
     dissolve::<(), DTError>(common::clear_static_common_props()).unwrap();
 }
 
