@@ -1,5 +1,5 @@
 BASEDIR=$(dirname "$0")
-cd "$BASEDIR" || (echo "Cannot cd to script's path" & exit)
+cd "$BASEDIR" || (echo "Cannot cd to script's path" && exit)
 
 # Naming of artifacts:
 #   dt_core_{package}[-{package_specific}]-{platform}-{architecture}.so
