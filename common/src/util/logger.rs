@@ -28,8 +28,7 @@ pub mod logger {
     #[macro_export]
     macro_rules! log_warning {
         ($($arg:tt)*) => {
-            if ($crate::util::logger::LOG_ENABLED.load(std::sync::atomic::Ordering::Relaxed)
-                && 2 >= $crate::util::logger::LOG_LEVEL.load(std::sync::atomic::Ordering::Relaxed)) {
+            if (2 >= $crate::util::logger::LOG_LEVEL.load(std::sync::atomic::Ordering::Relaxed)) {
                 println!("WARNING: [DT Core] {}",  format!($($arg)*));
             }
         };
