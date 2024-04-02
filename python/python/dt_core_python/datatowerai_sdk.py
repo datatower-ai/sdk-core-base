@@ -7,9 +7,7 @@ from .dt_core_base_py import (
     add_event as dt_add_event,
     flush as dt_flush,
     close as dt_close,
-    toggle_logger,
-    set_static_common_properties as dt_set_scp,
-    clear_static_common_properties as dt_clear_scp,
+    toggle_logger
 )
 
 version = sys.version_info
@@ -40,7 +38,6 @@ class DTAnalytics:
     def __init__(self, consumer: Consumer, debug=False):
         toggle_logger(debug)
         dt_init(consumer._get_config())
-
         self.__dynamic_getter = None
 
     def __add(self, dt_id: str, acid: Optional[str], event_name: str, event_type: str,
@@ -53,11 +50,6 @@ class DTAnalytics:
         event["#event_type"] = event_type
         event["#sdk_type"] = __SDK_NAME__
         event["#sdk_version_name"] = __VERSION__
-
-        if event_type == "track" and self.__dynamic_getter is not None:
-            for k, v in self.__dynamic_getter().items():
-                if k not in event:
-                    event[k] = v
 
         return dt_add_event(event)
 
@@ -93,18 +85,6 @@ class DTAnalytics:
 
     def close(self):
         dt_close()
-
-    def set_static_common_properties(self, properties: Dict[str, Any]):
-        dt_set_scp(properties)
-
-    def clear_static_common_properties(self):
-        dt_clear_scp()
-
-    def set_dynamic_common_properties(self, dynamic_getter: Callable[[], Dict[str, Any]]):
-        self.__dynamic_getter = dynamic_getter
-
-    def clear_dynamic_common_properties(self):
-        self.__dynamic_getter = None
 
 
 class DTLogConsumer(Consumer):

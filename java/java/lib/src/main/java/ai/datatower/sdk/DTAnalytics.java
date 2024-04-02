@@ -4,13 +4,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class DTAnalytics {
     private static final String SDK_TYPE = "dt_server_sdk_java";
     private static final String SDK_VERSION = "1.0.0";
-
-    private Supplier<Map<String, Object>> dynamicCommonPropertiesSupplier;
 
     private DTAnalytics(Consumer consumer, boolean isDebug) throws IOException {
         DTBase.load();
@@ -63,22 +60,6 @@ public class DTAnalytics {
     public boolean userUniqAppend(String dtId, String acId, Map<String, Object> properties) {
         return add(dtId, acId, "#user_uniq_append", "user", properties);
     }
-
-    public void setDynamicCommonProperties(Supplier<Map<String, Object>> dynamicCommonPropertiesSupplier) {
-        this.dynamicCommonPropertiesSupplier = dynamicCommonPropertiesSupplier;
-    }
-
-    public void clearDynamicCommonProperties() {
-        this.dynamicCommonPropertiesSupplier = null;
-    }
-
-    public void setStaticCommonProperties(Map<String, Object> properties) {
-        DTBase.setStaticCommonProperties(properties);
-    }
-
-    public void clearStaticCommonProperties() {
-        DTBase.clearStaticCommonProperties();
-    }
     
     public void flush() {
         DTBase.flush();
@@ -90,14 +71,6 @@ public class DTAnalytics {
     
     private boolean add(String dtId, String acId, String eventName, String eventType, Map<String, Object> properties) {
         Map<String, Object> event = new HashMap<>();
-
-        if (dynamicCommonPropertiesSupplier != null) {
-            try {
-                event.putAll(dynamicCommonPropertiesSupplier.get());
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-        }
 
         event.putAll(properties);
         event.put("#dt_id", dtId);
