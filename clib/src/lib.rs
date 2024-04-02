@@ -8,12 +8,7 @@ use common::util::result::{dissolve, dissolve_bool};
 use common::util::error::Result;
 
 #[no_mangle]
-pub extern fn simple_rust_func_called_from_go(arg1: u8, arg2: u16, arg3: u32) -> usize {
-    arg1 as usize + arg2 as usize + arg3 as usize
-}
-
-#[no_mangle]
-pub extern fn init(raw_config: *const c_char) -> i8 {
+pub extern fn dt_init(raw_config: *const c_char) -> i8 {
     let mut map = match cchar2map(raw_config) {
         Ok(map) => map,
         Err(e) => {
@@ -37,7 +32,7 @@ pub extern fn init(raw_config: *const c_char) -> i8 {
 }
 
 #[no_mangle]
-pub extern fn add_event(raw_event: *const c_char) -> i8 {
+pub extern fn dt_add_event(raw_event: *const c_char) -> i8 {
     let map = match cchar2map(raw_event) {
         Ok(map) => map,
         Err(e) => {
@@ -55,17 +50,17 @@ pub extern fn add_event(raw_event: *const c_char) -> i8 {
 }
 
 #[no_mangle]
-pub extern fn flush() {
+pub extern fn dt_flush() {
     dissolve::<(), DTError>(common::flush()).unwrap();
 }
 
 #[no_mangle]
-pub extern fn close() {
+pub extern fn dt_close() {
     dissolve::<(), DTError>(common::close()).unwrap();
 }
 
 #[no_mangle]
-pub extern fn toggle_logger(enable: u8) {
+pub extern fn dt_toggle_logger(enable: u8) {
     common::util::logger::LOG_ENABLED.store(enable != 0, Ordering::Relaxed);
 }
 

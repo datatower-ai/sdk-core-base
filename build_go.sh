@@ -32,10 +32,10 @@ function build_golang() {
   colima restart
 
   cross rustc --release --package clib --target x86_64-pc-windows-msvc
-  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/libdt_core_clib.dll" "$target_path/libdt_core_clib-windows-amd64.dll"
+  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/dt_core_clib.dll" "$target_path/dt_core_clib-windows-amd64.dll"
 
   cross rustc --release --package clib --target aarch64-pc-windows-msvc
-  cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/libdt_core_clib.dll" "$target_path/libdt_core_clib-windows-arm64.dll"
+  cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/dt_core_clib.dll" "$target_path/dt_core_clib-windows-arm64.dll"
 
   mv "$BASEDIR/.cargo/blocked.config.toml" "$BASEDIR/.cargo/config.toml"
 

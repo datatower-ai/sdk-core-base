@@ -102,7 +102,9 @@ pub fn close() -> Result<()> {
         return internal_error!("Something wrong, lock is reentered!");
     };
     if let Some(MemConsumer(mut consumer)) = mem.remove(&consumer::MEM_KEY.to_string()) {
-        consumer.close()
+        let ret = consumer.close();
+        log_info!("Closed!");
+        ret
     } else {
         runtime_error!("Consumer should be initialized before API calls!")
     }
