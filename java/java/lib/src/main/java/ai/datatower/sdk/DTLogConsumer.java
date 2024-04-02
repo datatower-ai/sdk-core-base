@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DTLogConsumer extends Consumer {
-    private final Map<String, Object> configMap;
+    private final String path;
+    private final int maxBatchLen;
+    private final String namePrefix;
+    private final long maxFileSizeBytes;
 
     /**
      * The Consumer that will put events to log files.
@@ -19,16 +22,20 @@ public class DTLogConsumer extends Consumer {
     public DTLogConsumer(
             String path, int maxBatchLen, String namePrefix, long maxFileSizeBytes
     ) {
-        configMap = new HashMap<>();
+        this.path = path;
+        this.maxBatchLen = maxBatchLen;
+        this.namePrefix = namePrefix;
+        this.maxFileSizeBytes = maxFileSizeBytes;
+    }
+
+    @Override
+    Map<String, Object> getConfigMap() {
+        Map<String, Object> configMap = new HashMap<>();
         configMap.put("consumer", "log");
         configMap.put("path", path);
         configMap.put("max_batch_len", maxBatchLen);
         configMap.put("name_prefix", namePrefix);
         configMap.put("max_file_size_bytes", maxFileSizeBytes);
-    }
-
-    @Override
-    Map<String, Object> getConfigMap() {
-        return Collections.unmodifiableMap(configMap);
+        return configMap;
     }
 }

@@ -22,6 +22,14 @@ class DTBase {
         loaded.set(true);
     }
 
+    static {
+        try {
+            DTBase.load();
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
+
     private static void loadDynamicLib() throws IOException {
         String os = getOs();
         String arch = getArch();

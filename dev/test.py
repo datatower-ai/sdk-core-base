@@ -2,7 +2,7 @@ import time
 from dt_core_python import *
 
 consumer = DTLogConsumer("log", 200, "dt_py", 10*1024*1024)
-dt = DTAnalytics(consumer, False)
+dt = DTAnalytics(consumer, True)
 
 dt_id = "1234567890987654321"
 acid = None

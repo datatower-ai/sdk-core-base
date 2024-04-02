@@ -36,9 +36,9 @@ class Consumer(ABC):
 
 class DTAnalytics:
     def __init__(self, consumer: Consumer, debug=False):
-        toggle_logger(debug)
-        dt_init(consumer._get_config())
-        self.__dynamic_getter = None
+        config = consumer._get_config()
+        config["_debug"] = debug
+        dt_init(config)
 
     def __add(self, dt_id: str, acid: Optional[str], event_name: str, event_type: str,
               properties: Dict[str, Any]) -> bool:

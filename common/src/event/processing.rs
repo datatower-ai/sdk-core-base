@@ -1,3 +1,4 @@
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::OnceLock;
 use std::time::{SystemTime, UNIX_EPOCH};
 use serde_json::{Map, Number, Value};
@@ -8,6 +9,8 @@ use crate::log_error;
 use crate::util::error::{DTError, Result};
 use crate::util::error::DTError::InternalError;
 use crate::util::error::macros::error_with;
+
+pub static DEBUG: AtomicBool = AtomicBool::new(false);
 
 pub fn process_event(event_map: Event) -> Result<Event> {
     let mut event = eventify(event_map)?;
@@ -80,6 +83,10 @@ fn fulfill_metas(event: &mut Event) {
 
     if !event.contains_key("#event_syn") {
         event.insert(String::from("#event_syn"), Value::String(uuid::Uuid::new_v4().to_string()));
+    }
+
+    if DEBUG.load(Ordering::Relaxed) {
+        event.insert(String::from("#debug"), Value::from(true));
     }
 }
 

@@ -10,9 +10,9 @@ public class DTAnalytics {
     private static final String SDK_VERSION = "1.0.0";
 
     private DTAnalytics(Consumer consumer, boolean isDebug) throws IOException {
-        DTBase.load();
-        DTBase.toggleLogger(isDebug);
-        DTBase.init(consumer.getConfigMap());
+        Map<String, Object> config = consumer.getConfigMap();
+        config.put("_debug", isDebug);
+        DTBase.init(config);
     }
 
     public static DTAnalytics init(Consumer consumer, boolean isDebug) {
@@ -67,6 +67,10 @@ public class DTAnalytics {
 
     public void close() {
         DTBase.close();
+    }
+
+    public static void toggleLogger(boolean enable) {
+        DTBase.toggleLogger(enable);
     }
     
     private boolean add(String dtId, String acId, String eventName, String eventType, Map<String, Object> properties) {
