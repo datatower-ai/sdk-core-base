@@ -1,4 +1,5 @@
 use std::backtrace::Backtrace;
+use std::sync::atomic::Ordering;
 use std::sync::Once;
 use serde_json::{Map, Value};
 use crate::base::mem;
@@ -7,7 +8,7 @@ use crate::consumer::Consumer;
 use crate::consumer::log::LogConsumer;
 use crate::event::common_properties::{clear_static_comm_props, Props, set_static_comm_props};
 use crate::event::Event;
-use crate::event::processing::process_event;
+use crate::event::processing::{DEBUG, process_event};
 use crate::util::error::{DTError, Result};
 use crate::util::error::macros::{host_error, internal_error, runtime_error};
 
@@ -29,7 +30,14 @@ pub fn init_by_config(mut config: Map<String, Value>) -> Result<()> {
         _ => return host_error!("Initialization config has 'consumer' but it's out of domain!")
     };
 
-    init_consumer(consumer?)
+    init_consumer(consumer?)?;
+
+    // after init success:
+    if let Some(Value::Bool(debug)) = config.get("_debug") {
+        DEBUG.store(*debug, Ordering::Relaxed);
+    }
+
+    Ok(())
 }
 
 pub fn init_consumer(consumer: Box<dyn Consumer>) -> Result<()> {
@@ -48,6 +56,7 @@ pub fn init_consumer(consumer: Box<dyn Consumer>) -> Result<()> {
         runtime_error!("Consumer can only be initialized once.")
     } else {
         mem.insert(consumer::MEM_KEY.to_string(), MemConsumer(consumer));
+        log_info!("Initialized!");
         Ok(())
     }
 }
