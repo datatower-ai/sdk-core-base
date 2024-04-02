@@ -1,4 +1,4 @@
-package dtanalytics
+package dt_analytics
 
 type DTLogConsumer struct {
 	path                string

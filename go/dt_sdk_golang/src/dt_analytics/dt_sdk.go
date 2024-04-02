@@ -1,4 +1,4 @@
-package dtanalytics
+package dt_analytics
 
 /*
 #cgo CFLAGS: -I.
@@ -13,6 +13,7 @@ package dtanalytics
 #include "dt_core_clib.h"
 */
 import "C"
+
 import (
 	"errors"
 	jsoniter "github.com/json-iterator/go"
@@ -42,7 +43,7 @@ func New(consumer DTConsumer, isDebug bool) (DTAnalytics, error) {
 	configCStr := C.CString(configStr)
 	defer C.free(unsafe.Pointer(configCStr))
 
-	res := C.init(configCStr)
+	res := C.dt_init(configCStr)
 	if res != 0 {
 		return DTAnalytics{}, nil
 	} else {
@@ -50,11 +51,11 @@ func New(consumer DTConsumer, isDebug bool) (DTAnalytics, error) {
 	}
 }
 
-func (dta DTAnalytics) Track(dtId string, acId string, eventName string, properties map[string]interface{}) (bool, error) {
+func (dta DTAnalytics) Track(dtId string, acId string, eventName string, properties map[string]interface{}) error {
 	return dta.add(dtId, acId, eventName, "track", properties)
 }
 
-func (_ DTAnalytics) add(dtId string, acId string, eventName string, eventType string, properties map[string]interface{}) (bool, error) {
+func (_ DTAnalytics) add(dtId string, acId string, eventName string, eventType string, properties map[string]interface{}) error {
 	event := make(map[string]interface{}, len(properties)+6)
 
 	for k, v := range properties {
@@ -69,20 +70,24 @@ func (_ DTAnalytics) add(dtId string, acId string, eventName string, eventType s
 
 	b, err := jsoniter.Marshal(event)
 	if err != nil {
-		return false, err
+		return err
 	}
 	eventJson := string(b)
 	cEventJson := C.CString(eventJson)
 
-	return C.add_event(cEventJson) != 0, nil
+	if C.dt_add_event(cEventJson) != 0 {
+		return nil
+	} else {
+		return errors.New("given event is not valid")
+	}
 }
 
 func (_ DTAnalytics) Flush() {
-	C.flush()
+	C.dt_flush()
 }
 
 func (_ DTAnalytics) Close() {
-	C.close()
+	C.dt_close()
 }
 
 func ToggleLogger(enable bool) {
@@ -91,5 +96,5 @@ func ToggleLogger(enable bool) {
 		enabled = 1
 	}
 	cEnabled := C.uint8_t(enabled)
-	C.toggle_logger(cEnabled)
+	C.dt_toggle_logger(cEnabled)
 }
