@@ -10,6 +10,7 @@ cd "$BASEDIR" || (echo "Cannot cd to script's path" && exit)
 # Build Golang
 ####################################
 function build_golang() {
+  version_check
   mkdir -p "$BASEDIR/output/go/"
   target_path="$BASEDIR/output/go/"
 
@@ -26,7 +27,7 @@ function build_golang() {
   cp -f "$BASEDIR/target/aarch64-unknown-linux-gnu/release/libdt_core_clib.so" "$target_path/libdt_core_clib-linux-arm64.so"
 
   mv "$BASEDIR/.cargo/config.toml" "$BASEDIR/.cargo/blocked.config.toml"
-  colima restart
+  colima start
 
   cross rustc --release --package clib --target x86_64-pc-windows-msvc
   cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/dt_core_clib.dll" "$target_path/dt_core_clib-windows-amd64.dll"
@@ -35,8 +36,17 @@ function build_golang() {
   cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/dt_core_clib.dll" "$target_path/dt_core_clib-windows-arm64.dll"
 
   mv "$BASEDIR/.cargo/blocked.config.toml" "$BASEDIR/.cargo/config.toml"
+}
 
-  # rm -rf "./tmp/"
+function version_check() {
+    version=$(grep -oE "^\t_sdkVersion = .*$" "./go/dt_sdk_golang/src/dt_analytics/dt_sdk.go" | sed -ne "s/^\t_sdkVersion = \"\(.*\)\" *$/\1/p")
+    if [ -z "$version" ]; then
+      echo "\033[0;31mCannot found version in dt_sdk.go\033[0m"
+      exit
+    fi
+    echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "┃ version: \033[1;35m$version\033[0m"
+    echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 }
 
 ####################################

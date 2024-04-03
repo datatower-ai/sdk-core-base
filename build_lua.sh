@@ -11,6 +11,7 @@ cd "$BASEDIR" || (echo "Cannot cd to script's path" && exit)
 # $1: features
 ####################################
 function build_lua() {
+  version_check
   mkdir -p "$BASEDIR/output/lua/"
 
   cargo rustc --release --package lua --no-default-features --features "$1" --target x86_64-apple-darwin
@@ -25,13 +26,28 @@ function build_lua() {
   cargo rustc --release --package lua --no-default-features --features "$1" --target aarch64-unknown-linux-gnu
   cp -f "$BASEDIR/target/aarch64-unknown-linux-gnu/release/libdt_core_lua.so" "$BASEDIR/output/lua/dt_core_lua-$1-linux-aarch64.so"
 
-  # USE WINDOWS TO BUILD!
-  # colima restart
-#  cross rustc --release --package lua --no-default-features --features "$1" --target x86_64-pc-windows-msvc
-#  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/libdt_core_lua.so" "$BASEDIR/output/lua/dt_core_lua-$1-windows-x86_64.so"
-#
-#  cross rustc --release --package lua --no-default-features --features "$1" --target aarch64-pc-windows-msvc
-#  cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/libdt_core_lua.so" "$BASEDIR/output/lua/dt_core_lua-$1-windows-aarch64.so"
+  mv "$BASEDIR/.cargo/config.toml" "$BASEDIR/.cargo/blocked.config.toml"
+  colima start
+
+  cross rustc --release --package lua --no-default-features --features "$1" --target x86_64-pc-windows-msvc
+  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/libdt_core_lua.so" "$BASEDIR/output/lua/dt_core_lua-$1-windows-x86_64.so"
+
+  cross rustc --release --package lua --no-default-features --features "$1" --target aarch64-pc-windows-msvc
+  cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/libdt_core_lua.so" "$BASEDIR/output/lua/dt_core_lua-$1-windows-aarch64.so"
+
+  mv "$BASEDIR/.cargo/blocked.config.toml" "$BASEDIR/.cargo/config.toml"
+}
+
+function version_check() {
+#    version=$(grep -oE "^\t_sdkVersion = .*$" "./go/dt_sdk_golang/src/dt_analytics/dt_sdk.go" | sed -ne "s/^\t_sdkVersion = \"\(.*\)\" *$/\1/p")
+#    if [ -z "$version" ]; then
+#      echo "\033[0;31mCannot found version in dt_sdk.go\033[0m"
+#      exit
+#    fi
+#    echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+#    echo "┃ version: \033[1;35m$version\033[0m"
+#    echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  pass
 }
 
 

@@ -21,6 +21,7 @@ function build_python_aux() {
 }
 
 function build_python() {
+  version_check
   mkdir -p "$BASEDIR/output/python/"
   cd python || (echo "Failed to \`cd python\`" & exit)
   source .env/bin/activate
@@ -41,9 +42,19 @@ function build_python() {
   cd "../"
 }
 
+function version_check() {
+    version=$(grep -oE "^version = .*$" "./python/Cargo.toml" | sed -ne "s/^version = \"\(.*\)\" *$/\1/p")
+    if [ -z "$version" ]; then
+      echo "\033[0;31mCannot found version in Cargo.toml\033[0m"
+      exit
+    fi
+    echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "┃ version: \033[1;35m$version\033[0m"
+    echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+}
+
 
 ####################################
 # Build
 ####################################
-build_python &
-wait
+build_python
