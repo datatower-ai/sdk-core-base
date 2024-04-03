@@ -1,6 +1,5 @@
 package ai.datatower.sdk;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,7 @@ public class DTAnalytics {
     private static final String SDK_TYPE = "dt_server_sdk_java";
     private static final String SDK_VERSION = "1.0.0";
 
-    private DTAnalytics(Consumer consumer, boolean isDebug) throws IOException {
+    private DTAnalytics(Consumer consumer, boolean isDebug) {
         Map<String, Object> config = consumer.getConfigMap();
         config.put("_debug", isDebug);
         DTBase.init(config);
