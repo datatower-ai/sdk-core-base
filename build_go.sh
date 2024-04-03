@@ -12,9 +12,6 @@ cd "$BASEDIR" || (echo "Cannot cd to script's path" && exit)
 function build_golang() {
   mkdir -p "$BASEDIR/output/go/"
   target_path="$BASEDIR/output/go/"
-#  mkdir -p "$BASEDIR/output/go/tmp/"
-#  cp -r "$BASEDIR/go/sdk_core_golang/" "$BASEDIR/output/go/tmp/"
-#  target_path="$BASEDIR/output/go/tmp/src/"
 
   cargo rustc --release --package clib --target x86_64-apple-darwin
   cp -f "$BASEDIR/target/x86_64-apple-darwin/release/libdt_core_clib.dylib" "$target_path/libdt_core_clib-macos-amd64.dylib"

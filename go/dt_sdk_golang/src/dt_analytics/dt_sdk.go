@@ -3,7 +3,7 @@ package dt_analytics
 /*
 #cgo CFLAGS: -I.
 #cgo darwin,arm64 LDFLAGS: -L. -ldt_core_clib-macos-arm64
-#cgo darwin,amd64 LDFLAGS: -L. -ldt_core_clib-macos-amd64
+#cgo darwin,amd64 LDFLAGS: -L. -ldt_core_clib
 #cgo linux,arm64 LDFLAGS: -L. -ldt_core_clib-linux-arm64
 #cgo linux,amd64 LDFLAGS: -L. -ldt_core_clib-linux-amd64
 #cgo windows,arm64 LDFLAGS: -L. -ldt_core_clib-windows-arm64
@@ -21,8 +21,8 @@ import (
 )
 
 const (
-	SDK_TYPE    = "dt_server_sdk_go"
-	SDK_VERSION = "1.0.0"
+	_sdkType    = "dt_server_sdk_go"
+	_sdkVersion = "1.0.0"
 )
 
 type DTConsumer interface {
@@ -43,8 +43,9 @@ func New(consumer DTConsumer, isDebug bool) (DTAnalytics, error) {
 	configCStr := C.CString(configStr)
 	defer C.free(unsafe.Pointer(configCStr))
 
-	res := C.dt_init(configCStr)
-	if res != 0 {
+	ret := C.dt_init(configCStr)
+	clear(configMap)
+	if ret != 0 {
 		return DTAnalytics{}, nil
 	} else {
 		return DTAnalytics{}, errors.New("failed to init DTAnalytics")
@@ -65,8 +66,8 @@ func (_ DTAnalytics) add(dtId string, acId string, eventName string, eventType s
 	event["#acid"] = acId
 	event["#event_name"] = eventName
 	event["#event_type"] = eventType
-	event["#sdk_type"] = SDK_TYPE
-	event["#sdk_version_name"] = SDK_VERSION
+	event["#sdk_type"] = _sdkType
+	event["#sdk_version_name"] = _sdkVersion
 
 	b, err := jsoniter.Marshal(event)
 	if err != nil {
@@ -74,8 +75,10 @@ func (_ DTAnalytics) add(dtId string, acId string, eventName string, eventType s
 	}
 	eventJson := string(b)
 	cEventJson := C.CString(eventJson)
+	ret := C.dt_add_event(cEventJson)
+	clear(event)
 
-	if C.dt_add_event(cEventJson) != 0 {
+	if ret != 0 {
 		return nil
 	} else {
 		return errors.New("given event is not valid")
