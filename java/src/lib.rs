@@ -44,7 +44,7 @@ pub extern "system" fn Java_ai_datatower_sdk_DTBase_flush<'local>(_env: JNIEnv<'
 
 #[no_mangle]
 pub extern "system" fn Java_ai_datatower_sdk_DTBase_close<'local>(_env: JNIEnv<'local>, _class: JClass<'local>) {
-    dissolve::<(), DTError>(common::flush()).unwrap();
+    dissolve::<(), DTError>(common::close()).unwrap();
 }
 
 #[no_mangle]
