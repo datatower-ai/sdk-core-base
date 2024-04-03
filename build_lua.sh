@@ -11,7 +11,6 @@ cd "$BASEDIR" || (echo "Cannot cd to script's path" && exit)
 # $1: features
 ####################################
 function build_lua() {
-  version_check
   mkdir -p "$BASEDIR/output/lua/"
 
   cargo rustc --release --package lua --no-default-features --features "$1" --target x86_64-apple-darwin
@@ -30,10 +29,10 @@ function build_lua() {
   colima start
 
   cross rustc --release --package lua --no-default-features --features "$1" --target x86_64-pc-windows-msvc
-  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/libdt_core_lua.so" "$BASEDIR/output/lua/dt_core_lua-$1-windows-x86_64.so"
+  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/dt_core_lua.dll" "$BASEDIR/output/lua/dt_core_lua-$1-windows-x86_64.dll"
 
   cross rustc --release --package lua --no-default-features --features "$1" --target aarch64-pc-windows-msvc
-  cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/libdt_core_lua.so" "$BASEDIR/output/lua/dt_core_lua-$1-windows-aarch64.so"
+  cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/dt_core_lua.dll" "$BASEDIR/output/lua/dt_core_lua-$1-windows-aarch64.dll"
 
   mv "$BASEDIR/.cargo/blocked.config.toml" "$BASEDIR/.cargo/config.toml"
 }
@@ -47,13 +46,14 @@ function version_check() {
 #    echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 #    echo "┃ version: \033[1;35m$version\033[0m"
 #    echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  pass
+  echo ""
 }
 
 
 ####################################
 # Build
 ####################################
+version_check
 build_lua lua54
 build_lua lua53
 build_lua lua52
