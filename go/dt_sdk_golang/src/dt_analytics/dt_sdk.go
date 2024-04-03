@@ -2,12 +2,12 @@ package dt_analytics
 
 /*
 #cgo CFLAGS: -I.
-#cgo darwin,arm64 LDFLAGS: -L. -ldt_core_clib-macos-arm64
-#cgo darwin,amd64 LDFLAGS: -L. -ldt_core_clib
-#cgo linux,arm64 LDFLAGS: -L. -ldt_core_clib-linux-arm64
-#cgo linux,amd64 LDFLAGS: -L. -ldt_core_clib-linux-amd64
-#cgo windows,arm64 LDFLAGS: -L. -ldt_core_clib-windows-arm64
-#cgo windows,amd64 LDFLAGS: -L. -ldt_core_clib-windows-amd64
+#cgo darwin,arm64 LDFLAGS: -L./libs -ldt_core_clib-macos-arm64
+#cgo darwin,amd64 LDFLAGS: -L./libs -ldt_core_clib-macos-amd64
+#cgo linux,arm64 LDFLAGS: -L./libs -ldt_core_clib-linux-arm64
+#cgo linux,amd64 LDFLAGS: -L./libs -ldt_core_clib-linux-amd64
+#cgo windows,arm64 LDFLAGS: -L./libs -ldt_core_clib-windows-arm64
+#cgo windows,amd64 LDFLAGS: -L./libs -ldt_core_clib-windows-amd64
 
 #include "stdlib.h"
 #include "dt_core_clib.h"
