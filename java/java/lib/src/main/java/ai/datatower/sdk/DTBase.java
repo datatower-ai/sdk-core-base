@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 class DTBase {
     static native boolean init(Map<String, Object> config);
     static native boolean addEvent(Map<String, Object> event);
+    static native boolean addEventStr(String event);
     static native void flush();
     static native void close();
     static native void toggleLogger(boolean enable);

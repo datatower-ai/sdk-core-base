@@ -1,8 +1,9 @@
 use Ordering::Relaxed;
 use std::sync::atomic::Ordering;
 use jni::JNIEnv;
-use jni::objects::{JClass, JObject};
+use jni::objects::{JClass, JObject, JString};
 use jni::sys::jboolean;
+use serde_json::Value;
 use common::log_error;
 use common::util::error::DTError;
 use common::util::result::{dissolve, dissolve_bool};
@@ -31,6 +32,33 @@ pub extern "system" fn Java_ai_datatower_sdk_DTBase_addEvent<'local>(mut env: JN
         log_error!("Failed to parse event/properties");
         return jboolean::from(false);
     };
+    let result = dissolve_bool::<(), DTError>(
+        common::add(event)
+    ).unwrap_or(false);
+    jboolean::from(result)
+}
+
+#[no_mangle]
+pub extern "system" fn Java_ai_datatower_sdk_DTBase_addEventStr<'local>(mut env: JNIEnv<'local>, _class: JClass<'local>, event: JString<'local>) -> jboolean {
+    let Ok(event) = env.get_string(&event) else {
+        log_error!("Failed to get event");
+        return jboolean::from(false);
+    };
+    let event_str: String = event.into();
+    let event = match serde_json::from_str::<Value>(event_str.as_str()) {
+        Ok(json) => match json {
+            Value::Object(map) => map,
+            _ => {
+                log_error!("Failed to parse init config! Given: {json:?}");
+                return jboolean::from(false);
+            },
+        },
+        Err(err) => {
+            log_error!("Failed to parse event, {err}");
+            return jboolean::from(false);
+        }
+    };
+
     let result = dissolve_bool::<(), DTError>(
         common::add(event)
     ).unwrap_or(false);

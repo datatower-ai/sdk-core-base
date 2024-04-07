@@ -8,17 +8,19 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
-    testImplementation 'com.google.code.gson:gson:2.10.1'
-}
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(8)
     }
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
+    testImplementation 'com.google.code.gson:gson:2.10.1'
+}
+
+jar {
+    from {
+        configurations.compileClasspath.filter{ it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }

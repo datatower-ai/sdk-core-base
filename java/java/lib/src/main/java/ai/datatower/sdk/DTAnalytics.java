@@ -1,5 +1,6 @@
 package ai.datatower.sdk;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,10 @@ public class DTAnalytics {
             t.printStackTrace();
             return null;
         }
+    }
+
+    public static void preload() throws IOException {
+        DTBase.load();
     }
     
     public boolean track(String dtId, String acId, String eventName, Map<String, Object> properties) {
@@ -73,9 +78,7 @@ public class DTAnalytics {
     }
     
     private boolean add(String dtId, String acId, String eventName, String eventType, Map<String, Object> properties) {
-        Map<String, Object> event = new HashMap<>();
-
-        event.putAll(properties);
+        Map<String, Object> event = new HashMap<>(properties);
         event.put("#dt_id", dtId);
         event.put("#acid", acId);
         event.put("#event_name", eventName);

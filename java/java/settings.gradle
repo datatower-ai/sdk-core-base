@@ -14,3 +14,5 @@ plugins {
 
 rootProject.name = 'dt_server_sdk_java'
 include('lib')
+include 'demo'
+
