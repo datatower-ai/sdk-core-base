@@ -7,7 +7,7 @@ from .dt_core_base_py import (
     add_event as dt_add_event,
     flush as dt_flush,
     close as dt_close,
-    toggle_logger
+    toggle_logger as dt_toggle_logger
 )
 
 version = sys.version_info
@@ -79,6 +79,9 @@ class DTAnalytics:
 
     def user_uniq_append(self, dt_id: str, acid: Optional[str], properties: Dict[str, Any]) -> bool:
         return self.__add(dt_id, acid, "#user_uniq_append", "user", properties)
+
+    def toggle_logger(self, enable: bool):
+        dt_toggle_logger(enable)
 
     def flush(self):
         dt_flush()
