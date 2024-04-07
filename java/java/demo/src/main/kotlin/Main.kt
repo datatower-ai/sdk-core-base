@@ -3,7 +3,8 @@ package org.example
 import ai.datatower.sdk.*
 
 fun main() {
-    DTAnalytics.toggleLogger(true)
+    //DTAnalytics.preload()
+    //DTAnalytics.toggleLogger(true)
     val consumer = DTLogConsumer("testing_logs", 200, "dt_test", (10 * 1024 * 1024).toLong())
     val dt: DTAnalytics = DTAnalytics.init(consumer, true)
 
@@ -21,7 +22,7 @@ fun main() {
         properties["a$i"] = "asd".repeat(i)
     }
 
-    val n = 10
+    val n = 100000
     var tm: Long = 0
     val startTime: Long = System.nanoTime()
     for (i in 0 until n) {
