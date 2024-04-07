@@ -102,17 +102,17 @@ mod parser {
     use common::log_error;
     use super::JniResult;
 
-    static CLASS_INTEGER: &str = "java/lang/Integer";
     static CLASS_STRING: &str = "java/lang/String";
+    static CLASS_INTEGER: &str = "java/lang/Integer";
     static CLASS_LONG: &str = "java/lang/Long";
-    static CLASS_SHORT: &str = "java/lang/Short";
-    static CLASS_BYTE: &str = "java/lang/Byte";
     static CLASS_FLOAT: &str = "java/lang/Float";
     static CLASS_DOUBLE: &str = "java/lang/Double";
-    static CLASS_CHAR: &str = "java/lang/Character";
     static CLASS_BOOLEAN: &str = "java/lang/Boolean";
     static CLASS_MAP: &str = "java/util/Map";
     static CLASS_LIST: &str = "java/util/List";
+    static CLASS_SHORT: &str = "java/lang/Short";
+    static CLASS_BYTE: &str = "java/lang/Byte";
+    static CLASS_CHAR: &str = "java/lang/Character";
 
     pub(super) fn jmap2map<'local>(env: &mut JNIEnv<'local>, jmap: JMap) -> JniResult<Map<String, Value>> {
         let mut map = Map::new();
@@ -149,41 +149,29 @@ mod parser {
         // remember to delete_local_ref()!
         if jobject.is_null() {
             Ok(Some(Value::Null))
-        } else if env.is_instance_of(&jobject, CLASS_INTEGER)? {
-            let int = env.call_method(&jobject, "intValue", "()I", &[])?;
-            env.delete_local_ref(jobject)?;
-            Ok(Some(Value::from(int.i()?.to_owned())))
         } else if env.is_instance_of(&jobject, CLASS_STRING)? {
             let js_string = JString::from(jobject);
             let value_string: String = env.get_string(&js_string)?.into();
             env.delete_local_ref(js_string)?;
             Ok(Some(Value::from(value_string)))
-        } else if env.is_instance_of(&jobject, CLASS_LONG)? {
-            let long = env.call_method(&jobject, "longValue", "()J", &[])?;
+        } else if env.is_instance_of(&jobject, CLASS_INTEGER)? {
+            let int = env.call_method(&jobject, "intValue", "()I", &[])?;
             env.delete_local_ref(jobject)?;
-            Ok(Some(Value::from(long.j()?.to_owned())))
-        } else if env.is_instance_of(&jobject, CLASS_SHORT)? {
-            let value = env.call_method(&jobject, "shortValue", "()S", &[])?;
-            env.delete_local_ref(jobject)?;
-            Ok(Some(Value::from(value.s()?.to_owned())))
-        } else if env.is_instance_of(&jobject, CLASS_BYTE)? {
-            let value = env.call_method(&jobject, "byteValue", "()B", &[])?;
-            env.delete_local_ref(jobject)?;
-            Ok(Some(Value::from(value.b()?.to_owned())))
+            Ok(Some(Value::from(int.i()?.to_owned())))
         } else if env.is_instance_of(&jobject, CLASS_FLOAT)? {
             let value = env.call_method(&jobject, "floatValue", "()F", &[])?;
             let float: f64 = value.f()?.to_owned() as f64;
             let float: f64 = (float * 10_000_000_f64).floor() / 10_000_000_f64;     // 7 digits precision.
             env.delete_local_ref(jobject)?;
             Ok(Some(Value::from(float)))
+        } else if env.is_instance_of(&jobject, CLASS_LONG)? {
+            let long = env.call_method(&jobject, "longValue", "()J", &[])?;
+            env.delete_local_ref(jobject)?;
+            Ok(Some(Value::from(long.j()?.to_owned())))
         } else if env.is_instance_of(&jobject, CLASS_DOUBLE)? {
             let value = env.call_method(&jobject, "doubleValue", "()D", &[])?;
             env.delete_local_ref(jobject)?;
             Ok(Some(Value::from(value.d()?.to_owned())))
-        } else if env.is_instance_of(&jobject, CLASS_CHAR)? {
-            let value = env.call_method(&jobject, "charValue", "()C", &[])?;
-            env.delete_local_ref(jobject)?;
-            Ok(Some(Value::from(value.c()?.to_owned())))
         } else if env.is_instance_of(&jobject, CLASS_BOOLEAN)? {
             let value = env.call_method(&jobject, "booleanValue", "()Z", &[])?;
             env.delete_local_ref(jobject)?;
@@ -196,6 +184,18 @@ mod parser {
             let jlist = env.get_list(&jobject)?;
             let arr = jlist2value(env, jlist)?;
             Ok(Some(Value::from(arr)))
+        } else if env.is_instance_of(&jobject, CLASS_SHORT)? {
+            let value = env.call_method(&jobject, "shortValue", "()S", &[])?;
+            env.delete_local_ref(jobject)?;
+            Ok(Some(Value::from(value.s()?.to_owned())))
+        } else if env.is_instance_of(&jobject, CLASS_BYTE)? {
+            let value = env.call_method(&jobject, "byteValue", "()B", &[])?;
+            env.delete_local_ref(jobject)?;
+            Ok(Some(Value::from(value.b()?.to_owned())))
+        } else if env.is_instance_of(&jobject, CLASS_CHAR)? {
+            let value = env.call_method(&jobject, "charValue", "()C", &[])?;
+            env.delete_local_ref(jobject)?;
+            Ok(Some(Value::from(value.c()?.to_owned())))
         } else {
             // might be array type.
             log_error!("Only accepting primitives, List and Map as value type! (note: currently Array is not supported)");
