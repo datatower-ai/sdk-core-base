@@ -37,7 +37,7 @@ pub(super) const COMPULSORY_META_PROPS: Lazy<Vec<String>> = Lazy::new(|| vec!(
     String::from("#event_syn"), String::from("properties")
 ));
 
-const PRESET_PROPS_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::from([
+const PRESET_EVENT_PROPS_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#bundle_id", TypeConstraint::String), ("#zone_offset", TypeConstraint::Integer),
     ("#session_id", TypeConstraint::String), ("#device_manufacturer", TypeConstraint::String),
     ("#is_foreground", TypeConstraint::Bool), ("#mcc", TypeConstraint::String),
@@ -235,7 +235,7 @@ fn verify_properties(
     }
 
     if is_preset(key) {
-        if let Some(constraint) = find_constraint_in_preset_event(key.as_str(), props_tuple, &PRESET_PROPS_COMMON) {
+        if let Some(constraint) = find_constraint_in_preset_event(key.as_str(), props_tuple, &PRESET_EVENT_PROPS_COMMON) {
             if !check_type_constraint(value, constraint) {
                 verify_error!(
                     "The type of value for property \"{}\" is not valid (Given: {}, Expected: {:?})!",

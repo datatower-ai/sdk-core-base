@@ -45,10 +45,15 @@ public class DTAnalytics {
         return add(dtId, acId, "#user_add", "user", properties);
     }
 
-    public boolean userUnset(String dtId, String acId, List<String> properties) {
+    public boolean userUnset(String dtId, String acId, Map<String, Object> properties) {
         Map<String, Object> props = new HashMap<>();
-        for (String prop : properties) {
-            props.put(prop, 0);
+        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            String key = entry.getKey();
+            if (key.startsWith("#")) {
+                props.put(key, entry.getValue());
+            } else {
+                props.put(key, 0);
+            }
         }
         return add(dtId, acId, "#user_unset", "user", props);
     }

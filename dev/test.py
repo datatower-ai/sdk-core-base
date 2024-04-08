@@ -7,6 +7,8 @@ dt = DTAnalytics(consumer, True)
 dt_id = "1234567890987654321"
 acid = None
 
+dt.user_unset("xx", "xxxx", {"#app_id": "aaa", "#bundle_id": "123", "bb": 2, "cc": "ss"})
+
 properties = dict()
 properties["productNames"] = ["Lua", "hello"]
 properties["productType"] = "Lua book"

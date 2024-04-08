@@ -65,10 +65,13 @@ class DTAnalytics:
     def user_add(self, dt_id: str, acid: Optional[str], properties: Dict[str, Any]) -> bool:
         return self.__add(dt_id, acid, "#user_add", "user", properties)
 
-    def user_unset(self, dt_id: str, acid: Optional[str], properties: List[str]) -> bool:
+    def user_unset(self, dt_id: str, acid: Optional[str], properties: Dict[str, Any]) -> bool:
         props_dict = {}
-        for prop in properties:
-            props_dict[prop] = 0
+        for k, v in properties.items():
+            if k.startswith("#"):
+                props_dict[k] = v
+            else:
+                props_dict[k] = 0
         return self.__add(dt_id, acid, "#user_unset", "user", props_dict)
 
     def user_delete(self, dt_id: str, acid: Optional[str]) -> bool:
