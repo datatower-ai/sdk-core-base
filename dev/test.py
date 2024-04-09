@@ -4,10 +4,14 @@ from dt_core_python import *
 consumer = DTLogConsumer("log", 200, "dt_py", 10*1024*1024)
 dt = DTAnalytics(consumer, True)
 
+DTAnalytics.enable_log()
+
 dt_id = "1234567890987654321"
 acid = None
 
 dt.user_unset("xx", "xxxx", {"#app_id": "aaa", "#bundle_id": "123", "bb": 2, "cc": "ss"})
+dt.user_delete("xx", "xxxx", {"#app_id": "aaa", "#bundle_id": "123", "bb": 2, "cc": "ss"})
+dt.flush()
 
 properties = dict()
 properties["productNames"] = ["Lua", "hello"]
@@ -20,6 +24,8 @@ properties["#app_id"] = "appid_1234567890"
 properties["#bundle_id"] = "com.example"
 for i in range(5):
     properties["a" + str(i)] = "asd" * i
+
+DTAnalytics.disable_log()
 
 n = 10
 tm = 0

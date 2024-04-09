@@ -58,8 +58,8 @@ public class DTAnalytics {
         return add(dtId, acId, "#user_unset", "user", props);
     }
 
-    public boolean userDelete(String dtId, String acId) {
-        return add(dtId, acId, "#user_delete", "user", new HashMap<>());
+    public boolean userDelete(String dtId, String acId, Map<String, Object> properties) {
+        return add(dtId, acId, "#user_delete", "user", properties);
     }
 
     public boolean userAppend(String dtId, String acId, Map<String, Object> properties) {

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, Optional
 import sys
 
 from .dt_core_base_py import (
@@ -74,8 +74,8 @@ class DTAnalytics:
                 props_dict[k] = 0
         return self.__add(dt_id, acid, "#user_unset", "user", props_dict)
 
-    def user_delete(self, dt_id: str, acid: Optional[str]) -> bool:
-        return self.__add(dt_id, acid, "#user_delete", "user", {})
+    def user_delete(self, dt_id: str, acid: Optional[str], properties: Dict[str, Any]) -> bool:
+        return self.__add(dt_id, acid, "#user_delete", "user", properties)
 
     def user_append(self, dt_id: str, acid: Optional[str], properties: Dict[str, Any]) -> bool:
         return self.__add(dt_id, acid, "#user_append", "user", properties)
@@ -85,6 +85,14 @@ class DTAnalytics:
 
     def toggle_logger(self, enable: bool):
         dt_toggle_logger(enable)
+
+    @staticmethod
+    def enable_log():
+        dt_toggle_logger(True)
+
+    @staticmethod
+    def disable_log():
+        dt_toggle_logger(False)
 
     def flush(self):
         dt_flush()
