@@ -66,10 +66,16 @@ fn set_panic_hook() {
 
     set_hook(Box::new(move |panic_info| {
         // Notice: Panics are for unrecoverable and unexpected errors!
+        let info = panic_info.to_string();
         let backtrace = Backtrace::force_capture();
-        let message = panic_info.to_string();
-        eprintln!("Error: {}", message);
-        eprintln!("Backtrace: {}", backtrace);
+        let border = "═".repeat(80);
+        let delimiter = "┈".repeat(80);
+        eprintln!("{border}");
+        eprintln!("{info}");
+        eprintln!("{delimiter}");
+        eprintln!("Backtrace:");
+        eprintln!("{backtrace}");
+        eprintln!("{border}");
         exit(1);
     }));
 }
