@@ -9,7 +9,7 @@ DTAnalytics.enable_log()
 dt_id = "1234567890987654321"
 acid = None
 
-dt.user_unset("xx", "xxxx", {"#app_id": "aaa", "#bundle_id": "123", "bb": 2, "cc": "ss"})
+dt.user_unset("xx", "xxxx", {"#app_id": "aaa", "#bundle_id": "123", "bb": 2, "cc": "ss", "#is_foreground": True})
 dt.user_delete("xx", "xxxx", {"#app_id": "aaa", "#bundle_id": "123", "bb": 2, "cc": "ss"})
 dt.flush()
 
@@ -27,7 +27,7 @@ for i in range(5):
 
 DTAnalytics.disable_log()
 
-n = 10
+n = 1000
 tm = 0
 start_time = time.time()
 for i in range(n):
