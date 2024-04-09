@@ -15,7 +15,11 @@ function find_name_4_whl() {
 
 # target, platform, architecture
 function build_python_aux() {
-  maturin build --release --zig --interpreter python3.9 --target "$1"
+  if [ "$2" = "win" ]; then
+    maturin build --release --zig --interpreter python3.9 --target "$1"
+  else
+    maturin build --release --zig --target "$1"
+  fi;
   name=$(find_name_4_whl "$2" "$3")
   cp -f "../target/wheels/$name" "../output/python/$name"
 }
