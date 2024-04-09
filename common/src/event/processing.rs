@@ -117,7 +117,7 @@ mod test {
     use super::{inject_sdk_base_info, eventify};
 
     #[test]
-    fn inject_sdk_base_info() {
+    fn test_inject_sdk_base_info() {
         let mut j = json!({
             "#app_id": "123",
             "#event_time": 123,
@@ -136,14 +136,15 @@ mod test {
         println!("After injected: {:?}", j);
     }
 
-
     #[test]
     fn roughen_event_loop_test() {
+        let n = 1000;
         let st = std::time::Instant::now();
-        for _ in 0..1000 {
+        for _ in 0..n {
             roughen_event_test()
         }
-        println!("Total: {}", st.elapsed().as_micros())
+        let elapsed = st.elapsed().as_micros();
+        println!("Total: {}, avg: {}", elapsed, elapsed / n)
     }
 
     #[test]
@@ -167,7 +168,7 @@ mod test {
         let j = j.as_object_mut().unwrap().to_owned();
         let st = std::time::Instant::now();
         match eventify(j) {
-            Ok(x) => println!("{:?}", x),
+            Ok(_x) => {},//println!("{:?}", x),
             Err(e) => eprintln!("{e}"),
         }
         println!("{}", st.elapsed().as_micros());

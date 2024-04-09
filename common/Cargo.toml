@@ -7,7 +7,7 @@ build = "build/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["async-upload-server"]
+default = ["log-consumer-server" ]
 log-consumer-server = ["cat_server"]    # Stable!
 db-cache-consumer-client = ["thread", "database", "network", "cat_client"]  # WIP!
 async-upload-server = ["thread", "network", "cat_server"]   # WIP!

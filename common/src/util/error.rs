@@ -27,7 +27,7 @@ impl fmt::Display for DTError {
             DTError::NetworkError(msg) => write!(f, "[Network] {msg}"),
             DTError::WithContext {context, cause} => {
                 writeln!(f, "{context}")?;
-                write!(f, "with: {cause}")
+                write!(f, "* With: {cause}")
             },
             DTError::RemoteError(msg) => write!(f, "[Remote] {msg}"),
             DTError::HostError(msg) => writeln!(f, "{msg}")
