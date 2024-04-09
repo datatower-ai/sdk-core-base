@@ -65,14 +65,18 @@ pub fn init_consumer(consumer: Box<dyn Consumer>) -> Result<()> {
 
 fn set_panic_hook() {
     use std::{panic::set_hook, process::exit};
+    use crate::util::datetime::get_fmt_datetime_detail;
 
     set_hook(Box::new(move |panic_info| {
         // Notice: Panics are for unrecoverable and unexpected errors!
         let info = panic_info.to_string();
         let backtrace = Backtrace::force_capture();
+        let fmt_time = get_fmt_datetime_detail();
         let border = "═".repeat(80);
         let delimiter = "┈".repeat(80);
         eprintln!("{border}");
+        eprintln!("{fmt_time}");
+        eprintln!("{delimiter}");
         eprintln!("{info}");
         eprintln!("{delimiter}");
         eprintln!("Backtrace:");
