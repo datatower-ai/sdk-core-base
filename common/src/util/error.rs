@@ -53,31 +53,31 @@ impl Error for DTError {
 pub(crate) mod macros {
     macro_rules! verify_error {
         ($($arg:tt)*) => {
-            Err(DTError::VerifyError(format!($($arg)*)))
+            Err($crate::util::error::DTError::VerifyError(format!($($arg)*)))
         };
     }
 
     macro_rules! internal_error {
         ($($arg:tt)*) => {
-            Err(DTError::InternalError(format!($($arg)*)))
+            Err($crate::util::error::DTError::InternalError(format!($($arg)*)))
         };
     }
 
     macro_rules! runtime_error {
         ($($arg:tt)*) => {
-            Err(DTError::RuntimeError(format!($($arg)*)))
+            Err($crate::util::error::DTError::RuntimeError(format!($($arg)*)))
         };
     }
 
     macro_rules! network_error {
         ($($arg:tt)*) => {
-            Err(DTError::NetworkError(format!($($arg)*)))
+            Err($crate::util::error::DTError::NetworkError(format!($($arg)*)))
         };
     }
 
     macro_rules! error_with {
         ($err:ident, $($arg:tt)*) => {
-            Err(DTError::WithContext {
+            Err($crate::util::error::DTError::WithContext {
                 context: format!($($arg)*),
                 cause: Box::new($err)
             })
@@ -86,13 +86,13 @@ pub(crate) mod macros {
 
     macro_rules! remote_error {
         ($($arg:tt)*) => {
-            Err(DTError::RemoteError(format!($($arg)*)))
+            Err($crate::util::error::DTError::RemoteError(format!($($arg)*)))
         };
     }
 
     macro_rules! host_error {
         ($($arg:tt)*) => {
-            Err(DTError::HostError(format!($($arg)*)))
+            Err($crate::util::error::DTError::HostError(format!($($arg)*)))
         };
     }
 

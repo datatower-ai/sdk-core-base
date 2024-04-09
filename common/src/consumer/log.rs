@@ -3,14 +3,16 @@ use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
+
 use regex::Regex;
 use serde_json::{Map, Value};
-use crate::consumer::Consumer;
+
 use crate::{log_error, log_info};
+use crate::consumer::Consumer;
 use crate::event::BoxedEvent;
 use crate::util::datetime::get_hour_since_epoch;
-use crate::util::error::{DTError, Result};
 use crate::util::error::macros::{host_error, runtime_error};
+use crate::util::error::Result;
 
 /**
  * Should be run in a single thread for current implementation.

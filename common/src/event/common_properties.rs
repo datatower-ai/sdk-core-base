@@ -1,9 +1,11 @@
 use std::cell::Cell;
 use std::sync::Mutex;
+
 use serde_json::{Map, Value};
+
 use crate::event::Event;
-use crate::util::error::macros::{internal_error};
-use crate::util::error::{DTError, Result};
+use crate::util::error::macros::internal_error;
+use crate::util::error::Result;
 
 pub(crate) type Props = Map<String, Value>;
 

@@ -1,10 +1,12 @@
 use std::collections::HashMap;
-use regex::Regex;
+
 use once_cell::sync::Lazy;
+use regex::Regex;
 use serde_json::{Map, Value};
+
 use crate::event::Event;
-use crate::util::error::{DTError, Result};
 use crate::util::error::macros::verify_error;
+use crate::util::error::Result;
 
 const NAME_REGEX_STR: &'static str = r"^[a-zA-Z#][a-zA-Z\d_]{0,63}$";
 static NAME_RE: Lazy<Regex> = Lazy::new(|| Regex::new(NAME_REGEX_STR).unwrap());
@@ -326,6 +328,7 @@ fn verify_all_custom_props_are_num(properties: &Map<String, Value>) -> Result<()
 #[cfg(test)]
 mod test {
     use serde_json::{json, Value};
+
     use super::verify_event;
 
     fn verify(obj: Value, target: bool) {

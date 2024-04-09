@@ -1,7 +1,9 @@
 use std::backtrace::Backtrace;
 use std::sync::atomic::Ordering;
 use std::sync::Once;
+
 use serde_json::{Map, Value};
+
 use crate::base::mem;
 use crate::base::MemValue::Consumer as MemConsumer;
 use crate::consumer::Consumer;
@@ -9,8 +11,8 @@ use crate::consumer::log::LogConsumer;
 use crate::event::common_properties::{clear_static_comm_props, Props, set_static_comm_props};
 use crate::event::Event;
 use crate::event::processing::{DEBUG, process_event};
-use crate::util::error::{DTError, Result};
 use crate::util::error::macros::{host_error, internal_error, runtime_error};
+use crate::util::error::Result;
 
 pub mod util;
 mod base;
