@@ -22,7 +22,7 @@ pub(crate) enum TypeConstraint {
 
 type PropsConstraintMap = Lazy<HashMap<&'static str, TypeConstraint>>;
 
-pub(super) const META_PROPS: PropsConstraintMap = Lazy::new(|| HashMap::from([
+pub(super) static META_PROPS: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#app_id", TypeConstraint::String), ("#bundle_id", TypeConstraint::String),
     ("#android_id", TypeConstraint::String), ("#gaid", TypeConstraint::String),
     ("#dt_id", TypeConstraint::String), ("#acid", TypeConstraint::String),
@@ -30,7 +30,7 @@ pub(super) const META_PROPS: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#event_time", TypeConstraint::Integer), ("#event_syn", TypeConstraint::String),
     ("properties", TypeConstraint::Object), ("#debug", TypeConstraint::Bool),
 ]));
-pub(super) const COMPULSORY_META_PROPS: Lazy<Vec<String>> = Lazy::new(|| vec!(
+pub(super) static COMPULSORY_META_PROPS: Lazy<Vec<String>> = Lazy::new(|| vec!(
     String::from("#app_id"), String::from("#bundle_id"),
     String::from("#dt_id"), String::from("#event_time"),
     String::from("#event_name"), String::from("#event_type"),
@@ -260,9 +260,8 @@ fn verify_properties(
 fn find_constraint_for_user_event<'a>(
     prop_name: &str
 ) -> Option<&'a TypeConstraint> {
-    let user_common = &PRESET_PROPS_USER_COMMON;
-    user_common.get(prop_name).or(
-        find_constraint_from_common(prop_name)
+    PRESET_PROPS_USER_COMMON.get(prop_name).or(
+        COMMON_PROPS.get(prop_name)
     )
 }
 
@@ -270,21 +269,13 @@ fn find_constraint_for_event<'a>(
     prop_name: &str,
     (props1, props2): &'a (&PropsConstraintMap, &PropsConstraintMap)
 ) -> Option<&'a TypeConstraint> {
-    let event_common = &PRESET_EVENT_PROPS_COMMON;
-    event_common.get(prop_name).or(
+    PRESET_EVENT_PROPS_COMMON.get(prop_name).or(
         props1.get(prop_name).or(
             props2.get(prop_name).or(
-                find_constraint_from_common(prop_name)
+                COMMON_PROPS.get(prop_name)
             )
         )
     )
-}
-
-fn find_constraint_from_common<'a> (
-    prop_name: &str,
-) -> Option<&'a TypeConstraint> {
-    let common = &COMMON_PROPS;
-    common.get(prop_name)
 }
 
 fn verify_user_event(event_name: &String, properties: &Map<String, Value>) -> Result<()> {
@@ -338,14 +329,16 @@ mod test {
     use super::verify_event;
 
     fn verify(obj: Value, target: bool) {
+        let obj = obj.as_object().unwrap();
         let st = std::time::Instant::now();
-        let pass = verify_event(obj.as_object().unwrap());
-        println!("{}µs", st.elapsed().as_micros());
+        let pass = verify_event(obj);
+        println!("{}µs, {}, {:?}", st.elapsed().as_micros(), pass.is_ok(), obj);
         assert_eq!(pass.is_ok(), target)
     }
 
     #[test]
     fn its_work() {
+        super::init().expect("Failed to init");
         let j = json!({
             "#app_id": "123",
             "#event_time": 123,
@@ -363,6 +356,7 @@ mod test {
 
     #[test]
     fn missing_meta() {
+        super::init().expect("Failed to init");
         let j = json!({
             "#event_time": 123,
             "#dt_id": "ddd",
@@ -468,6 +462,7 @@ mod test {
 
     #[test]
     fn wrong_type_meta() {
+        super::init().expect("Failed to init");
         let j = json!({
             "#app_id": "123",
             "#event_time": "123",               // <- wrong type
@@ -485,6 +480,7 @@ mod test {
 
     #[test]
     fn preset_event() {
+        super::init().expect("Failed to init");
         let j = json!({
             "#app_id": "123",
             "#event_time": 123,
@@ -567,6 +563,7 @@ mod test {
 
     #[test]
     fn custom_event() {
+        super::init().expect("Failed to init");
         let j = json!({
             "#app_id": "123",
             "#event_time": 123,
@@ -632,6 +629,7 @@ mod test {
 
     #[test]
     fn user_event() {
+        super::init().expect("Failed to init");
         let j = json!({
             "#app_id": "123",
             "#event_time": 123,
@@ -806,5 +804,40 @@ mod test {
             }
         });
         verify(j, false);
+    }
+
+    #[test]
+    fn benchmark() {
+        super::init().expect("Failed to init");
+        let n = 10000;
+
+        let mut j = json!({
+            "#app_id": "123",
+            "#dt_id": "ddd",
+            "#bundle_id": "com.xx",
+            "#event_name": "test_event",
+            "#event_type": "track",
+            "#event_time": 0,
+            "#event_syn": "x",
+            "properties": {
+                "#sdk_version_name": "1.2.3",
+                "productNames": ["Lua", "hello"],
+                "productType": "Lua book",
+                "producePrice": 80,
+                "shop": "xx-shop",
+                "#os": "1.1.1.1",
+                "date": 111,
+                "date1": 111,
+                "sex": "female"
+            }
+        });
+        let j = j.as_object_mut().unwrap().to_owned();
+
+        let st = std::time::Instant::now();
+        for _ in 0..n {
+            verify_event(&j).expect("This event is not valid");
+        }
+        let elapsed = st.elapsed().as_micros();
+        println!("Total: {}, Avg: {}", elapsed, elapsed / n)
     }
 }

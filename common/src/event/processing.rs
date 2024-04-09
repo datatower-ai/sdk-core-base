@@ -114,7 +114,7 @@ fn inject_sdk_base_info(event_map: &mut Event) {
 #[cfg(test)]
 mod test {
     use serde_json::json;
-    use super::{inject_sdk_base_info, eventify};
+    use super::{inject_sdk_base_info, eventify, process_event};
 
     #[test]
     fn test_inject_sdk_base_info() {
@@ -134,17 +134,6 @@ mod test {
         let j = j.as_object_mut().unwrap();
         inject_sdk_base_info(j);
         println!("After injected: {:?}", j);
-    }
-
-    #[test]
-    fn roughen_event_loop_test() {
-        let n = 1000;
-        let st = std::time::Instant::now();
-        for _ in 0..n {
-            roughen_event_test()
-        }
-        let elapsed = st.elapsed().as_micros();
-        println!("Total: {}, avg: {}", elapsed, elapsed / n)
     }
 
     #[test]
@@ -172,5 +161,38 @@ mod test {
             Err(e) => eprintln!("{e}"),
         }
         println!("{}", st.elapsed().as_micros());
+    }
+
+    #[test]
+    fn benchmark() {
+        crate::event::data_verification::init().expect("Failed to init");
+        let n = 10000;
+
+        let mut j = json!({
+                "#app_id": "123",
+                "#dt_id": "ddd",
+                "#bundle_id": "com.xx",
+                "#event_name": "test_event",
+                "#event_type": "track",
+                "#sdk_type": "rust",
+                "#sdk_version_name": "1.2.3",
+                "productNames": ["Lua", "hello"],
+                "productType": "Lua book",
+                "producePrice": 80,
+                "shop": "xx-shop",
+                "#os": "1.1.1.1",
+                "date": 111,
+                "date1": 111,
+                "sex": "female"
+            });
+        let j = j.as_object_mut().unwrap().to_owned();
+
+        let mut tm = 0;
+        for _ in 0..n {
+            let st = std::time::Instant::now();
+            process_event(j.clone()).expect("This event is not valid");
+            tm += st.elapsed().as_micros();
+        }
+        println!("Total: {}, Avg: {}", tm, tm / n)
     }
 }
