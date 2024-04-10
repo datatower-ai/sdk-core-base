@@ -25,16 +25,16 @@ function build_lua() {
   cargo rustc --release --package lua --no-default-features --features "$1" --target aarch64-unknown-linux-gnu
   cp -f "$BASEDIR/target/aarch64-unknown-linux-gnu/release/libdt_core_lua.so" "$BASEDIR/output/lua/dt_core_lua-$1-linux-aarch64.so"
 
-  mv "$BASEDIR/.cargo/config.toml" "$BASEDIR/.cargo/blocked.config.toml"
-  colima start
-
-  cross rustc --release --package lua --no-default-features --features "$1" --target x86_64-pc-windows-msvc
-  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/dt_core_lua.dll" "$BASEDIR/output/lua/dt_core_lua-$1-windows-x86_64.dll"
-
-  cross rustc --release --package lua --no-default-features --features "$1" --target aarch64-pc-windows-msvc
-  cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/dt_core_lua.dll" "$BASEDIR/output/lua/dt_core_lua-$1-windows-aarch64.dll"
-
-  mv "$BASEDIR/.cargo/blocked.config.toml" "$BASEDIR/.cargo/config.toml"
+#  mv "$BASEDIR/.cargo/config.toml" "$BASEDIR/.cargo/blocked.config.toml"
+#  colima start
+#
+#  cross rustc --release --package lua --no-default-features --features "$1" --target x86_64-pc-windows-msvc
+#  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/dt_core_lua.dll" "$BASEDIR/output/lua/dt_core_lua-$1-windows-x86_64.dll"
+#
+#  cross rustc --release --package lua --no-default-features --features "$1" --target aarch64-pc-windows-msvc
+#  cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/dt_core_lua.dll" "$BASEDIR/output/lua/dt_core_lua-$1-windows-aarch64.dll"
+#
+#  mv "$BASEDIR/.cargo/blocked.config.toml" "$BASEDIR/.cargo/config.toml"
 }
 
 function version_check() {
@@ -55,8 +55,8 @@ function version_check() {
 ####################################
 version_check
 build_lua lua54
-build_lua lua53
-build_lua lua52
-build_lua lua51
-build_lua luajit
-build_lua luau
+#build_lua lua53
+#build_lua lua52
+#build_lua lua51
+#build_lua luajit
+#build_lua luau

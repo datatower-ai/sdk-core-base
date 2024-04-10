@@ -27,7 +27,7 @@ properties["#bundle_id"] = "com.example"
 for i in range(5):
     properties["a" + str(i)] = "asd" * i
 
-n = 1000000
+n = 100000
 tm = 0
 lst = []
 start_time = time.time()
