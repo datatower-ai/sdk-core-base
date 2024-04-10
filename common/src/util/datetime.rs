@@ -12,7 +12,7 @@ pub(crate) fn get_hour_since_epoch() -> u64 {
     since_epoch_sec - since_epoch_sec % 3600
 }
 
-pub(crate) fn get_fmt_datetime() -> String {
+pub fn get_fmt_datetime() -> String {
     Local::now().format("%Y-%m-%d %H:%M:%S.%6f").to_string()
 }
 
