@@ -1,7 +1,11 @@
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [workspace]
 resolver = "2"
-members = ["common", "clib", "java", "lua", "python"]
+members = ["common", "clib", "java", "lua", "python", "nodejs"]
 
 [workspace.dependencies]
 serde_json = "1.0.114"
+
+[profile.release]
+lto = true
+strip = "debuginfo"

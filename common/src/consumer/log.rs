@@ -136,7 +136,7 @@ impl LogConsumer {
     ///     - 1: Refresh by time.
     ///     - 2: Refresh by size.
     fn write_to_file(self: &mut Self, refresh_mode: u8) {
-         // Once threading support needed, wrap this with a mutex!
+        // Once threading support needed, wrap this with a mutex!
         if !self.batch.is_empty() {
             let st = std::time::Instant::now();
             let filename = self.get_filename();

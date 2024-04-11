@@ -23,26 +23,7 @@ pub(crate) mod upload;
 static INITIALIZER: Once = Once::new();
 
 pub fn init_by_config(mut config: Map<String, Value>) -> Result<()> {
-    let Some(Value::String(cn)) = config.get("consumer") else {
-        return host_error!("Initialization config is missing 'consumer' or its type is not valid!")
-    };
-
-    let consumer: Result<Box<dyn Consumer>> = match cn.to_lowercase().as_str() {
-        "log" => LogConsumer::from_config(&mut config),
-        _ => return host_error!("Initialization config has 'consumer' but it's out of domain!")
-    };
-
-    init_consumer(consumer?)?;
-
-    // after init success:
-    if let Some(Value::Bool(debug)) = config.get("_debug") {
-        DEBUG.store(*debug, Ordering::Relaxed);
-    }
-
-    Ok(())
-}
-
-pub fn init_consumer(consumer: Box<dyn Consumer>) -> Result<()> {
+    // Onetime only init
     INITIALIZER.call_once(|| {
         set_panic_hook();
         if let Err(e) = event::init() {
@@ -50,17 +31,32 @@ pub fn init_consumer(consumer: Box<dyn Consumer>) -> Result<()> {
         }
     });
 
+    // Init consumer
+    let Some(Value::String(cn)) = config.get("consumer") else {
+        return host_error!("Initialization config is missing 'consumer' or its type is not valid!")
+    };
+    let consumer: Result<Box<dyn Consumer>> = match cn.to_lowercase().as_str() {
+        "log" => LogConsumer::from_config(&mut config),
+        _ => return host_error!("Initialization config has 'consumer' but it's out of domain!")
+    };
+
+    // Insert to memory
     let Ok(mut mem) = mem().lock() else {
         return internal_error!("lock is reentered!");
     };
-
     if mem.contains_key(&consumer::MEM_KEY.to_string()) {
-        runtime_error!("Consumer can only be initialized once.")
+        return runtime_error!("Consumer can only be initialized once.");
     } else {
-        mem.insert(consumer::MEM_KEY.to_string(), MemConsumer(consumer));
+        mem.insert(consumer::MEM_KEY.to_string(), MemConsumer(consumer?));
         log_info!("Initialized!");
-        Ok(())
     }
+
+    // After init success
+    if let Some(Value::Bool(debug)) = config.get("_debug") {
+        DEBUG.store(*debug, Ordering::Relaxed);
+    }
+
+    Ok(())
 }
 
 fn set_panic_hook() {
