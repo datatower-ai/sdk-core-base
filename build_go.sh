@@ -39,7 +39,7 @@ function build_golang() {
 }
 
 function version_check() {
-    version=$(grep -oE "^\t_sdkVersion = .*$" "./go/dt_sdk_golang/src/dt_analytics/dt_sdk.go" | sed -ne "s/^\t_sdkVersion = \"\(.*\)\" *$/\1/p")
+    version=$(grep -oE "^\t_sdkVersion = .*$" "./go/dt_core_golang/src/dt_analytics/dt_sdk.go" | sed -ne "s/^\t_sdkVersion = \"\(.*\)\" *$/\1/p")
     if [ -z "$version" ]; then
       echo "\033[0;31mCannot found version in dt_sdk.go\033[0m"
       exit

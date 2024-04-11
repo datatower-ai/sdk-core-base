@@ -12,7 +12,7 @@ cd "$BASEDIR" || (echo "Cannot cd to script's path" && exit)
 function build_nodejs() {
   version_check
   mkdir -p "$BASEDIR/output/nodejs/"
-  target_path="./output/nodejs/"
+  target_path="./output/nodejs/dt_core_nodejs"
 
   cd "$BASEDIR/nodejs" || (echo "Cannot cd to project path" && exit)
 
@@ -27,6 +27,11 @@ function build_nodejs() {
   yarn build --target x86_64-pc-windows-msvc "../$target_path"
 
   yarn build --target aarch64-pc-windows-msvc "../$target_path"
+
+  cd ../output/nodejs || (echo "Cannot cd to output path" && exit)
+  echo "Zipping..."
+  zip -r -q dt_core_nodejs.zip dt_core_nodejs
+  echo "Done"
 }
 
 function version_check() {

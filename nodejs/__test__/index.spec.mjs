@@ -1,7 +1,7 @@
 import test from 'ava'
 
 //import { init, track, flush, close, toggleLogger } from '../index.js'
-import dt from '../../output/nodejs/index.js'
+import dt from '../../output/nodejs/dt_core_nodejs/index.js'
 
 test('tack simple', (t) => {
     dt.toggleLogger(true);
