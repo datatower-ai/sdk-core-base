@@ -10,19 +10,11 @@ static SDK_NAME: &'static str = "nodejs";
 static TYPE_EVENT: &'static str = "track";
 static TYPE_USER: &'static str = "user";
 
-#[napi]
-fn init(path: String, max_batch_len: u32, name_prefix: Option<String>, max_file_size_bytes: Option<u32>) -> bool {
-    let mut config = Map::with_capacity(5);
-    config.insert("consumer".to_string(), Value::from("log"));
-    config.insert("path".to_string(), Value::from(path));
-    config.insert("max_batch_len".to_string(), Value::from(max_batch_len));
-    if let Some(name_prefix) = name_prefix {
-        config.insert("name_prefix".to_string(), Value::from(name_prefix));
-    }
-    if let Some(max_file_size_bytes) = max_file_size_bytes {
-        config.insert("max_file_size_bytes".to_string(), Value::from(max_file_size_bytes));
-    }
 
+#[napi]
+fn init(consumer: &Consumer, debug: Option<bool>) -> bool {
+    let mut config = consumer.get_config();
+    config.insert("_debug".to_string(), Value::from(debug.unwrap_or(false)));
     dissolve_bool::<(), DTError>(common::init_by_config(config)).unwrap_or(false)
 }
 
@@ -97,4 +89,32 @@ fn add_event(dt_id: String, ac_id: String, event_name: String, event_type: &'sta
     event.insert(String::from("#sdk_type"), serde_json::Value::from(SDK_NAME));
 
     dissolve_bool::<(), DTError>(common::add(event)).unwrap_or(false)
+}
+
+#[napi]
+pub struct Consumer {
+    config: Map<String, Value>
+}
+
+#[napi]
+impl Consumer {
+    fn get_config(self: &Self) -> Map<String, Value> {
+        self.config.clone()
+    }
+
+    #[napi(factory, js_name="DTLogConsumer")]
+    pub fn dt_log_consumer(path: String, max_batch_len: u32, name_prefix: Option<String>, max_file_size_bytes: Option<u32>) -> Self {
+        let mut config = Map::with_capacity(5);
+        config.insert("consumer".to_string(), Value::from("log"));
+        config.insert("path".to_string(), Value::from(path));
+        config.insert("max_batch_len".to_string(), Value::from(max_batch_len));
+        if let Some(name_prefix) = name_prefix {
+            config.insert("name_prefix".to_string(), Value::from(name_prefix));
+        }
+        if let Some(max_file_size_bytes) = max_file_size_bytes {
+            config.insert("max_file_size_bytes".to_string(), Value::from(max_file_size_bytes));
+        }
+
+        Self { config }
+    }
 }
