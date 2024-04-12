@@ -14,7 +14,7 @@ version = sys.version_info
 if version >= (3, 8):
     import importlib.metadata
 
-    __VERSION__ = importlib.metadata.version("dt_core_python")
+    __VERSION__ = importlib.metadata.version("dt-python-sdk")
 else:
     try:
         from importlib_metadata import version as metadata_version

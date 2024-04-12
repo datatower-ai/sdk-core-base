@@ -166,23 +166,21 @@ mod test {
     #[test]
     fn benchmark() {
         crate::event::data_verification::init().expect("Failed to init");
-        let n = 10000;
+        let n = 100000;
 
         let mut j = json!({
-                "#app_id": "123",
-                "#dt_id": "ddd",
-                "#bundle_id": "com.xx",
+                "#app_id": "appid_1234567890",
+                "#dt_id": "1234567890987654321",
+                "#bundle_id": "com.example",
                 "#event_name": "test_event",
                 "#event_type": "track",
                 "#sdk_type": "rust",
-                "#sdk_version_name": "1.2.3",
+                "#sdk_version_name": "0.0.0",
                 "productNames": ["Lua", "hello"],
                 "productType": "Lua book",
                 "producePrice": 80,
                 "shop": "xx-shop",
                 "#os": "1.1.1.1",
-                "date": 111,
-                "date1": 111,
                 "sex": "female"
             });
         let j = j.as_object_mut().unwrap().to_owned();
@@ -193,6 +191,7 @@ mod test {
             process_event(j.clone()).expect("This event is not valid");
             tm += st.elapsed().as_micros();
         }
-        println!("Total: {}, Avg: {}", tm, tm / n)
+        println!("Total: {}, Avg: {}", tm, tm / n);
+        println!("QPS: {}", 1000000/(tm/n));
     }
 }

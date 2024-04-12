@@ -10,7 +10,7 @@ cd "$BASEDIR" || (echo "Cannot cd to script's path" && exit)
 # Build Python
 ####################################
 function find_name_4_whl() {
-  find ../target/wheels/ -name "dt_core_python-*-*$1*$2*.whl" -type f -exec basename {} \; | head -1
+  find ../target/wheels/ -name "dt_python_sdk-*-*$1*$2*.whl" -type f -exec basename {} \; | head -1
 }
 
 # target, platform, architecture

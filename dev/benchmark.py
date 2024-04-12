@@ -1,5 +1,5 @@
 import time
-from dt_core_python import *
+from dt_python_sdk import *
 
 consumer = DTLogConsumer("log", 200, "dt_py", 10*1024*1024)
 dt = DTAnalytics(consumer, True)

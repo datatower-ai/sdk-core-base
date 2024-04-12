@@ -28,16 +28,16 @@ function build_java() {
   cargo rustc --release --package java --target aarch64-unknown-linux-gnu
   cp -f "$BASEDIR/target/aarch64-unknown-linux-gnu/release/libdt_core_java.so" "$target_path/libdt_core_java-linux-arm64.so"
 
-#  mv "$BASEDIR/.cargo/config.toml" "$BASEDIR/.cargo/blocked.config.toml"
-#  colima start
-#
-#  cross rustc --release --package java --target x86_64-pc-windows-msvc
-#  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/dt_core_java.dll" "$target_path/dt_core_java-windows-amd64.dll"
-#
-#  cross rustc --release --package java --target aarch64-pc-windows-msvc
-#  cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/dt_core_java.dll" "$target_path/dt_core_java-windows-arm64.dll"
-#
-#  mv "$BASEDIR/.cargo/blocked.config.toml" "$BASEDIR/.cargo/config.toml"
+  mv "$BASEDIR/.cargo/config.toml" "$BASEDIR/.cargo/blocked.config.toml"
+  colima start
+
+  cross rustc --release --package java --target x86_64-pc-windows-msvc
+  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/dt_core_java.dll" "$target_path/dt_core_java-windows-amd64.dll"
+
+  cross rustc --release --package java --target aarch64-pc-windows-msvc
+  cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/dt_core_java.dll" "$target_path/dt_core_java-windows-arm64.dll"
+
+  mv "$BASEDIR/.cargo/blocked.config.toml" "$BASEDIR/.cargo/config.toml"
 
   cd ./output/java/tmp/ || (echo "Cannot cd to java project" && exit)
   ./gradlew lib:build

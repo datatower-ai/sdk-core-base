@@ -3,7 +3,7 @@ requires = ["maturin>=1.5,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "dt_core_python"
+name = "dt-python-sdk"
 requires-python = ">=3.7"
 authors = [{name = "DataTower.ai"}]
 description = "DataTower.ai Core SDK for Python"
@@ -20,4 +20,4 @@ Homepage = "https://datatower.ai/"
 [tool.maturin]
 features = ["pyo3/extension-module"]
 python-source = "python"
-module-name = "dt_core_python.dt_core_base_py"
+module-name = "dt_python_sdk.dt_core_base_py"
