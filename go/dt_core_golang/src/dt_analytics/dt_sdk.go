@@ -54,47 +54,71 @@ func New(consumer DTConsumer, isDebug bool) (DTAnalytics, error) {
 	}
 }
 
-// Track an event.
+// Track an event (custom or preset).
+// returns
+//   - nil if given event and properties is valid, or
+//   - error if there are invalid and will not be processed.
 func (dta DTAnalytics) Track(dtId string, acId string, eventName string, properties map[string]interface{}) error {
 	return dta.add(dtId, acId, eventName, "track", properties)
 }
 
 // UserSet Set user properties for the user with given dtId and acId.
+// returns
+//   - nil if given event and properties is valid, or
+//   - error if there are invalid and will not be processed.
 func (dta DTAnalytics) UserSet(dtId string, acId string, properties map[string]interface{}) error {
 	return dta.add(dtId, acId, "#user_set", "user", properties)
 }
 
 // UserSetOnce Set user properties only once for user with given dtId and acId.
 // The value will not override existed property.
+// returns
+//   - nil if given event and properties is valid, or
+//   - error if there are invalid and will not be processed.
 func (dta DTAnalytics) UserSetOnce(dtId string, acId string, properties map[string]interface{}) error {
 	return dta.add(dtId, acId, "#user_set_once", "user", properties)
 }
 
 // UserAdd Arithmetic add the value of property by given number for user with given dtId and acId.
 // Hence, the type of value for 'custom properties' should be a number.
+// returns
+//   - nil if given event and properties is valid, or
+//   - error if there are invalid and will not be processed.
 func (dta DTAnalytics) UserAdd(dtId string, acId string, properties map[string]interface{}) error {
 	return dta.add(dtId, acId, "#user_add", "user", properties)
 }
 
 // UserUnset Unset properties for user with given dtId and acId.
 // Only the key of 'custom properties' will be used and its value is meaningless here.
+// returns
+//   - nil if given event and properties is valid, or
+//   - error if there are invalid and will not be processed.
 func (dta DTAnalytics) UserUnset(dtId string, acId string, properties map[string]interface{}) error {
 	return dta.add(dtId, acId, "#user_unset", "user", properties)
 }
 
 // UserDelete Delete the user with given dtId and acId.
+// returns
+//   - nil if given event and properties is valid, or
+//   - error if there are invalid and will not be processed.
 func (dta DTAnalytics) UserDelete(dtId string, acId string, properties map[string]interface{}) error {
 	return dta.add(dtId, acId, "#user_delete", "user", properties)
 }
 
 // UserAppend Append values to property for the user with given dtId and acId.
 // Hence, the type of value for 'custom properties' should be an array.
+// returns
+//   - nil if given event and properties is valid, or
+//   - error if there are invalid and will not be processed.
 func (dta DTAnalytics) UserAppend(dtId string, acId string, properties map[string]interface{}) error {
 	return dta.add(dtId, acId, "#user_append", "user", properties)
 }
 
 // UserUniqAppend Append values to property without duplications for the user with given dtId and acId.
 // Hence, the type of value for 'custom properties' should be an array.
+// returns
+//   - nil if given event and properties is valid, or
+//   - error if there are invalid and will not be processed.
 func (dta DTAnalytics) UserUniqAppend(dtId string, acId string, properties map[string]interface{}) error {
 	return dta.add(dtId, acId, "#user_uniq_append", "user", properties)
 }
