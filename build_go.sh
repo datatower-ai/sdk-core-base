@@ -1,6 +1,27 @@
 BASEDIR=$(dirname "$0")
 cd "$BASEDIR" || (echo "Cannot cd to script's path" && exit)
 
+f_benchmark=false
+f_has_macos=true
+f_has_windows=true
+f_has_linux=true
+
+while getopts bmwl opt; do
+  case "$opt" in
+    b) f_benchmark=true;;
+    m) f_has_macos=true; f_has_windows=false; f_has_linux=false;;
+    w) f_has_macos=false; f_has_windows=true; f_has_linux=false;;
+    l) f_has_macos=false; f_has_windows=false; f_has_linux=true;;
+    *) ;;
+  esac
+done
+
+target_path="$BASEDIR/output/go/"
+if [ "$f_benchmark" = true ]; then
+  target_path="$BASEDIR/output-benchmark/go/"
+fi
+mkdir -p "$target_path"
+
 # Naming of artifacts:
 #   dt_core_{package}[-{package_specific}]-{platform}-{architecture}.so
 # E.g.
@@ -11,28 +32,59 @@ cd "$BASEDIR" || (echo "Cannot cd to script's path" && exit)
 ####################################
 function build_golang() {
   version_check
-  mkdir -p "$BASEDIR/output/go/"
-  target_path="$BASEDIR/output/go/"
 
-  cargo rustc --release --package clib --target x86_64-apple-darwin
+  if [ "$f_has_macos" = true ]; then
+    build_macos
+  fi
+
+  if [ "$f_has_linux" = true ]; then
+    build_linux
+  fi
+
+  if [ "$f_has_windows" = true ]; then
+    build_windows
+  fi
+}
+
+function build_macos() {
+  if [ "$f_benchmark" = true ]; then
+    cargo rustc --release --package clib --target x86_64-apple-darwin --features "benchmark"
+    cargo rustc --release --package clib --target aarch64-apple-darwin --features "benchmark"
+  else
+    cargo rustc --release --package clib --target x86_64-apple-darwin
+    cargo rustc --release --package clib --target aarch64-apple-darwin
+  fi
+
   cp -f "$BASEDIR/target/x86_64-apple-darwin/release/libdt_core_clib.dylib" "$target_path/libdt_core_clib-macos-amd64.dylib"
-
-  cargo rustc --release --package clib --target aarch64-apple-darwin
   cp -f "$BASEDIR/target/aarch64-apple-darwin/release/libdt_core_clib.dylib" "$target_path/libdt_core_clib-macos-arm64.dylib"
+}
 
-  cargo rustc --release --package clib --target x86_64-unknown-linux-gnu
+function build_linux() {
+  if [ "$f_benchmark" = true ]; then
+    cargo rustc --release --package clib --target x86_64-unknown-linux-gnu --features "benchmark"
+    cargo rustc --release --package clib --target x86_64-unknown-linux-gnu --features "benchmark"
+  else
+    cargo rustc --release --package clib --target x86_64-unknown-linux-gnu
+    cargo rustc --release --package clib --target aarch64-unknown-linux-gnu
+  fi
+
   cp -f "$BASEDIR/target/x86_64-unknown-linux-gnu/release/libdt_core_clib.so" "$target_path/libdt_core_clib-linux-amd64.so"
-
-  cargo rustc --release --package clib --target aarch64-unknown-linux-gnu
   cp -f "$BASEDIR/target/aarch64-unknown-linux-gnu/release/libdt_core_clib.so" "$target_path/libdt_core_clib-linux-arm64.so"
+}
 
+function build_windows() {
   mv "$BASEDIR/.cargo/config.toml" "$BASEDIR/.cargo/blocked.config.toml"
   colima start
 
-  cross rustc --release --package clib --target x86_64-pc-windows-msvc
-  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/dt_core_clib.dll" "$target_path/dt_core_clib-windows-amd64.dll"
+  if [ "$f_benchmark" = true ]; then
+    cross rustc --release --package clib --target x86_64-pc-windows-msvc --features "benchmark"
+    cross rustc --release --package clib --target aarch64-pc-windows-msvc --features "benchmark"
+  else
+    cross rustc --release --package clib --target x86_64-pc-windows-msvc
+    cross rustc --release --package clib --target aarch64-pc-windows-msvc
+  fi
 
-  cross rustc --release --package clib --target aarch64-pc-windows-msvc
+  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/dt_core_clib.dll" "$target_path/dt_core_clib-windows-amd64.dll"
   cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/dt_core_clib.dll" "$target_path/dt_core_clib-windows-arm64.dll"
 
   mv "$BASEDIR/.cargo/blocked.config.toml" "$BASEDIR/.cargo/config.toml"
@@ -40,12 +92,14 @@ function build_golang() {
 
 function version_check() {
     version=$(grep -oE "^\t_sdkVersion = .*$" "./go/dt_core_golang/src/dt_analytics/dt_sdk.go" | sed -ne "s/^\t_sdkVersion = \"\(.*\)\" *$/\1/p")
+    common_version=$(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
     if [ -z "$version" ]; then
       echo "\033[0;31mCannot found version in dt_sdk.go\033[0m"
       exit
     fi
     echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "┃ version: \033[1;35m$version\033[0m"
+    printf "┃ version: \t\033[1;35m%s\033[0m\n" "$version"
+    printf "┃ common ver: \t\033[1;35m%s\033[0m\n" "$common_version"
     echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 }
 

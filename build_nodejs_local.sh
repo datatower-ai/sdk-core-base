@@ -36,12 +36,14 @@ function build_nodejs() {
 
 function version_check() {
     version=$(grep -oE "^static VERSION: &'static str = .*$" "./nodejs/src/lib.rs" | sed -ne "s/^static VERSION: &'static str = \"\(.*\)\"; *$/\1/p")
+    common_version=$(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
     if [ -z "$version" ]; then
       echo "\033[0;31mCannot found version in lib.rs\033[0m"
       exit
     fi
     echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "┃ version: \033[1;35m$version\033[0m"
+    printf "┃ version: \t\033[1;35m%s\033[0m\n" "$version"
+    printf "┃ common ver: \t\033[1;35m%s\033[0m\n" "$common_version"
     echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 }
 

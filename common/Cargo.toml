@@ -17,6 +17,7 @@ database = ["rusqlite"]         # with database cache
 network = ["reqwest"]           # with networking (upload)
 cat_client = []                 # Category: Client SDK, c2s
 cat_server = []                 # Category: Server SDK, s2s
+benchmark = []                  # for benchmark usage only (dev)
 
 [build-dependencies]
 cfg-if = "1.0.0"

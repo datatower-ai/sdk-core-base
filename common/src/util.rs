@@ -5,3 +5,5 @@ pub(crate) mod data_struct;
 pub mod logger;
 pub mod error;
 pub mod result;
+#[cfg(feature = "benchmark")]
+pub mod benchmark_tracer;

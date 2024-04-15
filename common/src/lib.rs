@@ -29,6 +29,8 @@ pub fn init_by_config(mut config: Map<String, Value>) -> Result<()> {
         if let Err(e) = event::init() {
             log_error!("Failed to init event processor, reason: {e}")
         }
+        #[cfg(feature = "benchmark")]
+        log_warning!("Running in benchmark mode!")
     });
 
     // Init consumer
@@ -82,10 +84,33 @@ fn set_panic_hook() {
     }));
 }
 
+#[cfg(not(feature = "benchmark"))]
 pub fn add(event: Event) -> Result<()> {
+    add_aux(event)
+}
+
+#[cfg(feature = "benchmark")]
+pub fn add(mut event: Event) -> Result<()> {
+    if let Ok(crt) = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH) {
+        let crt = crt.as_micros();
+        if let Some(Value::String(time)) = event.remove("$_event_call_time") {
+            if let Ok(st) = time.parse::<u128>() {
+                (&util::benchmark_tracer::BM_TRACER).add("Time used before add", crt-st);
+            }
+        }
+    }
+
+    let st = std::time::Instant::now();
+    let ret = add_aux(event);
+    (&util::benchmark_tracer::BM_TRACER).add("Time for add", st.elapsed().as_micros());
+    ret
+}
+
+pub fn add_aux(event: Event) -> Result<()> {
     let Ok(mut mem) = mem().lock() else {
         return internal_error!("lock is reentered!");
     };
+
     if let Some(MemConsumer(consumer)) = mem.get_mut(&consumer::MEM_KEY.to_string()) {
         let event = process_event(event)?;
         consumer.add(Box::new(event))
@@ -109,6 +134,10 @@ pub fn close() -> Result<()> {
     let Ok(mut mem) = mem().lock() else {
         return internal_error!("Something wrong, lock is reentered!");
     };
+
+    #[cfg(feature = "benchmark")]
+    util::benchmark_tracer::BM_TRACER.summary();
+
     if let Some(MemConsumer(mut consumer)) = mem.remove(&consumer::MEM_KEY.to_string()) {
         let ret = consumer.close();
         log_info!("Closed!");

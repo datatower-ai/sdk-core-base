@@ -1,6 +1,7 @@
 /target
 .idea
 /output
+/output-benchmark
 **/*.dll
 **/*.so
 **/*.dylib

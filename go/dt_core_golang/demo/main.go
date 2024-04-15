@@ -5,6 +5,7 @@ import (
 	dtanalytics "github.com/datatower-ai/sdk-core-golang/src/dt_analytics"
 	"log"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -35,6 +36,7 @@ func main() {
 	tm := int64(0)
 	lst := []int64{}
 	for i := 0; i < n; i++ {
+		properties["$_event_call_time"] = strconv.FormatInt(time.Now().UnixMicro(), 10)
 		st := time.Now()
 		err := dt.Track("dtiddd", "", "simple_event", properties)
 		tmp := time.Since(st).Microseconds()
