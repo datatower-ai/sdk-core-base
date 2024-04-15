@@ -18,6 +18,9 @@ edition = "2021"
 name = "dt_core_python"
 crate-type = ["cdylib"]
 
+[features]
+benchmark = ["common/benchmark"]
+
 [dependencies]
 pyo3 = { version = "0.20.3", features = ["generate-import-lib", "abi3", "abi3-py37"] }
 common = { path = "../common", default-features = false, features = ["log-consumer-server"] }

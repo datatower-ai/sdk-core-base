@@ -32,6 +32,7 @@ tm = 0
 lst = []
 start_time = time.time()
 for i in range(n):
+    properties["$_event_call_time"] = str(int(time.time() * 1000 * 1000))
     st = time.time()
     dt.track(dt_id, acid, "eventName", properties)
     crt = time.time() - st
