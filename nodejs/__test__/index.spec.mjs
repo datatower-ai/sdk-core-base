@@ -1,21 +1,22 @@
 import test from 'ava'
 
-import dt, { Consumer as DTConsumer } from '../index.js'
+//import dt, { Consumer as DTConsumer } from '../index.js'
 //import dt, { Consumer as DTConsumer } from '../../output/nodejs/dt_core_nodejs/index.js'
+import dt, { Consumer as DTConsumer } from '../../output-benchmark/nodejs/dt_core_nodejs/index.js'
 
-test('tack simple', (t) => {
-    dt.toggleLogger(true);
-    let consumer = DTConsumer.DTLogConsumer("log", 200, "dt_nodejs", 10*1024*1024)
-    dt.init(consumer, true);
-    let ret = dt.track("xxx", "xx", "simple_event_from_nodejs", {
-        "#app_id": "appidddd",
-        "#bundle_id": "com.example",
-        "custom_prop": "my value",
-    });
-    t.is(ret, true)
-    dt.flush();
-    dt.close();
-})
+// test('tack simple', (t) => {
+//     dt.toggleLogger(true);
+//     let consumer = DTConsumer.DTLogConsumer("log", 200, "dt_nodejs", 10*1024*1024)
+//     dt.init(consumer, true);
+//     let ret = dt.track("xxx", "xx", "simple_event_from_nodejs", {
+//         "#app_id": "appidddd",
+//         "#bundle_id": "com.example",
+//         "custom_prop": "my value",
+//     });
+//     t.is(ret, true)
+//     dt.flush();
+//     dt.close();
+// })
 
 test('bench', (t) => {
     dt.toggleLogger(true);
@@ -44,6 +45,9 @@ test('bench', (t) => {
     let lst = []
     let start_time = performance.now()
     for (let i = 0; i < n; i++) {
+        let before_time = process.hrtime()
+        let before_time_str = Math.floor(before_time[0] * 1e9 + before_time[1] / 1e3).toString()
+        properties["$_event_call_time"] = Date.now().toString() + before_time_str.substring(before_time_str.length-3)
         let st = performance.now()
         dt.track(dt_id, acid, "eventName", properties)
         let crt = performance.now() - st
