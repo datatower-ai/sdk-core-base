@@ -15,6 +15,12 @@ public class DTAnalytics {
         DTBase.init(config);
     }
 
+    /**
+     * Initialize the DTAnalytics with given consumer.
+     *
+     * @param consumer DTConsumer. e.g. DTLogConsumer.
+     * @param isDebug If set to true, the data will not be inserted to production environment.
+     */
     public static DTAnalytics init(Consumer consumer, boolean isDebug) {
         try {
             return new DTAnalytics(consumer, isDebug);
@@ -25,26 +31,73 @@ public class DTAnalytics {
         }
     }
 
+    /**
+     * Preload the dynamic library.
+     */
     public static void preload() throws IOException {
         DTBase.load();
     }
-    
+
+    /**
+     * Track an event.
+     *
+     * @param dt_id The device-scoped id.
+     * @param acid The account-scoped id.
+     * @param event_name Event name, can be custom event or preset event.
+     * @param properties properties of this event. (preset properties are scoped by event name, and has type constraints)
+     * @return True if given event and properties is valid or False if there are invalid and will not be processed.
+     */
     public boolean track(String dtId, String acId, String eventName, Map<String, Object> properties) {
         return add(dtId, acId, eventName, "track", properties);
     }
 
+    /**
+     * Set user properties for the user with given dtId and acId.
+     *
+     * @param dt_id The device-scoped id.
+     * @param acid The account-scoped id.
+     * @param properties properties of this event. (preset properties are scoped by event name, and has type constraints)
+     * @return True if given event and properties is valid or False if there are invalid and will not be processed.
+     */
     public boolean userSet(String dtId, String acId, Map<String, Object> properties) {
         return add(dtId, acId, "#user_set", "user", properties);
     }
 
+    /**
+     * Set user properties for the user with given dtId and acId.
+     * the value will not override existed property.
+     *
+     * @param dt_id The device-scoped id.
+     * @param acid The account-scoped id.
+     * @param properties properties of this event. (preset properties are scoped by event name, and has type constraints)
+     * @return True if given event and properties is valid or False if there are invalid and will not be processed.
+     */
     public boolean userSetOnce(String dtId, String acId, Map<String, Object> properties) {
         return add(dtId, acId, "#user_set_once", "user", properties);
     }
 
+    /**
+     * Arithmetic add the value of property by given number for user with given dtId and acId.
+     * Hence, the type of value for 'custom properties' should be a number.
+     *
+     * @param dt_id The device-scoped id.
+     * @param acid The account-scoped id.
+     * @param properties properties of this event. (preset properties are scoped by event name, and has type constraints)
+     * @return True if given event and properties is valid or False if there are invalid and will not be processed.
+     */
     public boolean userAdd(String dtId, String acId, Map<String, Object> properties) {
         return add(dtId, acId, "#user_add", "user", properties);
     }
 
+    /**
+     * Unset properties for user with given dtId and acId.
+     * Only the key of 'custom properties' will be used and its value is meaningless here.
+     *
+     * @param dt_id The device-scoped id.
+     * @param acid The account-scoped id.
+     * @param properties properties of this event. (preset properties are scoped by event name, and has type constraints)
+     * @return True if given event and properties is valid or False if there are invalid and will not be processed.
+     */
     public boolean userUnset(String dtId, String acId, Map<String, Object> properties) {
         Map<String, Object> props = new HashMap<>();
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
@@ -58,26 +111,61 @@ public class DTAnalytics {
         return add(dtId, acId, "#user_unset", "user", props);
     }
 
+    /**
+     * Delete the user with given dtId and acId.
+     *
+     * @param dt_id The device-scoped id.
+     * @param acid The account-scoped id.
+     * @param properties preset properties of this event.
+     * @return True if given event and properties is valid or False if there are invalid and will not be processed.
+     */
     public boolean userDelete(String dtId, String acId, Map<String, Object> properties) {
         return add(dtId, acId, "#user_delete", "user", properties);
     }
 
+    /**
+     * Append values to property for the user with given dtId and acId.
+     * Hence, the type of value for 'custom properties' should be an array.
+     *
+     * @param dt_id The device-scoped id.
+     * @param acid The account-scoped id.
+     * @param properties properties of this event. (preset properties are scoped by event name, and has type constraints)
+     * @return True if given event and properties is valid or False if there are invalid and will not be processed.
+     */
     public boolean userAppend(String dtId, String acId, Map<String, Object> properties) {
         return add(dtId, acId, "#user_append", "user", properties);
     }
 
+    /**
+     * Append values to property without duplications for the user with given dtId and acId.
+     * Hence, the type of value for 'custom properties' should be an array.
+     *
+     * @param dt_id The device-scoped id.
+     * @param acid The account-scoped id.
+     * @param properties properties of this event. (preset properties are scoped by event name, and has type constraints)
+     * @return True if given event and properties is valid or False if there are invalid and will not be processed.
+     */
     public boolean userUniqAppend(String dtId, String acId, Map<String, Object> properties) {
         return add(dtId, acId, "#user_uniq_append", "user", properties);
     }
-    
+
+    /**
+     * Flush the data buffer manually.
+     */
     public void flush() {
         DTBase.flush();
     }
 
+    /**
+     * Close the DTAnalytics, remember to call this before the program finishes to preventing data loss!
+     */
     public void close() {
         DTBase.close();
     }
 
+    /**
+     * To enable and disable the logging.
+     */
     public static void toggleLogger(boolean enable) {
         DTBase.toggleLogger(enable);
     }
