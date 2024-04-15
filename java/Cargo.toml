@@ -8,6 +8,9 @@ edition = "2021"
 name = "dt_core_java"
 crate-type = ["cdylib"]
 
+[features]
+benchmark = ["common/benchmark"]
+
 [dependencies]
 common = { path = "../common", default-features = false, features = ["log-consumer-server"] }
 serde_json = { workspace = true }

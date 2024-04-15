@@ -3,10 +3,11 @@ package org.example
 import ai.datatower.sdk.*
 
 fun main() {
-    //DTAnalytics.preload()
-    //DTAnalytics.toggleLogger(true)
+    DTAnalytics.preload()
+    DTAnalytics.toggleLogger(true)
     val consumer = DTLogConsumer("log", 200, "dt_java", (10 * 1024 * 1024).toLong())
     val dt: DTAnalytics = DTAnalytics.init(consumer, true)
+    DTAnalytics.toggleLogger(false)
 
     val properties: java.util.HashMap<String, Any> = java.util.HashMap<String, Any>()
     properties["productNames"] = listOf("Lua", "hello")
@@ -27,6 +28,8 @@ fun main() {
     val startTime: Long = System.nanoTime()
     val lst = arrayListOf<Long>()
     for (i in 0 until n) {
+        val crt = System.currentTimeMillis().toString() + (System.nanoTime() / 1000).toString().let { it.substring(it.length-3) }
+        properties["\$_event_call_time"] = crt
         val st: Long = System.nanoTime()
         dt.track("xxx", null, "eventName", properties)
         val tmp = System.nanoTime() - st

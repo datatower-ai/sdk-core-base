@@ -1,6 +1,28 @@
 BASEDIR=$(dirname "$0")
 cd "$BASEDIR" || (echo "Cannot cd to script's path" && exit)
 
+f_benchmark=false
+f_has_macos=true
+f_has_windows=true
+f_has_linux=true
+
+while getopts bmwl opt; do
+  case "$opt" in
+    b) f_benchmark=true;;
+    m) f_has_macos=true; f_has_windows=false; f_has_linux=false;;
+    w) f_has_macos=false; f_has_windows=true; f_has_linux=false;;
+    l) f_has_macos=false; f_has_windows=false; f_has_linux=true;;
+    *) ;;
+  esac
+done
+
+tmp_path="$BASEDIR/output/java/tmp/"
+if [ "$f_benchmark" = true ]; then
+  tmp_path="$BASEDIR/output-benchmark/java/tmp/"
+fi
+target_path="$tmp_path/lib/src/main/resources/ai/datatower/sdk"
+mkdir -p "$target_path"
+
 # Naming of artifacts:
 #   dt_core_{package}[-{package_specific}]-{platform}-{architecture}.so
 # E.g.
@@ -12,34 +34,70 @@ cd "$BASEDIR" || (echo "Cannot cd to script's path" && exit)
 ####################################
 function build_java() {
   version_check
-  mkdir -p "$BASEDIR/output/java/tmp/"
-  cp -r "$BASEDIR/java/java/" "$BASEDIR/output/java/tmp/"
-  target_path="$BASEDIR/output/java/tmp/lib/src/main/resources/ai/datatower/sdk"
+  mkdir -p "$tmp_path"
+  cp -r "$BASEDIR/java/java/" "$tmp_path"
 
-  cargo rustc --release --package java --target x86_64-apple-darwin
+  if [ "$f_has_macos" = true ]; then
+    build_macos
+  fi
+
+  if [ "$f_has_linux" = true ]; then
+    build_linux
+  fi
+
+  if [ "$f_has_windows" = true ]; then
+    build_windows
+  fi
+
+  build_jar
+}
+
+function build_macos() {
+  if [ "$f_benchmark" = true ]; then
+    cargo rustc --release --package java --target x86_64-apple-darwin --features "benchmark"
+    cargo rustc --release --package java --target aarch64-apple-darwin --features "benchmark"
+  else
+    cargo rustc --release --package java --target x86_64-apple-darwin
+    cargo rustc --release --package java --target aarch64-apple-darwin
+  fi
+
   cp -f "$BASEDIR/target/x86_64-apple-darwin/release/libdt_core_java.dylib" "$target_path/libdt_core_java-macos-amd64.dylib"
-
-  cargo rustc --release --package java --target aarch64-apple-darwin
   cp -f "$BASEDIR/target/aarch64-apple-darwin/release/libdt_core_java.dylib" "$target_path/libdt_core_java-macos-arm64.dylib"
+}
 
-  cargo rustc --release --package java --target x86_64-unknown-linux-gnu
+function build_linux() {
+  if [ "$f_benchmark" = true ]; then
+    cargo rustc --release --package java --target x86_64-unknown-linux-gnu --features "benchmark"
+    cargo rustc --release --package java --target aarch64-unknown-linux-gnu --features "benchmark"
+  else
+    cargo rustc --release --package java --target x86_64-unknown-linux-gnu
+    cargo rustc --release --package java --target aarch64-unknown-linux-gnu
+  fi
+
   cp -f "$BASEDIR/target/x86_64-unknown-linux-gnu/release/libdt_core_java.so" "$target_path/libdt_core_java-linux-amd64.so"
-
-  cargo rustc --release --package java --target aarch64-unknown-linux-gnu
   cp -f "$BASEDIR/target/aarch64-unknown-linux-gnu/release/libdt_core_java.so" "$target_path/libdt_core_java-linux-arm64.so"
+}
 
+function build_windows() {
   mv "$BASEDIR/.cargo/config.toml" "$BASEDIR/.cargo/blocked.config.toml"
   colima start
 
-  cross rustc --release --package java --target x86_64-pc-windows-msvc
-  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/dt_core_java.dll" "$target_path/dt_core_java-windows-amd64.dll"
-
-  cross rustc --release --package java --target aarch64-pc-windows-msvc
-  cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/dt_core_java.dll" "$target_path/dt_core_java-windows-arm64.dll"
+  if [ "$f_benchmark" = true ]; then
+    cross rustc --release --package java --target x86_64-pc-windows-msvc --features "benchmark"
+    cross rustc --release --package java --target aarch64-pc-windows-msvc --features "benchmark"
+  else
+    cross rustc --release --package java --target x86_64-pc-windows-msvc
+    cross rustc --release --package java --target aarch64-pc-windows-msvc
+  fi
 
   mv "$BASEDIR/.cargo/blocked.config.toml" "$BASEDIR/.cargo/config.toml"
 
-  cd ./output/java/tmp/ || (echo "Cannot cd to java project" && exit)
+  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/dt_core_java.dll" "$target_path/dt_core_java-windows-amd64.dll"
+  cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/dt_core_java.dll" "$target_path/dt_core_java-windows-arm64.dll"
+}
+
+function build_jar() {
+  cd "$tmp_path" || (echo "Cannot cd to java project" && exit)
   ./gradlew lib:build
   artifact=$(ls "./lib/build/libs" | head -1)
   version=$(echo "$artifact" | sed -ne "s/^lib-\(.*\)\.jar$/\1/p")
