@@ -56,7 +56,12 @@ impl LogConsumer {
         let Some(Value::Number(max_batch_len)) = max_batch_len else {
             return host_error!("Failed to initialize: missing \"max_batch_len\"!");
         };
-        let Some(max_batch_len) = max_batch_len.as_u64() else {
+        let max_batch_len = if let Some(max_batch_len) = max_batch_len.as_u64() {
+            if max_batch_len == 0 {
+                return host_error!("Failed to initialize: \"max_batch_len\" cannot be ZERO!");
+            }
+            max_batch_len
+        } else {
             return host_error!("Failed to initialize: \"max_batch_len\" should be a positive number!");
         };
 
@@ -67,7 +72,15 @@ impl LogConsumer {
         };
         let max_file_size_bytes = config.remove("max_file_size_bytes");
         let max_file_size_bytes: Option<u64> = if let Some(Value::Number(max_file_size_bytes)) = max_file_size_bytes {
-            max_file_size_bytes.as_u64()
+            let max_file_size_bytes = max_file_size_bytes.as_u64();
+            let num = max_file_size_bytes.unwrap_or(0);
+            if num == 0 {
+                // for the port that cannot set default/none arg value, uses 0 instead for unlimited.
+                None
+            } else {
+                // With minimum value?
+                max_file_size_bytes
+            }
         } else {
             None
         };
