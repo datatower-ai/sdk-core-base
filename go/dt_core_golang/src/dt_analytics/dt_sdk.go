@@ -1,7 +1,7 @@
 package dt_analytics
 
 /*
-#cgo CFLAGS: -I.
+#cgo CFLAGS: -I./libs
 #cgo darwin,arm64 LDFLAGS: -L./libs -ldt_core_clib-macos-arm64
 #cgo darwin,amd64 LDFLAGS: -L./libs -ldt_core_clib-macos-amd64
 #cgo linux,arm64 LDFLAGS: -L./libs -ldt_core_clib-linux-arm64
@@ -31,6 +31,8 @@ type DTConsumer interface {
 
 type DTAnalytics struct{}
 
+// New for initialization of the DTAnalytics with given consumer.
+// If isDebug is set to true, the data will not be inserted to production environment.
 func New(consumer DTConsumer, isDebug bool) (DTAnalytics, error) {
 	configMap := consumer.getConfig()
 
@@ -52,8 +54,49 @@ func New(consumer DTConsumer, isDebug bool) (DTAnalytics, error) {
 	}
 }
 
+// Track an event.
 func (dta DTAnalytics) Track(dtId string, acId string, eventName string, properties map[string]interface{}) error {
 	return dta.add(dtId, acId, eventName, "track", properties)
+}
+
+// UserSet Set user properties for the user with given dtId and acId.
+func (dta DTAnalytics) UserSet(dtId string, acId string, properties map[string]interface{}) error {
+	return dta.add(dtId, acId, "#user_set", "user", properties)
+}
+
+// UserSetOnce Set user properties only once for user with given dtId and acId.
+// The value will not override existed property.
+func (dta DTAnalytics) UserSetOnce(dtId string, acId string, properties map[string]interface{}) error {
+	return dta.add(dtId, acId, "#user_set_once", "user", properties)
+}
+
+// UserAdd Arithmetic add the value of property by given number for user with given dtId and acId.
+// Hence, the type of value for 'custom properties' should be a number.
+func (dta DTAnalytics) UserAdd(dtId string, acId string, properties map[string]interface{}) error {
+	return dta.add(dtId, acId, "#user_add", "user", properties)
+}
+
+// UserUnset Unset properties for user with given dtId and acId.
+// Only the key of 'custom properties' will be used and its value is meaningless here.
+func (dta DTAnalytics) UserUnset(dtId string, acId string, properties map[string]interface{}) error {
+	return dta.add(dtId, acId, "#user_unset", "user", properties)
+}
+
+// UserDelete Delete the user with given dtId and acId.
+func (dta DTAnalytics) UserDelete(dtId string, acId string, properties map[string]interface{}) error {
+	return dta.add(dtId, acId, "#user_delete", "user", properties)
+}
+
+// UserAppend Append values to property for the user with given dtId and acId.
+// Hence, the type of value for 'custom properties' should be an array.
+func (dta DTAnalytics) UserAppend(dtId string, acId string, properties map[string]interface{}) error {
+	return dta.add(dtId, acId, "#user_append", "user", properties)
+}
+
+// UserUniqAppend Append values to property without duplications for the user with given dtId and acId.
+// Hence, the type of value for 'custom properties' should be an array.
+func (dta DTAnalytics) UserUniqAppend(dtId string, acId string, properties map[string]interface{}) error {
+	return dta.add(dtId, acId, "#user_uniq_append", "user", properties)
 }
 
 func (_ DTAnalytics) add(dtId string, acId string, eventName string, eventType string, properties map[string]interface{}) error {
@@ -85,14 +128,17 @@ func (_ DTAnalytics) add(dtId string, acId string, eventName string, eventType s
 	}
 }
 
+// Flush the data buffer manually.
 func (_ DTAnalytics) Flush() {
 	C.dt_flush()
 }
 
+// Close the DTAnalytics, remember to call this before the program finishes to preventing data loss!
 func (_ DTAnalytics) Close() {
 	C.dt_close()
 }
 
+// ToggleLogger to enable and disable the logging.
 func ToggleLogger(enable bool) {
 	enabled := 0
 	if enable {

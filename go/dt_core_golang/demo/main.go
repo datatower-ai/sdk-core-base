@@ -10,9 +10,10 @@ import (
 )
 
 func main() {
-	//dtanalytics.ToggleLogger(true)
-	consumer := dtanalytics.NewDTLogConsumer("log", 200, "dt_go_demo", 10*1024*1024)
+	dtanalytics.ToggleLogger(true)
+	consumer := dtanalytics.NewDTLogConsumer("log", 200, "dt_go_demo", 0)
 	dt, _ := dtanalytics.New(consumer, true)
+	dtanalytics.ToggleLogger(false)
 
 	properties := map[string]interface{}{
 		"productNames": []string{"Lua", "hello"},
