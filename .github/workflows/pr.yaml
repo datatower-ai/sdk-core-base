@@ -6,14 +6,16 @@ on:
       - opened
       - edited
       - synchronize
+      - reopened
 
 jobs:
   version_check:
     name: Version test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Run version_test.sh
         run: |
-          chmod +x ./.github/scripts/version_check.sh && ./.github/scripts/version_check.sh
+          chmod +x ./.github/scripts/version_check.sh 
+          ./.github/scripts/version_check.sh
         shell: bash

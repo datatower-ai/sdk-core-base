@@ -3,17 +3,14 @@
 #
 #    maturin generate-ci -o dist --platform linux windows macos --zig github
 #
-name: CI
+name: Python CI
 
 on:
   push:
     branches:
       - main
-      - master
     tags:
-      - '*'
-  pull_request:
-  workflow_dispatch:
+      - 'v*'
 
 permissions:
   contents: read
@@ -36,17 +33,18 @@ jobs:
           args: --release --out dist --zig
           sccache: 'true'
           manylinux: auto
+          working-directory: ./python
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels-linux-${{ matrix.target }}
-          path: dist
+          path: ./python/dist
 
   windows:
     runs-on: windows-latest
     strategy:
       matrix:
-        target: [x64, x86, aarch64]
+        target: [x64, x86]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -59,11 +57,12 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist
           sccache: 'true'
+          working-directory: ./python
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels-windows-${{ matrix.target }}
-          path: dist
+          path: ./python/dist
 
   macos:
     runs-on: macos-latest
@@ -81,32 +80,18 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist
           sccache: 'true'
+          working-directory: ./python
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels-macos-${{ matrix.target }}
-          path: dist
-
-  sdist:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build sdist
-        uses: PyO3/maturin-action@v1
-        with:
-          command: sdist
-          args: --out dist
-      - name: Upload sdist
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels-sdist
-          path: dist
+          path: ./python/dist
 
   release:
     name: Release
     runs-on: ubuntu-latest
     if: "startsWith(github.ref, 'refs/tags/')"
-    needs: [linux, windows, macos, sdist]
+    needs: [linux, windows, macos]
     steps:
       - uses: actions/download-artifact@v4
       - name: Publish to PyPI
