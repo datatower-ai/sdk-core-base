@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
-import sys
 
 from .dt_core_base_py import (
     init as dt_init,
@@ -9,21 +8,6 @@ from .dt_core_base_py import (
     close as dt_close,
     toggle_logger as dt_toggle_logger
 )
-
-version = sys.version_info
-if version >= (3, 8):
-    import importlib.metadata
-
-    __VERSION__ = importlib.metadata.version("dt-python-sdk")
-else:
-    try:
-        from importlib_metadata import version as metadata_version
-
-        __VERSION__ = metadata_version("dt_core_python")
-    except ModuleNotFoundError as e:
-        print(f"ModuleNotFoundError: {e.msg}")
-        print("Please run `pip install importlib_metadata` to install such prerequisite!")
-        sys.exit(1)
 
 __SDK_NAME__ = "dt_python_sdk"
 
@@ -54,7 +38,6 @@ class DTAnalytics:
         event["#event_name"] = event_name
         event["#event_type"] = event_type
         event["#sdk_type"] = __SDK_NAME__
-        event["#sdk_version_name"] = __VERSION__
 
         return dt_add_event(event)
 

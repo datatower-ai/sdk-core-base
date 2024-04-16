@@ -91,18 +91,11 @@ fn fulfill_metas(event: &mut Event) {
 }
 
 fn inject_sdk_base_info(event_map: &mut Event) {
-    let version_key: String = String::from("#sdk_version_name");
     let type_key: String = String::from("#sdk_type");
 
     if let Some(Value::Object(properties)) = event_map.get_mut(&String::from("properties")) {
-        if let Some(Value::String(version)) = properties.get(&version_key) {
-            let new_version = format!("{}_{}", version, get_base_version());
-            properties.insert(version_key, Value::String(new_version));
-        } else {
-            log_error!("{}", InternalError(String::from("⚠ CAUTION! Forget to set #sdk_version_name?")));
-            let new_version = format!("unknown_{}", get_base_version());
-            properties.insert(version_key, Value::String(new_version));
-        };
+        let version = get_base_version().to_string();
+        properties.insert(String::from("#sdk_version_name"), Value::String(version));
 
         if let Some(Value::String(_)) = properties.get(&type_key) {} else {
             log_error!("{}", InternalError(String::from("⚠ CAUTION! Forget to set #sdk_type?")));

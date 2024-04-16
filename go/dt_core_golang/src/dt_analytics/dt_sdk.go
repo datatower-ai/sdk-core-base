@@ -22,7 +22,6 @@ import (
 
 const (
 	_sdkType    = "dt_server_sdk_go"
-	_sdkVersion = "1.0.0"
 )
 
 type DTConsumer interface {
@@ -134,7 +133,6 @@ func (_ DTAnalytics) add(dtId string, acId string, eventName string, eventType s
 	event["#event_name"] = eventName
 	event["#event_type"] = eventType
 	event["#sdk_type"] = _sdkType
-	event["#sdk_version_name"] = _sdkVersion
 
 	b, err := jsoniter.Marshal(event)
 	if err != nil {

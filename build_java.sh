@@ -107,18 +107,9 @@ function build_jar() {
 }
 
 function version_check() {
-    code_version=$(grep -oE "^ *private static final String SDK_VERSION = .*; *$" "./java/java/lib/src/main/java/ai/datatower/sdk/DTAnalytics.java" | sed -ne "s/^ *private static final String SDK_VERSION = \"\(.*\)\"; *$/\1/p")
-    gradle_version=$(grep -oE "^version = .*$" "./java/java/lib/build.gradle" | sed -ne "s/^version = \"\(.*\)\"$/\1/p")
     common_version=$(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
-    if [ ! "$code_version" = "$gradle_version" ]; then
-      echo "\033[0;31mVersion check failed!\033[0m"
-      echo "@code: \033[1m$code_version\033[0m"
-      echo "@gradle: \033[1m$gradle_version\033[0m"
-      exit
-    fi
     echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    printf "┃ version: \t\033[1;35m%s\033[0m\n" "$code_version"
-    printf "┃ common ver: \t\033[1;35m%s\033[0m\n" "$common_version"
+    printf "┃ version: \t\033[1;35m%s\033[0m\n" "$common_version"
     echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 }
 

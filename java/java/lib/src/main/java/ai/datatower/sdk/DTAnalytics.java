@@ -7,7 +7,6 @@ import java.util.Map;
 
 public class DTAnalytics {
     private static final String SDK_TYPE = "dt_server_sdk_java";
-    private static final String SDK_VERSION = "1.0.0";
 
     private DTAnalytics(Consumer consumer, boolean isDebug) {
         Map<String, Object> config = consumer.getConfigMap();
@@ -177,7 +176,6 @@ public class DTAnalytics {
         event.put("#event_name", eventName);
         event.put("#event_type", eventType);
         event.put("#sdk_type", DTAnalytics.SDK_TYPE);
-        event.put("#sdk_version_name", DTAnalytics.SDK_VERSION);
         
         return DTBase.addEvent(event);
     }

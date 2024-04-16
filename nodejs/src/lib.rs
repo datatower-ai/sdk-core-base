@@ -4,8 +4,7 @@ use serde_json::{Map, Value};
 use common::util::error::DTError;
 use common::util::result::{dissolve, dissolve_bool};
 
-static VERSION: &'static str = "1.0.0";
-static SDK_NAME: &'static str = "nodejs";
+static SDK_NAME: &'static str = "dt_server_sdk_nodejs";
 
 static TYPE_EVENT: &'static str = "track";
 static TYPE_USER: &'static str = "user";
@@ -85,7 +84,6 @@ fn add_event(dt_id: String, ac_id: String, event_name: String, event_type: &'sta
     event.insert(String::from("#acid"), serde_json::Value::from(ac_id));
     event.insert(String::from("#event_name"), serde_json::Value::from(event_name));
     event.insert(String::from("#event_type"), serde_json::Value::from(event_type));
-    event.insert(String::from("#sdk_version_name"), serde_json::Value::from(VERSION));
     event.insert(String::from("#sdk_type"), serde_json::Value::from(SDK_NAME));
 
     dissolve_bool::<(), DTError>(common::add(event)).unwrap_or(false)

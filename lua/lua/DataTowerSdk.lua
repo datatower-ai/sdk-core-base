@@ -89,7 +89,6 @@ local function upload(dtId, acId, eventType, eventName, properties, superPropert
         properties = Util.mergeTables(properties, dynamicSuperProperties)
     end
     properties["#sdk_type"] = DTAnalytics.platform
-    properties["#sdk_version_name"] = DTAnalytics.version
 
     result = dt_base.add_event(properties)
     return result
@@ -302,7 +301,6 @@ end
 
 
 DTAnalytics.platform = "dt_lua_sdk"
-DTAnalytics.version = "1.0.0"
 
 function Util.mergeTables(...)
     local tabs = { ... }
