@@ -24,6 +24,7 @@ lua52 = ["mlua/lua52"]
 lua51 = ["mlua/lua51"]
 luajit = ["mlua/luajit"]
 luau = ["mlua/luau"]
+benchmark = ["common/benchmark"]
 
 [dependencies]
 common = { path = "../common", default-features = false, features = ["log-consumer-server"] }

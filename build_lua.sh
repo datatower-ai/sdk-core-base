@@ -1,6 +1,27 @@
 BASEDIR=$(dirname "$0")
 cd "$BASEDIR" || (echo "Cannot cd to script's path" && exit)
 
+f_benchmark=false
+f_has_macos=true
+f_has_windows=true
+f_has_linux=true
+
+while getopts bmwl opt; do
+  case "$opt" in
+    b) f_benchmark=true;;
+    m) f_has_macos=true; f_has_windows=false; f_has_linux=false;;
+    w) f_has_macos=false; f_has_windows=true; f_has_linux=false;;
+    l) f_has_macos=false; f_has_windows=false; f_has_linux=true;;
+    *) ;;
+  esac
+done
+
+target_path="./output/lua/"
+if [ "$f_benchmark" = true ]; then
+  target_path="./output-benchmark/lua/"
+fi
+mkdir -p "$target_path"
+
 # Naming of artifacts:
 #   dt_core_{package}[-{package_specific}]-{platform}-{architecture}.so
 # E.g.
@@ -11,43 +32,74 @@ cd "$BASEDIR" || (echo "Cannot cd to script's path" && exit)
 # $1: features
 ####################################
 function build_lua() {
-  mkdir -p "$BASEDIR/output/lua/"
+  if [ "$f_has_macos" = true ]; then
+    build_macos "$1"
+  fi
 
-  cargo rustc --release --package lua --no-default-features --features "$1" --target x86_64-apple-darwin
-  cp -f "$BASEDIR/target/x86_64-apple-darwin/release/libdt_core_lua.dylib" "$BASEDIR/output/lua/dt_core_lua-$1-macos-x86_64.so"
+  if [ "$f_has_linux" = true ]; then
+    build_linux "$1"
+  fi
 
-  cargo rustc --release --package lua --no-default-features --features "$1" --target aarch64-apple-darwin
-  cp -f "$BASEDIR/target/aarch64-apple-darwin/release/libdt_core_lua.dylib" "$BASEDIR/output/lua/dt_core_lua-$1-macos-aarch64.so"
+  if [ "$f_has_windows" = true ]; then
+    build_windows "$1"
+  fi
+}
 
-  cargo rustc --release --package lua --no-default-features --features "$1" --target x86_64-unknown-linux-gnu
-  cp -f "$BASEDIR/target/x86_64-unknown-linux-gnu/release/libdt_core_lua.so" "$BASEDIR/output/lua/dt_core_lua-$1-linux-x86_64.so"
+function build_macos() {
+  if [ "$f_benchmark" = true ]; then
+    cargo rustc --release --package lua --no-default-features --features "$1,benchmark" --target x86_64-apple-darwin
+    cargo rustc --release --package lua --no-default-features --features "$1,benchmark" --target aarch64-apple-darwin
+  else
+    cargo rustc --release --package lua --no-default-features --features "$1" --target x86_64-apple-darwin
+    cargo rustc --release --package lua --no-default-features --features "$1" --target aarch64-apple-darwin
+  fi
 
-  cargo rustc --release --package lua --no-default-features --features "$1" --target aarch64-unknown-linux-gnu
-  cp -f "$BASEDIR/target/aarch64-unknown-linux-gnu/release/libdt_core_lua.so" "$BASEDIR/output/lua/dt_core_lua-$1-linux-aarch64.so"
+  cp -f "./target/x86_64-apple-darwin/release/libdt_core_lua.dylib" "$target_path/dt_core_lua-$1-macos-x86_64.so"
+  cp -f "./target/aarch64-apple-darwin/release/libdt_core_lua.dylib" "$target_path/dt_core_lua-$1-macos-aarch64.so"
+}
 
-  mv "$BASEDIR/.cargo/config.toml" "$BASEDIR/.cargo/blocked.config.toml"
+function build_linux() {
+  if [ "$f_benchmark" = true ]; then
+    cargo rustc --release --package lua --no-default-features --features "$1,benchmark" --target x86_64-unknown-linux-gnu
+    cargo rustc --release --package lua --no-default-features --features "$1,benchmark" --target aarch64-unknown-linux-gnu
+  else
+    cargo rustc --release --package lua --no-default-features --features "$1" --target x86_64-unknown-linux-gnu
+    cargo rustc --release --package lua --no-default-features --features "$1" --target aarch64-unknown-linux-gnu
+  fi
+
+  cp -f "./target/x86_64-unknown-linux-gnu/release/libdt_core_lua.so" "$target_path/dt_core_lua-$1-linux-x86_64.so"
+  cp -f "./target/aarch64-unknown-linux-gnu/release/libdt_core_lua.so" "$target_path/dt_core_lua-$1-linux-aarch64.so"
+}
+
+function build_windows() {
+  mv "./.cargo/config.toml" "./.cargo/blocked.config.toml"
   colima start
 
-  cross rustc --release --package lua --no-default-features --features "$1" --target x86_64-pc-windows-msvc
-  cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/dt_core_lua.dll" "$BASEDIR/output/lua/dt_core_lua-$1-windows-x86_64.dll"
+  if [ "$f_benchmark" = true ]; then
+    cross rustc --release --package lua --no-default-features --features "$1,benchmark" --target x86_64-pc-windows-msvc
+    cross rustc --release --package lua --no-default-features --features "$1,benchmark" --target aarch64-pc-windows-msvc
+  else
+    cross rustc --release --package lua --no-default-features --features "$1" --target x86_64-pc-windows-msvc
+    cross rustc --release --package lua --no-default-features --features "$1" --target aarch64-pc-windows-msvc
+  fi
 
-  cross rustc --release --package lua --no-default-features --features "$1" --target aarch64-pc-windows-msvc
-  cp -f "$BASEDIR/target/aarch64-pc-windows-msvc/release/dt_core_lua.dll" "$BASEDIR/output/lua/dt_core_lua-$1-windows-aarch64.dll"
+  cp -f "./target/x86_64-pc-windows-msvc/release/dt_core_lua.dll" "$target_path/dt_core_lua-$1-windows-x86_64.dll"
+  cp -f "./target/aarch64-pc-windows-msvc/release/dt_core_lua.dll" "$target_path/dt_core_lua-$1-windows-aarch64.dll"
 
-  mv "$BASEDIR/.cargo/blocked.config.toml" "$BASEDIR/.cargo/config.toml"
+  mv "./.cargo/blocked.config.toml" "./.cargo/config.toml"
 }
 
 function version_check() {
-#    version=$(grep -oE "^\t_sdkVersion = .*$" "./go/dt_sdk_golang/src/dt_analytics/dt_sdk.go" | sed -ne "s/^\t_sdkVersion = \"\(.*\)\" *$/\1/p")
-#    common_version=$(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
-#    if [ -z "$version" ]; then
-#      echo "\033[0;31mCannot found version in dt_sdk.go\033[0m"
-#      exit
-#    fi
-#    echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-#    printf "┃ version: \t\033[1;35m%s\033[0m\n" "$version"
-#    printf "┃ common ver: \t\033[1;35m%s\033[0m\n" "$common_version"
-#    echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    version=$(grep -oE "^DTAnalytics.version =.*$" "./lua/lua/DataTowerSdk.lua" | sed -ne "s/^DTAnalytics.version = \"\(.*\)\".*$/\1/p")
+    common_version=$(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
+    if [ -z "$version" ]; then
+      echo "\033[0;31mCannot found version in dt_sdk.go\033[0m"
+      exit
+    fi
+    echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    printf "┃ version: \t\033[1;35m%s\033[0m\n" "$version"
+    printf "┃ common ver: \t\033[1;35m%s\033[0m\n" "$common_version"
+    echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
 }
 

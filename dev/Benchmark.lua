@@ -70,6 +70,7 @@ local lst = {}
 local start_time = socket.gettime()
 for i = n, 1, -1
 do
+    properties["$_event_call_time"] = tostring(math.floor(socket.gettime() * 1000000))
     st = socket.gettime()
     sdk:track(acId, dtId, "eventName", properties)
     tmp = socket.gettime() - st
