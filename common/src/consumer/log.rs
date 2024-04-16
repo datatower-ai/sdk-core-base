@@ -7,7 +7,7 @@ use std::path::Path;
 use regex::Regex;
 use serde_json::{Map, Value};
 
-use crate::{log_error, log_info, util};
+use crate::{log_error, log_info};
 use crate::consumer::Consumer;
 use crate::event::BoxedEvent;
 use crate::util::datetime::get_hour_since_epoch;
@@ -151,6 +151,7 @@ impl LogConsumer {
     fn write_to_file(self: &mut Self, refresh_mode: u8) {
         // Once threading support needed, wrap this with a mutex!
         if !self.batch.is_empty() {
+            #[cfg(feature = "benchmark")]
             let st = std::time::Instant::now();
             let filename = self.get_filename();
 
@@ -177,7 +178,7 @@ impl LogConsumer {
             self.crt_size_bytes = file.metadata().unwrap().len();
             log_info!("Flushed {} events!", n);
             #[cfg(feature = "benchmark")]
-            (&util::benchmark_tracer::BM_TRACER).add("Time used to flush", st.elapsed().as_micros());
+            (&crate::util::benchmark_tracer::BM_TRACER).add("Time used to flush", st.elapsed().as_micros());
         }
 
         // Once threading support needed, wrap this with a mutex!
