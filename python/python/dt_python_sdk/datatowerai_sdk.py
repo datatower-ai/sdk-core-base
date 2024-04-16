@@ -9,7 +9,7 @@ from .dt_core_base_py import (
     toggle_logger as dt_toggle_logger
 )
 
-__SDK_NAME__ = "dt_python_sdk"
+__SDK_NAME__ = "dt_server_sdk_python"
 
 
 class Consumer(ABC):
