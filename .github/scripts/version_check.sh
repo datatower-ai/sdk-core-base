@@ -9,18 +9,24 @@ function check() {
       echo "✔ $2: $1"
     else
       echo "✘ $2: $1"
-      failed=$((failed+1))
+      ((failed++))
     fi
 }
 
 function check_nodejs_version() {
+  before="$failed"
   ver=$(grep -oE "^ *\"version\": \".*\", *$" "./nodejs/package.json" | sed -ne "s/.*\"version\": \"\(.*\)\",.*/\1/p")
   check "$ver" "Node.js"
+  after="$failed"
 
-  find ./nodejs/npm/ -maxdepth 2 -type f -name "package.json" | while read fpath; do
+  while read fpath; do
     ver=$(cat $fpath | grep -oE "^ *\"version\": \".*\", *$" | sed -ne "s/.*\"version\": \"\(.*\)\",.*/\1/p")
     check "$ver" "  ◇ $(echo $fpath | sed -n "s/^.*\/\(.*\)\/package.json$/\1/p")"
-  done
+  done <<< $(find ./nodejs/npm/ -maxdepth 2 -type f -name "package.json")
+
+  if [ "$after" != "$failed" ] && [ "$before" = "$after" ]; then
+    echo "ⓘ   Please ensure to run \`yarn create-npm-dir\` before push!"
+  fi
 }
 
 

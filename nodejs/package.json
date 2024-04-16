@@ -1,6 +1,7 @@
 {
   "name": "@datatower-ai/sdk-core-nodejs",
   "version": "1.0.0",
+  "author": "DataTower.ai",
   "main": "index.js",
   "types": "index.d.ts",
   "napi": {
@@ -32,7 +33,8 @@
     "prepublishOnly": "napi prepublish -t npm",
     "test": "ava",
     "universal": "napi universal",
-    "version": "napi version"
+    "create-npm-dir": "napi create-npm-dir -t .",
+    "sync-version": "napi version"
   },
   "packageManager": "yarn@4.1.1"
 }

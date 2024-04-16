@@ -2,8 +2,8 @@
 name: Node.js CI
 
 env:
-  DEBUG: napi:*
-  APP_NAME: sdk-core-nodejs
+#  DEBUG: napi:*                     # for debug mode
+  APP_NAME: sdk_core_nodejs           # hyphens should be replaced with underscore
   MACOSX_DEPLOYMENT_TARGET: '10.13'
 
 permissions:
@@ -36,14 +36,14 @@ jobs:
           - host: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian
-            build: yarn build --target x86_64-unknown-linux-gnu
+            build: cd nodejs && yarn build --target x86_64-unknown-linux-gnu
           - host: macos-latest
             target: aarch64-apple-darwin
             build: yarn build --target aarch64-apple-darwin
           - host: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian-aarch64
-            build: yarn build --target aarch64-unknown-linux-gnu
+            build: cd nodejs && yarn build --target aarch64-unknown-linux-gnu
           - host: windows-latest
             target: aarch64-pc-windows-msvc
             build: yarn build --target aarch64-pc-windows-msvc
@@ -100,17 +100,19 @@ jobs:
         if: ${{ matrix.settings.docker }}
         with:
           image: ${{ matrix.settings.docker }}
-          options: '--user 0:0 -v ${{ github.workspace }}/.cargo-cache/git/db:/usr/local/cargo/git/db -v ${{ github.workspace }}/.cargo/registry/cache:/usr/local/cargo/registry/cache -v ${{ github.workspace }}/.cargo/registry/index:/usr/local/cargo/registry/index -v ${{ github.workspace }}:/build -w /build'
+          options: '--user 0:0 -v ${{ github.workspace }}/nodejs/.cargo-cache/git/db:/usr/local/cargo/git/db -v ${{ github.workspace }}/nodejs/.cargo/registry/cache:/usr/local/cargo/registry/cache -v ${{ github.workspace }}/nodejs/.cargo/registry/index:/usr/local/cargo/registry/index -v ${{ github.workspace }}:/build -w /build'
           run: ${{ matrix.settings.build }}
       - name: Build
         run: ${{ matrix.settings.build }}
         if: ${{ !matrix.settings.docker }}
         shell: bash
+#      - run: find "${{ github.workspace }}" | sed -e "s/[^-][^\/]*\//  |/g" -e "s/|\([^ ]\)/|-\1/"
+#        shell: bash
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: bindings-${{ matrix.settings.target }}
-          path: nodejs/${{ env.APP_NAME }}.*.node
+          path: ./nodejs/${{ env.APP_NAME }}.*.node
           if-no-files-found: error
   test-macOS-windows-binding:
     name: Test bindings on ${{ matrix.settings.target }} - node@${{ matrix.node }}
@@ -135,13 +137,14 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
+          cache-dependency-path: "./nodejs"
       - name: Install dependencies
         run: yarn install
       - name: Download nodejs
         uses: actions/download-artifact@v4
         with:
           name: bindings-${{ matrix.settings.target }}
-          path: .
+          path: nodejs
       - name: List packages
         run: ls -R .
         shell: bash
@@ -165,13 +168,14 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
+          cache-dependency-path: "./nodejs"
       - name: Install dependencies
         run: yarn install
       - name: Download nodejs
         uses: actions/download-artifact@v4
         with:
           name: bindings-x86_64-unknown-linux-gnu
-          path: .
+          path: nodejs
       - name: List packages
         run: ls -R .
         shell: bash
@@ -194,7 +198,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: bindings-aarch64-unknown-linux-gnu
-          path: .
+          path: nodejs
       - name: List packages
         run: ls -R .
         shell: bash
@@ -214,48 +218,51 @@ jobs:
           image: node:${{ matrix.node }}-slim
           options: '--platform linux/arm64 -v ${{ github.workspace }}:/build -w /build'
           run: |
+            cd nodejs
             set -e
             yarn test
             ls -la
-#  publish:
-#    name: Publish
-#    runs-on: ubuntu-latest
-#    needs:
-#      - test-macOS-windows-binding
-#      - test-linux-x64-gnu-binding
-#      - test-linux-aarch64-gnu-binding
-#    steps:
-#      - uses: actions/checkout@v4
-#      - name: Setup node
-#        uses: actions/setup-node@v4
-#        with:
-#          node-version: 20
-#          cache: yarn
-#      - name: Install dependencies
-#        run: yarn install
-#      - name: Download all nodejs
-#        uses: actions/download-artifact@v4
-#        with:
-#          path: nodejs
-#      - name: Move nodejs
-#        run: yarn nodejs
-#      - name: List packages
-#        run: ls -R ./npm
-#        shell: bash
-#      - name: Publish
-#        run: |
-#          npm config set provenance true
-#          if git log -1 --pretty=%B | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+$";
-#          then
-#            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
-#            npm publish --access public
-#          elif git log -1 --pretty=%B | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+";
-#          then
-#            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
-#            npm publish --tag next --access public
-#          else
-#            echo "Not a release, skipping publish"
-#          fi
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    needs:
+      - test-macOS-windows-binding
+      - test-linux-x64-gnu-binding
+      - test-linux-aarch64-gnu-binding
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: "./nodejs"
+      - name: Install dependencies
+        run: yarn install
+      - name: Creating NPM directories
+        run: yarn create-npm-dir
+      - name: Download all nodejs
+        uses: actions/download-artifact@v4
+        with:
+          path: nodejs/artifacts
+      - name: Move nodejs_artifacts
+        run: yarn artifacts
+      - name: List packages
+        run: ls -R ./npm
+        shell: bash
+      - name: Publish
+        run: |
+          npm config set provenance true
+          if git log -1 --pretty=%B | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+$";
+          then
+            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+            npm publish --access public
+          elif git log -1 --pretty=%B | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+";
+          then
+            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+            npm publish --tag next --access public
+          else
+            echo "Not a release, skipping publish"
+          fi
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
