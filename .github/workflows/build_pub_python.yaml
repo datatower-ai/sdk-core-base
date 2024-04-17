@@ -16,8 +16,22 @@ permissions:
   contents: read
 
 jobs:
+  check-version-with-tag:
+    name: Check Version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Version With Tag
+        run: |
+          chmod +x ./.github/scripts/check_version_by.sh
+          ./.github/scripts/check_version_by.sh $(grep -oE "^version = .*$" "./python/Cargo.toml" | sed -ne "s/^version = \"\(.*\)\" *$/\1/p")
+        shell: bash
+        working-directory: ./
+
   linux:
     runs-on: ubuntu-latest
+    needs:
+      - check-version-with-tag
     strategy:
       matrix:
         target: [x86_64, x86, aarch64, armv7, s390x, ppc64le]
@@ -42,6 +56,8 @@ jobs:
 
   windows:
     runs-on: windows-latest
+    needs:
+      - check-version-with-tag
     strategy:
       matrix:
         target: [x64, x86]
@@ -66,6 +82,8 @@ jobs:
 
   macos:
     runs-on: macos-latest
+    needs:
+      - check-version-with-tag
     strategy:
       matrix:
         target: [x86_64, aarch64]
