@@ -12,10 +12,10 @@ permissions:
 
 on:
   push:
-#    branches:
-#      - main
-#    tags:
-#      - 'v*'
+    branches:
+      - main
+    tags:
+      - 'v*'
 
 defaults:
   run:
@@ -33,7 +33,6 @@ jobs:
           ./.github/scripts/check_version_by.sh $(grep -oE "^ *\"version\": \".*\", *$" "./nodejs/package.json" | sed -ne "s/.*\"version\": \"\(.*\)\",.*/\1/p")
         shell: bash
         working-directory: ./
-
   build:
     strategy:
       fail-fast: false
@@ -126,7 +125,6 @@ jobs:
           name: bindings-${{ matrix.settings.target }}
           path: ./nodejs/${{ env.APP_NAME }}.*.node
           if-no-files-found: error
-
   test-macOS-windows-binding:
     name: Test bindings on ${{ matrix.settings.target }} - node@${{ matrix.node }}
     needs:
@@ -163,7 +161,6 @@ jobs:
         shell: bash
       - name: Test bindings
         run: yarn test
-
   test-linux-x64-gnu-binding:
     name: Test bindings on Linux-x64-gnu - node@${{ matrix.node }}
     needs:
@@ -195,7 +192,6 @@ jobs:
         shell: bash
       - name: Test bindings
         run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim yarn test
-
   test-linux-aarch64-gnu-binding:
     name: Test bindings on aarch64-unknown-linux-gnu - node@${{ matrix.node }}
     needs:
@@ -272,10 +268,12 @@ jobs:
           ver=$(grep -oE "^ *\"version\": \".*\", *$" "./package.json" | sed -ne "s/.*\"version\": \"\(.*\)\",.*/\1/p")
           if echo "$ver" | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+$";
           then
+            echo "Publishing Release"
             echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
             npm publish --access public
           elif echo "$ver" | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+";
           then
+            echo "Publishing Beta Release"
             echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
             npm publish --tag beta --access public
           else
