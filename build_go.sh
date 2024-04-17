@@ -48,11 +48,11 @@ function build_golang() {
 
 function build_macos() {
   if [ "$f_benchmark" = true ]; then
-    cargo rustc --release --package clib --target x86_64-apple-darwin --features "benchmark"
-    cargo rustc --release --package clib --target aarch64-apple-darwin --features "benchmark"
+    cargo build --release --package clib --target x86_64-apple-darwin --features "benchmark"
+    cargo build --release --package clib --target aarch64-apple-darwin --features "benchmark"
   else
-    cargo rustc --release --package clib --target x86_64-apple-darwin
-    cargo rustc --release --package clib --target aarch64-apple-darwin
+    cargo build --release --package clib --target x86_64-apple-darwin
+    cargo build --release --package clib --target aarch64-apple-darwin
   fi
 
   cp -f "$BASEDIR/target/x86_64-apple-darwin/release/libdt_core_clib.dylib" "$target_path/libdt_core_clib-macos-amd64.dylib"
@@ -61,11 +61,11 @@ function build_macos() {
 
 function build_linux() {
   if [ "$f_benchmark" = true ]; then
-    cargo rustc --release --package clib --target x86_64-unknown-linux-gnu --features "benchmark"
-    cargo rustc --release --package clib --target x86_64-unknown-linux-gnu --features "benchmark"
+    cargo build --release --package clib --target x86_64-unknown-linux-gnu --features "benchmark"
+    cargo build --release --package clib --target x86_64-unknown-linux-gnu --features "benchmark"
   else
-    cargo rustc --release --package clib --target x86_64-unknown-linux-gnu
-    cargo rustc --release --package clib --target aarch64-unknown-linux-gnu
+    cargo build --release --package clib --target x86_64-unknown-linux-gnu
+    cargo build --release --package clib --target aarch64-unknown-linux-gnu
   fi
 
   cp -f "$BASEDIR/target/x86_64-unknown-linux-gnu/release/libdt_core_clib.so" "$target_path/libdt_core_clib-linux-amd64.so"
@@ -77,11 +77,11 @@ function build_windows() {
   colima start
 
   if [ "$f_benchmark" = true ]; then
-    cross rustc --release --package clib --target x86_64-pc-windows-msvc --features "benchmark"
-    cross rustc --release --package clib --target aarch64-pc-windows-msvc --features "benchmark"
+    cross build --release --package clib --target x86_64-pc-windows-msvc --features "benchmark"
+    cross build --release --package clib --target aarch64-pc-windows-msvc --features "benchmark"
   else
-    cross rustc --release --package clib --target x86_64-pc-windows-msvc
-    cross rustc --release --package clib --target aarch64-pc-windows-msvc
+    cross build --release --package clib --target x86_64-pc-windows-msvc
+    cross build --release --package clib --target aarch64-pc-windows-msvc
   fi
 
   cp -f "$BASEDIR/target/x86_64-pc-windows-msvc/release/dt_core_clib.dll" "$target_path/dt_core_clib-windows-amd64.dll"

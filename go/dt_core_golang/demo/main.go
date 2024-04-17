@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	dtanalytics "github.com/datatower-ai/sdk-core-golang/src/dt_analytics"
+	dtAnalytics "github.com/datatower-ai/dt-golang-sdk"
 	"log"
 	"slices"
 	"strconv"
@@ -11,10 +11,10 @@ import (
 )
 
 func main() {
-	dtanalytics.ToggleLogger(true)
-	consumer := dtanalytics.NewDTLogConsumer("log", 200, "dt_go_demo", 0)
-	dt, _ := dtanalytics.New(consumer, true)
-	dtanalytics.ToggleLogger(false)
+	dtAnalytics.ToggleLogger(true)
+	consumer := dtAnalytics.NewDTLogConsumer("log", 200, "dt_go_demo", 0)
+	dt, _ := dtAnalytics.New(consumer, true)
+	dtAnalytics.ToggleLogger(false)
 
 	properties := map[string]interface{}{
 		"productNames": []string{"Lua", "hello"},
@@ -31,7 +31,7 @@ func main() {
 		properties[fmt.Sprintf("a%d", i)] = strings.Repeat("asd", i)
 	}
 
-	n := 100000
+	n := 100
 	start := time.Now()
 	tm := int64(0)
 	lst := []int64{}

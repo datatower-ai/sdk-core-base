@@ -16,23 +16,23 @@ function check() {
 }
 
 
-# Python
-ver_python=$(grep -oE "^version = .*$" "./python/Cargo.toml" | sed -ne "s/^version = \"\(.*\)\" *$/\1/p")
-check "$ver_python" "Python"
+# Golang: ignored
+echo "⊘ Golang: Ignored"
 
 # Java
 ver_java=$(grep -oE "^version = .*$" "./java/java/lib/build.gradle" | sed -ne "s/^version = \"\(.*\)\"$/\1/p")
 check "$ver_java" "Java"
 
+# Lua
+# ...
+
 # Node.js
 ver=$(grep -oE "^ *\"version\": \".*\", *$" "./nodejs/package.json" | sed -ne "s/.*\"version\": \"\(.*\)\",.*/\1/p")
 check "$ver" "Node.js"
 
-# Golang: ignored
-echo "⊘ Golang: Ignored"
-
-# Lua
-# ...
+# Python
+ver_python=$(grep -oE "^version = .*$" "./python/Cargo.toml" | sed -ne "s/^version = \"\(.*\)\" *$/\1/p")
+check "$ver_python" "Python"
 
 
 exit $((failed))

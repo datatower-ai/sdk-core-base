@@ -1,4 +1,4 @@
-module github.com/datatower-ai/sdk-core-golang
+module github.com/datatower-ai/dt-golang-sdk
 
 go 1.22
 

@@ -6,6 +6,7 @@
 
 [![Node.js CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_nodejs.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_nodejs.yaml)
 [![Python CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_python.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_python.yaml)
+[![Golang CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_golang.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_golang.yaml)
 
 <p align="center">
     <a href="https://datatower.ai/" target="_blank">
