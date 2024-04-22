@@ -7,10 +7,19 @@ version = 'unspecified'
 
 repositories {
     mavenCentral()
+    maven {
+        url "https://jitpack.io"
+    }
+    mavenLocal()
+}
+
+configurations.configureEach {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 
 dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
+    //implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "com.github.datatower-ai:dt-java-sdk:+"
 }
 
 test {

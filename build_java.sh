@@ -49,7 +49,8 @@ function build_java() {
     build_windows
   fi
 
-  build_jar
+  #build_jar
+  publish_maven_local
 }
 
 function build_macos() {
@@ -103,6 +104,12 @@ function build_jar() {
   version=$(echo "$artifact" | sed -ne "s/^lib-\(.*\)\.jar$/\1/p")
   cp "./lib/build/libs/$artifact" "../dt_server_sdk_java-$version.jar"
   cd "../" || (echo "Cannot cd back" && exit)
+  rm -rf "./tmp/"
+}
+
+function publish_maven_local() {
+  cd "$tmp_path" || (echo "Cannot cd to java project" && exit)
+  ./gradlew lib:build lib:publishToMavenLocal
   rm -rf "./tmp/"
 }
 

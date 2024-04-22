@@ -1,7 +1,9 @@
 plugins {
-    id 'java-library'
+    id 'java'
+    id "maven-publish"
 }
 
+group = 'com.github.datatower-ai'
 version = "1.0.0-beta1"
 
 repositories {
@@ -22,5 +24,14 @@ dependencies {
 jar {
     from {
         configurations.compileClasspath.filter{ it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId "dt-java-sdk"
+            from components.java
+        }
     }
 }

@@ -11,9 +11,21 @@ permissions:
   contents: read
 
 jobs:
+  check-version-with-tag:
+    name: Check Version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Version With Tag
+        run: |
+          chmod +x ./.github/scripts/check_version_by.sh
+          ./.github/scripts/check_version_by.sh $(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
+        shell: bash
+        working-directory: ./
   build:
     name: Build ${{ matrix.settings.target }}
     runs-on: ${{ matrix.settings.host }}
+    needs: [ check-version-with-tag ]
     strategy:
       matrix:
         settings:

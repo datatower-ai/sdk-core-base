@@ -7,7 +7,7 @@ chmod +x "$(dirname "$0")/check_version_by.sh"
 
 # $1: version, $2: name
 function check() {
-    if $(dirname "$0")/check_version_by.sh $1 $ver_common; then
+    if "$(dirname "$0")"/check_version_by.sh $1 $ver_common; then
       echo "✔ $2: $1"
     else
       echo "✘ $2: $1"
