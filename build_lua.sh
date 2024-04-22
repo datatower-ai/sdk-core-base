@@ -47,11 +47,11 @@ function build_lua() {
 
 function build_macos() {
   if [ "$f_benchmark" = true ]; then
-    cargo rustc --release --package lua --no-default-features --features "$1,benchmark" --target x86_64-apple-darwin
-    cargo rustc --release --package lua --no-default-features --features "$1,benchmark" --target aarch64-apple-darwin
+    cargo rustc --release --package lua --no-default-features --features "$1,benchmark" --target x86_64-apple-darwin -- -C link-arg=-undefined -C link-arg=dynamic_lookup
+    cargo rustc --release --package lua --no-default-features --features "$1,benchmark" --target aarch64-apple-darwin -- -C link-arg=-undefined -C link-arg=dynamic_lookup
   else
-    cargo rustc --release --package lua --no-default-features --features "$1" --target x86_64-apple-darwin
-    cargo rustc --release --package lua --no-default-features --features "$1" --target aarch64-apple-darwin
+    cargo rustc --release --package lua --no-default-features --features "$1" --target x86_64-apple-darwin -- -C link-arg=-undefined -C link-arg=dynamic_lookup
+    cargo rustc --release --package lua --no-default-features --features "$1" --target aarch64-apple-darwin -- -C link-arg=-undefined -C link-arg=dynamic_lookup
   fi
 
   cp -f "./target/x86_64-apple-darwin/release/libdt_core_lua.dylib" "$target_path/dt_core_lua-$1-macos-x86_64.so"

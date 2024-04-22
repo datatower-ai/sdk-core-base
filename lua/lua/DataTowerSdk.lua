@@ -1,22 +1,17 @@
 -- DT LuaSDK
-function getDivider()
-    return package.config:sub(1,1)
+function loadBaseLib()
+--     local divider = package.config:sub(1,1)
+--     local suffix = divider == "\\" and "dll" or "so"
+--     local pathStr = debug.getinfo(2, "S").source:sub(2)
+--     local path = pathStr:match("(.*" .. divider .. ")")
+--     if path == nil then
+--         return nil
+--     end
+--     package.cpath = package.cpath .. ";" .. path .. "?." .. suffix .. ";"
+    return require("dt_core_lua")
 end
-function getDynSuffix()
-    return package.config:sub(1,1) == "\\" and "dll" or "so"
-end
-function script_path()
-    local str = debug.getinfo(2, "S").source:sub(2)
-    local result = str:match("(.*" .. getDivider() .. ")")
-    if result == nil then
-        return ""
-    end
-    return result
-end
-package.cpath = package.cpath .. ";" .. script_path() .. "?." .. getDynSuffix() .. ";"
-local dt_base = require("dt_core_lua")
+local dt_base = loadBaseLib()
 
-local socket = require("socket")
 local Util = {}
 local DTLog = {}
 
@@ -333,11 +328,6 @@ function Util.startWith(str, substr)
     else
         return true
     end
-end
-
-function Util.create_uuid()
-    local uuidLib = require("uuid")
-    return uuidLib()
 end
 
 Util.enableLog = false

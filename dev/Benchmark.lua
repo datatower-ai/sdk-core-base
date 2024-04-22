@@ -1,19 +1,5 @@
 -- $ lua dev/Benchmark.lua
 socket = require("socket")
-
-function getDivider()
-    return package.config:sub(1,1)
-end
-function script_path()
-    local str = debug.getinfo(2, "S").source:sub(2)
-    local result = str:match("(.*" .. getDivider() .. ")")
-    if result == nil then
-        return ""
-    end
-    return result
-end
-local sdk_path = script_path() .. ".." .. getDivider() .. "lua" .. getDivider() .. "lua" .. getDivider()
-package.path = package.path .. ";" .. sdk_path .. "?.lua"
 local dtAnalytics = require("DataTowerSdk")
 
 table.reduce = function (list, fn, init)
