@@ -1,6 +1,6 @@
 {
   "name": "@datatower-ai/sdk-core-nodejs",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-alpha.1",
   "author": "DataTower.ai",
   "main": "index.js",
   "types": "index.d.ts",

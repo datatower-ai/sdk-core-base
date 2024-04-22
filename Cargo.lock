@@ -154,7 +154,7 @@ dependencies = [
 
 [[package]]
 name = "clib"
-version = "0.1.0"
+version = "1.0.0-alpha1"
 dependencies = [
  "common",
  "serde_json",
@@ -569,7 +569,7 @@ checksum = "b1a46d1a171d865aa5f83f92695765caa047a9b4cbae2cbf37dbd613a793fd4c"
 
 [[package]]
 name = "java"
-version = "1.0.0"
+version = "1.0.0-alpha1"
 dependencies = [
  "common",
  "jni",
@@ -664,7 +664,7 @@ checksum = "90ed8c1e510134f979dbc4f070f87d4313098b704861a105fe34231c70a3901c"
 
 [[package]]
 name = "lua"
-version = "1.0.0"
+version = "1.0.0-alpha1"
 dependencies = [
  "common",
  "mlua",
@@ -1062,7 +1062,7 @@ dependencies = [
 
 [[package]]
 name = "python"
-version = "1.0.0-beta1"
+version = "1.0.0-alpha1"
 dependencies = [
  "common",
  "pyo3",
@@ -1267,7 +1267,7 @@ checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
 name = "sdk_core_nodejs"
-version = "1.0.0"
+version = "1.0.0-alpha1"
 dependencies = [
  "common",
  "napi",
