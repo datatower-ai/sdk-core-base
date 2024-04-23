@@ -30,7 +30,7 @@ mkdir -p "$target_path"
 ####################################
 # Build Golang
 ####################################
-function build_golang() {
+build_golang() {
   version_check
 
   if [ "$f_has_macos" = true ]; then
@@ -46,7 +46,7 @@ function build_golang() {
   fi
 }
 
-function build_macos() {
+build_macos() {
   if [ "$f_benchmark" = true ]; then
     cargo build --release --package clib --target x86_64-apple-darwin --features "benchmark"
     cargo build --release --package clib --target aarch64-apple-darwin --features "benchmark"
@@ -59,7 +59,7 @@ function build_macos() {
   cp -f "$BASEDIR/target/aarch64-apple-darwin/release/libdt_core_clib.dylib" "$target_path/libdt_core_clib-macos-arm64.dylib"
 }
 
-function build_linux() {
+build_linux() {
   if [ "$f_benchmark" = true ]; then
     cargo build --release --package clib --target x86_64-unknown-linux-gnu --features "benchmark"
     cargo build --release --package clib --target x86_64-unknown-linux-gnu --features "benchmark"
@@ -72,7 +72,7 @@ function build_linux() {
   cp -f "$BASEDIR/target/aarch64-unknown-linux-gnu/release/libdt_core_clib.so" "$target_path/libdt_core_clib-linux-arm64.so"
 }
 
-function build_windows() {
+build_windows() {
   mv "$BASEDIR/.cargo/config.toml" "$BASEDIR/.cargo/blocked.config.toml"
   colima start
 
@@ -90,7 +90,7 @@ function build_windows() {
   mv "$BASEDIR/.cargo/blocked.config.toml" "$BASEDIR/.cargo/config.toml"
 }
 
-function version_check() {
+version_check() {
     common_version=$(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
     echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     printf "┃ version: \t\033[1;35m%s\033[0m\n" "$common_version"

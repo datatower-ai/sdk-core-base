@@ -31,7 +31,7 @@ mkdir -p "$tmp_path"
 ####################################
 # Build Node.js
 ####################################
-function build_nodejs() {
+build_nodejs() {
   version_check
 
   cd "$BASEDIR/nodejs" || (echo "Cannot cd to project path" && exit)
@@ -54,7 +54,7 @@ function build_nodejs() {
   echo "Done"
 }
 
-function build_macos() {
+build_macos() {
   if [ "$f_benchmark" = true ]; then
     yarn build --target x86_64-apple-darwin "../$tmp_path" --features "benchmark"
     yarn build --target aarch64-apple-darwin "../$tmp_path" --features "benchmark"
@@ -64,7 +64,7 @@ function build_macos() {
   fi
 }
 
-function build_linux() {
+build_linux() {
   if [ "$f_benchmark" = true ]; then
     yarn build --target x86_64-unknown-linux-gnu "../$tmp_path" --features "benchmark"
     yarn build --target aarch64-unknown-linux-gnu "../$tmp_path" --features "benchmark"
@@ -74,7 +74,7 @@ function build_linux() {
   fi
 }
 
-function build_windows() {
+build_windows() {
   if [ "$f_benchmark" = true ]; then
     yarn build --target x86_64-pc-windows-msvc "../$tmp_path" --features "benchmark"
     yarn build --target aarch64-pc-windows-msvc "../$tmp_path" --features "benchmark"
@@ -84,7 +84,7 @@ function build_windows() {
   fi
 }
 
-function version_check() {
+version_check() {
     common_version=$(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
     echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     printf "┃ version: \t\033[1;35m%s\033[0m\n" "$common_version"

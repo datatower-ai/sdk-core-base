@@ -3,26 +3,28 @@
 
 base=$(dirname "$0")
 
-function halt() {
+halt() {
   echo "$1"
   exit 1
 }
 
 cd "$base" || halt "Failed to cd base: $base"
 
-version=$(grep -oE "^version = \".*\"$" "../Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
+version=$(grep -oE "^version = \".*\"$" "./Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
 version=$(echo "$version" | sed -nE "s/^(v?([0-9]+)\.([0-9]+)\.([0-9]+)[-._]?(([a|A])lpha|([b|B])eta)?([0-9]*))$/\2.\3.\4.\5\8/p")
 
 if [[ -z $version ]]; then
   halt "Cannot get the version"
 fi
 
-cat << EOT >> "dt-lua-sdk-$version-1.rockspec"
+archive_name=$(basename "$(find . -maxdepth 1 -mindepth 1 -type f -name "dt-lua-sdk-*.tar.gz" | head -1)")
+
+echo "dt-lua-sdk-$version-1.rockspec"
+cat << EOT > "dt-lua-sdk-$version-1.rockspec"
 package = "dt-lua-sdk"
 version = "$version-1"
 source = {
-    url = "git://github.com/datatower-ai/sdk-core-lua",
-    branch = "dt_test"
+    url = "file://$(pwd)/$archive_name",
 }
 description = {
     summary = "DataTower.ai Lua SDK",

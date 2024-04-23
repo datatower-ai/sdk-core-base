@@ -6,7 +6,7 @@ failed=0
 chmod +x "$(dirname "$0")/check_version_by.sh"
 
 # $1: version, $2: name
-function check() {
+check() {
     if "$(dirname "$0")"/check_version_by.sh $1 $ver_common; then
       echo "✔ $2: $1"
     else
@@ -24,7 +24,8 @@ ver_java=$(grep -oE "^version = .*$" "./java/java/lib/build.gradle" | sed -ne "s
 check "$ver_java" "Java"
 
 # Lua
-# ...
+ver_lua=$(grep -oE "^version = .*$" "./lua/Cargo.toml" | sed -ne "s/^version = \"\(.*\)\" *$/\1/p")
+check "$ver_lua" "Lua"
 
 # Node.js
 ver=$(grep -oE "^ *\"version\": \".*\", *$" "./nodejs/package.json" | sed -ne "s/.*\"version\": \"\(.*\)\",.*/\1/p")

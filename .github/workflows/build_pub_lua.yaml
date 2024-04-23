@@ -1,0 +1,335 @@
+name: Lua CI
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  check-version-with-tag:
+    name: Check Version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Version With Tag
+        run: |
+          chmod +x ./.github/scripts/check_version_by.sh
+          ./.github/scripts/check_version_by.sh $(grep -oE "^version = .*$" "./lua/dt-lua-sdk/lib/build.gradle" | sed -ne "s/^version = \"\(.*\)\"$/\1/p")
+        shell: bash
+        working-directory: ./
+  
+  build:
+    name: Build ${{ matrix.settings.target }} (${{ matrix.settings.lua_version }})
+    runs-on: ${{ matrix.settings.host }}
+    needs: [ check-version-with-tag ]
+    strategy:
+      matrix:
+        settings:
+          - target: x86_64-unknown-linux-gnu
+            host: ubuntu-latest
+            so_name: libdt_core_lua.so
+            lua_version: lua51
+            lua_version_num: 5.1
+            os: linux
+          - target: x86_64-unknown-linux-gnu
+            host: ubuntu-latest
+            so_name: libdt_core_lua.so
+            lua_version: lua52
+            lua_version_num: 5.2
+            os: linux
+          - target: x86_64-unknown-linux-gnu
+            host: ubuntu-latest
+            so_name: libdt_core_lua.so
+            lua_version: lua53
+            lua_version_num: 5.3
+            os: linux
+          - target: x86_64-unknown-linux-gnu
+            host: ubuntu-latest
+            so_name: libdt_core_lua.so
+            lua_version: lua54
+            lua_version_num: 5.4
+            os: linux
+          #---------------------------------------
+          - target: aarch64-unknown-linux-gnu
+            host: ubuntu-latest
+            so_name: libdt_core_lua.so
+            lua_version: lua51
+            lua_version_num: 5.1
+            os: linux
+          - target: aarch64-unknown-linux-gnu
+            host: ubuntu-latest
+            so_name: libdt_core_lua.so
+            lua_version: lua52
+            lua_version_num: 5.2
+            os: linux
+          - target: aarch64-unknown-linux-gnu
+            host: ubuntu-latest
+            so_name: libdt_core_lua.so
+            lua_version: lua53
+            lua_version_num: 5.3
+            os: linux
+          - target: aarch64-unknown-linux-gnu
+            host: ubuntu-latest
+            so_name: libdt_core_lua.so
+            lua_version: lua54
+            lua_version_num: 5.4
+            os: linux
+          #---------------------------------------
+          - target: x86_64-apple-darwin
+            host: macOS-latest
+            so_name: libdt_core_lua.dylib
+            lua_version: lua51
+            lua_version_num: 5.1
+            os: macosx
+          - target: x86_64-apple-darwin
+            host: macOS-latest
+            so_name: libdt_core_lua.dylib
+            lua_version: lua52
+            lua_version_num: 5.2
+            os: macosx
+          - target: x86_64-apple-darwin
+            host: macOS-latest
+            so_name: libdt_core_lua.dylib
+            lua_version: lua53
+            lua_version_num: 5.3
+            os: macosx
+          - target: x86_64-apple-darwin
+            host: macOS-latest
+            so_name: libdt_core_lua.dylib
+            lua_version: lua54
+            lua_version_num: 5.4
+            os: macosx
+          #---------------------------------------
+          - target: aarch64-apple-darwin
+            host: macOS-latest
+            so_name: libdt_core_lua.dylib
+            lua_version: lua51
+            lua_version_num: 5.1
+            os: macosx
+          - target: aarch64-apple-darwin
+            host: macOS-latest
+            so_name: libdt_core_lua.dylib
+            lua_version: lua52
+            lua_version_num: 5.2
+            os: macosx
+          - target: aarch64-apple-darwin
+            host: macOS-latest
+            so_name: libdt_core_lua.dylib
+            lua_version: lua53
+            lua_version_num: 5.3
+            os: macosx
+          - target: aarch64-apple-darwin
+            host: macOS-latest
+            so_name: libdt_core_lua.dylib
+            lua_version: lua54
+            lua_version_num: 5.4
+            os: macosx
+          #---------------------------------------
+          - target: x86_64-pc-windows-msvc
+            host: windows-latest
+            so_name: dt_core_lua.dll
+            lua_version: lua51
+            lua_version_num: 5.1
+            os: windows
+          - target: x86_64-pc-windows-msvc
+            host: windows-latest
+            so_name: dt_core_lua.dll
+            lua_version: lua52
+            lua_version_num: 5.2
+            os: windows
+          - target: x86_64-pc-windows-msvc
+            host: windows-latest
+            so_name: dt_core_lua.dll
+            lua_version: lua53
+            lua_version_num: 5.3
+            os: windows
+          - target: x86_64-pc-windows-msvc
+            host: windows-latest
+            so_name: dt_core_lua.dll
+            lua_version: lua54
+            lua_version_num: 5.4
+            os: windows
+          #---------------------------------------
+          - target: aarch64-pc-windows-msvc
+            host: windows-latest
+            so_name: dt_core_lua.dll
+            lua_version: lua51
+            lua_version_num: 5.1
+            os: windows
+          - target: aarch64-pc-windows-msvc
+            host: windows-latest
+            so_name: dt_core_lua.dll
+            lua_version: lua52
+            lua_version_num: 5.2
+            os: windows
+          - target: aarch64-pc-windows-msvc
+            host: windows-latest
+            so_name: dt_core_lua.dll
+            lua_version: lua53
+            lua_version_num: 5.3
+            os: windows
+          - target: aarch64-pc-windows-msvc
+            host: windows-latest
+            so_name: dt_core_lua.dll
+            lua_version: lua54
+            lua_version_num: 5.4
+            os: windows
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pre-build
+        if: ${{ matrix.settings.os == 'macosx' }}
+        run: |
+          mkdir .cargo
+          cat > .cargo/config << EOT
+          [target.x86_64-apple-darwin]
+            rustflags = [
+            "-C", "link-arg=-undefined",
+            "-C", "link-arg=dynamic_lookup",
+          ]
+          
+            [target.aarch64-apple-darwin]
+            rustflags = [
+            "-C", "link-arg=-undefined",
+            "-C", "link-arg=dynamic_lookup",
+          ]
+          EOT
+        shell: bash
+      - name: Build Core
+        uses: houseabsolute/actions-rust-cross@v0
+        with:
+          command: build
+          target: ${{ matrix.settings.target }}
+          args: "--release --package lua --no-default-features --features ${{ matrix.settings.lua_version }}"
+      - name: Moving Core Artifact
+        run: |
+          mkdir artifacts
+          target=${{ matrix.settings.target }}
+          [[ "${{ matrix.settings.os }}" == "windows" ]] && extension="dll" || extension="so"
+          artifact_prefix="${{ matrix.settings.lua_version }}-${{ matrix.settings.os }}-${target%%-*}"
+          so_file_name="$artifact_prefix-dt_core_lua.$extension"
+          mv ./target/${{ matrix.settings.target }}/release/${{ matrix.settings.so_name }} "./artifacts/$so_file_name"
+          echo "SO_FILE_NAME=$(echo $so_file_name)" >> $GITHUB_ENV
+        shell: bash
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.SO_FILE_NAME }}
+          path: ./artifacts/${{ env.SO_FILE_NAME }}
+
+  build_rocks:
+    name: Build Rocks
+    runs-on: ubuntu-latest
+    needs: [ build ]
+    strategy:
+      matrix:
+        settings:
+          - lua_version_num: 5.1
+            lua_version_name: lua51
+          - lua_version_num: 5.2
+            lua_version_name: lua52
+          - lua_version_num: 5.3
+            lua_version_name: lua53
+          - lua_version_num: 5.4
+            lua_version_name: lua54
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: ${{ matrix.settings.lua_version_num }}
+      - uses: leafo/gh-actions-luarocks@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: ${{ matrix.settings.lua_version_name }}-*
+          merge-multiple: true
+      - name: Build Lua rocks
+        run: |
+          version=$(grep -oE "^version = \".*\"$" "./lua/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
+          version=$(echo "$version" | sed -nE "s/^(v?([0-9]+)\.([0-9]+)\.([0-9]+)[-._]?(([a|A])lpha|([b|B])eta)?([0-9]*))$/\2.\3.\4.\5\8/p")
+          archive_folder="dt-lua-sdk-$version"
+          mv ./lua/dt-lua-sdk/ "./lua/$archive_folder"
+          mkdir lua_rocks
+          
+          for core_so in artifacts/*; do
+            core_so_name=$(basename "$core_so")
+            prefix=$(echo "$core_so_name" | sed "s/\(.*\)-dt_core_lua\..*/\1/g")
+            os=$(echo "$core_so_name" | sed "s/.*-\(.*\)-.*-dt_core_lua\..*/\1/g")
+            mv "$core_so" "./lua/$archive_folder/dt_core_lua.so"
+            cd lua
+            tar czvpf "$archive_folder.tar.gz" "./$archive_folder/"
+            chmod +x "./gen_rockspec.sh"
+            name=$(./gen_rockspec.sh ${{ matrix.settings.lua_version_num }} $os)
+            luarocks pack "$name"
+            rock_file=$(basename $(find . -maxdepth 1 -mindepth 1 -type f -name "*.rock" | head -1))
+            mv "$rock_file" "../lua_rocks/$prefix-$rock_file"
+            rm -f "$name"
+            rm -f "$archive_folder.tar.gz"
+            cd ../
+          done
+        shell: bash
+      - run: |
+          ls lua_rocks
+        shell: bash
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rock-${{ matrix.settings.lua_version_name }}
+          path: ./lua_rocks/
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: [ build_rocks ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: rock-*
+          merge-multiple: true
+      - name: Syncing sdk-core-lua
+        continue-on-error: true
+        run: |
+          version=$(grep -oE "^version = \".*\"$" "./lua/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
+          tag="v$version"
+          echo "RELEASE_TAG=$(echo "$tag")" >> $GITHUB_ENV
+          
+          echo "Cloning..."
+          mkdir target_repo && cd target_repo
+          git clone -b main https://github.com/datatower-ai/sdk-core-lua.git
+          cd ../
+          
+          echo "Resetting..."
+          find target_repo/sdk-core-lua/ -mindepth 1 -maxdepth 1 -type f -exec rm -f {} +
+          find target_repo/sdk-core-lua/ -mindepth 1 -maxdepth 1 ! -name '.git' -type d -exec rm -rf {} +
+
+          echo "Updating..."
+          mv lua/dt-lua-sdk/* target_repo/sdk-core-lua/
+          find lua/dt-lua-sdk/ -mindepth 1 -maxdepth 1 -type f -name '.*' -exec mv -f {} target_repo/sdk-core-lua/ \;
+          find lua/dt-lua-sdk/ -mindepth 1 -maxdepth 1 -type d -name '.*' ! -name "." ! -name ".." -exec mv -rf {} target_repo/sdk-core-lua/ \;
+          echo "$tag" >> target_repo/sdk-core-lua/history
+
+          echo "Pushing..." 
+          cd target_repo/sdk-core-lua/
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git config url."https://${{ secrets.SERVER_SDK_LUA_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          git add .
+          git commit -m "GitHub Action Bot: Syncing with $tag"
+          git tag "$tag"
+          git push -f origin main --tags
+          echo "$tag"
+        shell: bash
+      - name: Publish Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "artifacts/*.rock"
+          tag: "${{ env.RELEASE_TAG }}"
+          repo: "sdk-core-lua"
+          token: ${{ secrets.SERVER_SDK_LUA_TOKEN }}
+          name: "DataTower.ai Core Lua - ${{ env.RELEASE_TAG }}"
+          body: "> Please read the README.md for the installation guide."

@@ -30,12 +30,12 @@ mkdir -p "$target_path"
 ####################################
 # Build Python
 ####################################
-function find_name_4_whl() {
+find_name_4_whl() {
   find ../target/wheels/ -name "dt_python_sdk-*-*$1*$2*.whl" -type f -exec basename {} \; | head -1
 }
 
 # target, platform, architecture
-function build_python_aux() {
+build_python_aux() {
   if [ "$2" = "win" ]; then
     maturin build --release --zig --interpreter python3.9 --target "$1"
   else
@@ -46,7 +46,7 @@ function build_python_aux() {
 }
 
 # target, platform, architecture, features
-function build_python_aux_featured() {
+build_python_aux_featured() {
   if [ "$2" = "win" ]; then
     maturin build --release --zig --interpreter python3.9 --target "$1" --features "$4"
   else
@@ -56,7 +56,7 @@ function build_python_aux_featured() {
   cp -f "../target/wheels/$name" "../$target_path"
 }
 
-function build_python() {
+build_python() {
   version_check
   cd python || (echo "Failed to \`cd python\`" & exit)
   source .env/bin/activate
@@ -77,7 +77,7 @@ function build_python() {
   cd "../"
 }
 
-function build_macos() {
+build_macos() {
   if [ "$f_benchmark" = true ]; then
     build_python_aux_featured x86_64-apple-darwin macos x86_64 "benchmark"
     build_python_aux_featured aarch64-apple-darwin macos arm64 "benchmark"
@@ -87,7 +87,7 @@ function build_macos() {
   fi
 }
 
-function build_linux() {
+build_linux() {
   if [ "$f_benchmark" = true ]; then
     build_python_aux_featured x86_64-unknown-linux-gnu manylinux x86_64 "benchmark"
     build_python_aux_featured aarch64-unknown-linux-gnu manylinux aarch64 "benchmark"
@@ -97,7 +97,7 @@ function build_linux() {
   fi
 }
 
-function build_windows() {
+build_windows() {
   if [ "$f_benchmark" = true ]; then
     build_python_aux_featured x86_64-pc-windows-msvc win amd64 "benchmark"
     build_python_aux_featured aarch64-pc-windows-msvc win arm64 "benchmark"
@@ -107,7 +107,7 @@ function build_windows() {
   fi
 }
 
-function version_check() {
+version_check() {
     common_version=$(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
     echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     printf "┃ version: \t\033[1;35m%s\033[0m\n" "$common_version"

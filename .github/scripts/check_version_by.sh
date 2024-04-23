@@ -3,7 +3,7 @@ input_version=$1
 
 echo_out=false
 
-function print() {
+print() {
   if $echo_out; then echo "$1"; fi
 }
 

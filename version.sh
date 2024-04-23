@@ -33,7 +33,7 @@ fi
 echo "New version: $std_ver, $var_ver"
 
 # $1: From regex; $2: to; $3: Target file
-function update() {
+update() {
   sed -i '' -e "s/$1/$2/g" "$3" || echo "! Failed for $3"
 }
 
