@@ -103,11 +103,11 @@ jobs:
           find java/java/ -mindepth 1 -maxdepth 1 -type f -name '.*' -exec mv -f {} target_repo/dt-java-sdk/ \;
           find java/java/ -mindepth 1 -maxdepth 1 -type d -name '.*' ! -name "." ! -name ".." -exec mv -rf {} target_repo/dt-java-sdk/ \;
           mv target_repo/dt-java-sdk/.gitignore_sub target_repo/dt-java-sdk/.gitignore
-          mkdir -p target_repo/dt-java-sdk/lib/
+          mkdir -p target_repo/dt-java-sdk/lib/src/main/resources/ai/datatower/sdk
           mv artifacts/* target_repo/dt-java-sdk/lib/src/main/resources/ai/datatower/sdk
 
           echo "Pushing..."
-          version=$(grep -oE "^version = .*$" "./java/java/lib/build.gradle" | sed -ne "s/^version = \"\(.*\)\"$/\1/p")
+          version=$(grep -oE "^version = .*$" "target_repo/dt-java-sdk/lib/build.gradle" | sed -ne "s/^version = \"\(.*\)\"$/\1/p")
           cd target_repo/dt-java-sdk/
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
