@@ -2,30 +2,31 @@ name: Java CI
 
 on:
   push:
-#    branches:
-#      - main
-#    tags:
-#      - 'v*'
+    branches:
+      - main
+    tags:
+      - 'v*'
 
 permissions:
   contents: read
 
 jobs:
-#  check-version-with-tag:
-#    name: Check Version
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#      - name: Check Version With Tag
-#        run: |
-#          chmod +x ./.github/scripts/check_version_by.sh
-#          ./.github/scripts/check_version_by.sh $(grep -oE "^version = .*$" "./java/java/lib/build.gradle" | sed -ne "s/^version = \"\(.*\)\"$/\1/p")
-#        shell: bash
-#        working-directory: ./
+  check-version-with-tag:
+    name: Check Version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Version With Tag
+        run: |
+          chmod +x ./.github/scripts/check_version_by.sh
+          ./.github/scripts/check_version_by.sh $(grep -oE "^version = .*$" "./java/java/lib/build.gradle" | sed -ne "s/^version = \"\(.*\)\"$/\1/p")
+        shell: bash
+        working-directory: ./
+
   build:
     name: Build ${{ matrix.settings.target }}
     runs-on: ${{ matrix.settings.host }}
-#    needs: [ check-version-with-tag ]
+    needs: [ check-version-with-tag ]
     strategy:
       matrix:
         settings:
@@ -91,7 +92,7 @@ jobs:
         run: |
           echo "Cloning..."
           mkdir target_repo && cd target_repo
-          git clone -b dt_test https://github.com/datatower-ai/dt-java-sdk.git
+          git clone -b main https://github.com/datatower-ai/dt-java-sdk.git
           cd ../
 
           echo "Resetting..."
@@ -115,5 +116,5 @@ jobs:
           git add .
           git commit -m "GitHub Action Bot: Syncing with v$version"
           git tag "v$version"
-          git push -f origin dt_test --tags
+          git push -f origin main --tags
         shell: bash
