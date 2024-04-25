@@ -44,6 +44,8 @@ build_golang() {
   if [ "$f_has_windows" = true ]; then
     build_windows
   fi
+
+  cp -f "clib/dt_core_clib.h" "$target_path/dt_core_clib.h"
 }
 
 build_macos() {

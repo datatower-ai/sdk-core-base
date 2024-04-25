@@ -22,6 +22,7 @@ jobs:
           ./.github/scripts/check_version_by.sh $(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
         shell: bash
         working-directory: ./
+
   build:
     name: Build ${{ matrix.settings.target }}
     runs-on: ${{ matrix.settings.host }}
@@ -85,6 +86,12 @@ jobs:
         with:
           name: ${{ matrix.settings.target }}
           path: ./artifacts/${{ matrix.settings.target_name }}
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dt_core_clib_header
+          path: ./clib/dt_core_clib.h
+          overwrite: true
 
   publish:
     name: Publish
@@ -113,6 +120,8 @@ jobs:
           find go/dt_core_golang/ -mindepth 1 -maxdepth 1 -type f -name '.*' -exec mv -f {} target_repo/dt-golang-sdk/ \;
           find go/dt_core_golang/ -mindepth 1 -maxdepth 1 -type d -name '.*' ! -name "." ! -name ".." -exec mv -rf {} target_repo/dt-golang-sdk/ \;
           mv target_repo/dt-golang-sdk/.gitignore_sub target_repo/dt-golang-sdk/.gitignore
+          mkdir -p target_repo/dt-golang-sdk/include/
+          mv artifacts/dt_core_clib.h target_repo/dt-golang-sdk/include/
           mkdir -p target_repo/dt-golang-sdk/lib/
           mv artifacts/* target_repo/dt-golang-sdk/lib/
           
@@ -125,5 +134,5 @@ jobs:
           git add .
           git commit -m "GitHub Action Bot: Syncing with v$version"
           git tag "v$version"
-          git push -f origin main --tags
+          git push -f main dt_test --tags
         shell: bash
