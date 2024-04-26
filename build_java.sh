@@ -110,6 +110,7 @@ build_jar() {
 publish_maven_local() {
   cd "$tmp_path" || (echo "Cannot cd to java project" && exit)
   ./gradlew lib:build lib:publishToMavenLocal
+  cd "../" || (echo "Cannot cd back" && exit)
   rm -rf "./tmp/"
 }
 

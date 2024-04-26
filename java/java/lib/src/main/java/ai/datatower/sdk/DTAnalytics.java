@@ -8,6 +8,8 @@ import java.util.Map;
 public class DTAnalytics {
     private static final String SDK_TYPE = "dt_server_sdk_java";
 
+    private static volatile DTAnalytics instance = null;
+
     private DTAnalytics(Consumer consumer, boolean isDebug) {
         Map<String, Object> config = consumer.getConfigMap();
         config.put("_debug", isDebug);
@@ -22,7 +24,14 @@ public class DTAnalytics {
      */
     public static DTAnalytics init(Consumer consumer, boolean isDebug) {
         try {
-            return new DTAnalytics(consumer, isDebug);
+            if (instance == null) {
+                synchronized (DTAnalytics.class) {
+                    if (instance == null) {
+                        instance = new DTAnalytics(consumer, isDebug);
+                    }
+                }
+            }
+            return instance;
         } catch (Throwable t) {
             System.out.println("[DT Java] Failed to init DTAnalytics!");
             t.printStackTrace();
@@ -40,9 +49,9 @@ public class DTAnalytics {
     /**
      * Track an event.
      *
-     * @param dt_id The device-scoped id.
-     * @param acid The account-scoped id.
-     * @param event_name Event name, can be custom event or preset event.
+     * @param dtId The device-scoped id.
+     * @param acId The account-scoped id.
+     * @param eventName Event name, can be custom event or preset event.
      * @param properties properties of this event. (preset properties are scoped by event name, and has type constraints)
      * @return True if given event and properties is valid or False if there are invalid and will not be processed.
      */
@@ -53,8 +62,8 @@ public class DTAnalytics {
     /**
      * Set user properties for the user with given dtId and acId.
      *
-     * @param dt_id The device-scoped id.
-     * @param acid The account-scoped id.
+     * @param dtId The device-scoped id.
+     * @param acId The account-scoped id.
      * @param properties properties of this event. (preset properties are scoped by event name, and has type constraints)
      * @return True if given event and properties is valid or False if there are invalid and will not be processed.
      */
@@ -66,8 +75,8 @@ public class DTAnalytics {
      * Set user properties for the user with given dtId and acId.
      * the value will not override existed property.
      *
-     * @param dt_id The device-scoped id.
-     * @param acid The account-scoped id.
+     * @param dtId The device-scoped id.
+     * @param acId The account-scoped id.
      * @param properties properties of this event. (preset properties are scoped by event name, and has type constraints)
      * @return True if given event and properties is valid or False if there are invalid and will not be processed.
      */
@@ -79,8 +88,8 @@ public class DTAnalytics {
      * Arithmetic add the value of property by given number for user with given dtId and acId.
      * Hence, the type of value for 'custom properties' should be a number.
      *
-     * @param dt_id The device-scoped id.
-     * @param acid The account-scoped id.
+     * @param dtId The device-scoped id.
+     * @param acId The account-scoped id.
      * @param properties properties of this event. (preset properties are scoped by event name, and has type constraints)
      * @return True if given event and properties is valid or False if there are invalid and will not be processed.
      */
@@ -92,8 +101,8 @@ public class DTAnalytics {
      * Unset properties for user with given dtId and acId.
      * Only the key of 'custom properties' will be used and its value is meaningless here.
      *
-     * @param dt_id The device-scoped id.
-     * @param acid The account-scoped id.
+     * @param dtId The device-scoped id.
+     * @param acId The account-scoped id.
      * @param properties properties of this event. (preset properties are scoped by event name, and has type constraints)
      * @return True if given event and properties is valid or False if there are invalid and will not be processed.
      */
@@ -113,8 +122,8 @@ public class DTAnalytics {
     /**
      * Delete the user with given dtId and acId.
      *
-     * @param dt_id The device-scoped id.
-     * @param acid The account-scoped id.
+     * @param dtId The device-scoped id.
+     * @param acId The account-scoped id.
      * @param properties preset properties of this event.
      * @return True if given event and properties is valid or False if there are invalid and will not be processed.
      */
@@ -126,8 +135,8 @@ public class DTAnalytics {
      * Append values to property for the user with given dtId and acId.
      * Hence, the type of value for 'custom properties' should be an array.
      *
-     * @param dt_id The device-scoped id.
-     * @param acid The account-scoped id.
+     * @param dtId The device-scoped id.
+     * @param acId The account-scoped id.
      * @param properties properties of this event. (preset properties are scoped by event name, and has type constraints)
      * @return True if given event and properties is valid or False if there are invalid and will not be processed.
      */
@@ -139,8 +148,8 @@ public class DTAnalytics {
      * Append values to property without duplications for the user with given dtId and acId.
      * Hence, the type of value for 'custom properties' should be an array.
      *
-     * @param dt_id The device-scoped id.
-     * @param acid The account-scoped id.
+     * @param dtId The device-scoped id.
+     * @param acId The account-scoped id.
      * @param properties properties of this event. (preset properties are scoped by event name, and has type constraints)
      * @return True if given event and properties is valid or False if there are invalid and will not be processed.
      */

@@ -1,5 +1,7 @@
 plugins {
+    id 'java'
     id 'org.jetbrains.kotlin.jvm'
+    id 'org.jetbrains.kotlin.plugin.serialization' version "1.9.23"
 }
 
 group = 'org.example'
@@ -7,18 +9,14 @@ version = 'unspecified'
 
 repositories {
     mavenCentral()
-    maven {
-        url "https://jitpack.io"
-    }
     mavenLocal()
 }
 
-configurations.configureEach {
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
-
 dependencies {
-    //implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "io.ktor:ktor-server-netty:2.3.10"
+    implementation 'com.google.code.gson:gson:2.10.1'
+
     implementation "com.github.datatower-ai:dt-java-sdk:+"
 }
 
