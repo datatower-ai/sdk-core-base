@@ -7,6 +7,7 @@ use serde_json::{Map, Value};
 use crate::event::Event;
 use crate::util::error::macros::verify_error;
 use crate::util::error::Result;
+use crate::log_warning;
 
 const NAME_REGEX_STR: &'static str = r"^[a-zA-Z#][a-zA-Z\d_]{0,63}$";
 static NAME_RE: Lazy<Regex> = Lazy::new(|| Regex::new(NAME_REGEX_STR).unwrap());
@@ -304,7 +305,7 @@ fn verify_custom_event(event_name: &String, properties: &Map<String, Value>) -> 
 fn verify_all_custom_props_are_list(properties: &Map<String, Value>) -> Result<()> {
     for (k, v) in properties {
         if is_preset(k) {
-            return Ok(());
+            continue;
         }
         let Value::Array(_) = v else {
             return verify_error!("Type of value in this event should be List");
@@ -316,7 +317,7 @@ fn verify_all_custom_props_are_list(properties: &Map<String, Value>) -> Result<(
 fn verify_all_custom_props_are_num(properties: &Map<String, Value>) -> Result<()> {
     for (k, v) in properties {
         if is_preset(k) {
-            return Ok(());
+            continue;
         }
         let Value::Number(_) = v else {
             return verify_error!("Type of value in this event should be Number");
