@@ -1,15 +1,8 @@
 plugins {
+    id 'application'
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
     id 'org.jetbrains.kotlin.plugin.serialization' version "1.9.23"
-}
-
-group = 'org.example'
-version = 'unspecified'
-
-repositories {
-    mavenCentral()
-    mavenLocal()
 }
 
 dependencies {
@@ -24,5 +17,9 @@ test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(8)
+}
+
+application {
+    mainClassName = "ai.datatower.sdk.demo.HttpTestKt"
 }

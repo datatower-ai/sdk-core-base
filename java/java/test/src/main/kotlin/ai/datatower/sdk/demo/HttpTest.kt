@@ -1,4 +1,4 @@
-package org.example
+package ai.datatower.sdk.demo
 
 import ai.datatower.sdk.DTAnalytics
 import ai.datatower.sdk.DTLogConsumer
@@ -11,7 +11,6 @@ import io.ktor.server.netty.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.util.*
 
 
 val gson = Gson()
@@ -21,7 +20,13 @@ fun main(args: Array<String>) {
     val port = args.firstOrNull()?.toIntOrNull() ?: 8015
     DTAnalytics.preload()
     println("Running in port: $port")
-    embeddedServer(Netty, host = "localhost", port = port) {
+    lateinit var server: NettyApplicationEngine
+    server = embeddedServer(Netty, host = "localhost", port = port) {
+        install(ShutDownUrl.ApplicationCallPlugin) {
+            shutDownUrl = "/shutdown"
+            exitCodeSupplier = { 0 }
+        }
+
         routing {
             post("/init") {
                 val json: Map<String, Any?> = call.getJson()
@@ -42,9 +47,7 @@ fun main(args: Array<String>) {
                     val acId = json["acid"]?.toString()
                     val eventName = json["event_name"].toString()
                     val properties = json["props"] as Map<String, Any?>
-                    dt?.track(dtId, acId, eventName, properties)?.let {
-                        call.respondText("Received Track, result: $it\n", ContentType.Text.Plain)
-                    } ?: call.respondText("Received Track, but sdk not initialized\n", ContentType.Text.Plain)
+                    call.respondText(genResponseByResult("Track", dt?.track(dtId, acId, eventName, properties)), ContentType.Text.Plain)
                 } catch (t: Throwable) {
                     t.printStackTrace()
                     call.respondText("Received Track, failed!\n${t.message}\n", ContentType.Text.Plain, status = HttpStatusCode.BadRequest)
@@ -82,6 +85,7 @@ fun main(args: Array<String>) {
                 println("\nclose")
                 dt?.close()?.let {
                     call.respondText("Received Close\n", ContentType.Text.Plain)
+                    server.stop(500, 3000)
                 } ?: call.respondText("Received Close, but sdk not initialized\n", ContentType.Text.Plain)
             }
             post("/log/enable") {
@@ -108,15 +112,19 @@ fun Route.userApi(api: String, func: (String, String?, Map<String, Any?>) -> Boo
             val dtId = json["dt_id"].toString()
             val acId = json["acid"]?.toString()
             val properties = json["props"] as Map<String, Any?>
-            func(dtId, acId, properties)?.let {
-                call.respondText("Received $api, result: $it\n", ContentType.Text.Plain)
-            } ?: call.respondText("Received $api, but sdk not initialized\n", ContentType.Text.Plain)
+            call.respondText(genResponseByResult(api, func(dtId, acId, properties)), ContentType.Text.Plain)
         } catch (t: Throwable) {
             t.printStackTrace()
             call.respondText("Received $api, failed!\n${t.message}\n", ContentType.Text.Plain, status = HttpStatusCode.BadRequest)
             return@post
         }
     }
+}
+
+fun genResponseByResult(api: String, result: Boolean?): String {
+    return result?.let { if (it) "success" else "fail" }?.let {
+        "Received $api, result: $it\n"
+    } ?: "Received $api, but sdk not initialized\n"
 }
 
 suspend fun ApplicationCall.getJson(): Map<String, Any?> = try {
