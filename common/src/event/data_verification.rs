@@ -7,7 +7,6 @@ use serde_json::{Map, Value};
 use crate::event::Event;
 use crate::util::error::macros::verify_error;
 use crate::util::error::Result;
-use crate::log_warning;
 
 const NAME_REGEX_STR: &'static str = r"^[a-zA-Z#][a-zA-Z\d_]{0,63}$";
 static NAME_RE: Lazy<Regex> = Lazy::new(|| Regex::new(NAME_REGEX_STR).unwrap());

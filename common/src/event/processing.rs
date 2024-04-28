@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 use std::time::{SystemTime, UNIX_EPOCH};
 use serde_json::{Map, Number, Value};
 use crate::event::common_properties::fulfill_by_comm_props;
-use crate::event::data_verification::{COMPULSORY_META_PROPS, META_PROPS, verify_event};
+use crate::event::data_verification::{META_PROPS, verify_event};
 use crate::event::Event;
 use crate::log_error;
 use crate::util::error::{DTError, Result};
@@ -33,9 +33,6 @@ fn is_need_eventify(event: &Event) -> bool {
     if event.len() > META_PROPS.len() {
         // Guarantees to contain non-meta properties.
         true
-    } else if event.len() < COMPULSORY_META_PROPS.len() {
-        // Guarantees to fail the verification. So, just skipping the eventify.
-        false
     } else {
         for key in event.keys() {
             if !META_PROPS.contains_key(key.as_str()) {
@@ -87,6 +84,10 @@ fn fulfill_metas(event: &mut Event) {
 
     if DEBUG.load(Ordering::Relaxed) {
         event.insert(String::from("#debug"), Value::from(true));
+    }
+
+    if !event.contains_key(&String::from("properties")) {
+        event.insert(String::from("properties"), Value::Object(serde_json::Map::with_capacity(2)));
     }
 }
 
