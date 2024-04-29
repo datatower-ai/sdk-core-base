@@ -54,8 +54,11 @@ build_macos() {
     cargo rustc --release --package lua --no-default-features --features "$1" --target aarch64-apple-darwin -- -C link-arg=-undefined -C link-arg=dynamic_lookup
   fi
 
-  cp -f "./target/x86_64-apple-darwin/release/libdt_core_lua.dylib" "$target_path/dt_core_lua-$1-macos-x86_64.so"
-  cp -f "./target/aarch64-apple-darwin/release/libdt_core_lua.dylib" "$target_path/dt_core_lua-$1-macos-aarch64.so"
+  #cp -f "./target/x86_64-apple-darwin/release/libdt_core_lua.dylib" "$target_path/dt_core_lua-$1-macos-x86_64.so"
+  #cp -f "./target/aarch64-apple-darwin/release/libdt_core_lua.dylib" "$target_path/dt_core_lua-$1-macos-aarch64.so"
+
+  build_rock "$1" macosx x86_64 "$2" x86_64-apple-darwin libdt_core_lua.dylib dt_core_lua.so
+  build_rock "$1" macosx aarch64 "$2" aarch64-apple-darwin libdt_core_lua.dylib dt_core_lua.so
 }
 
 build_linux() {
@@ -89,12 +92,42 @@ build_windows() {
   mv "./.cargo/blocked.config.toml" "./.cargo/config.toml"
 }
 
+
+# $1: Lua version
+# $2: OS
+# $3: Arch
+# $4: Lua version number
+# $5: Target
+# $6: Artifact name
+# $7: Target Artifact name
+# Copy -> Compress -> Build -> Move -> Clear
+build_rock() {
+  mkdir -p "$target_path/tmp"
+  version=$(grep -oE "^version = \".*\"$" "./lua/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
+  version=$(echo "$version" | sed -nE "s/^(v?([0-9]+)\.([0-9]+)\.([0-9]+)[-._]?(([a|A])lpha|([b|B])eta)?([0-9]*))$/\2.\3.\4.\5\8/p")
+  cp -f "./lua/gen_rockspec.sh" "$target_path/tmp/"
+  cp -f "./lua/Cargo.toml" "$target_path/tmp/"
+  archive_folder="dt-lua-sdk-$version"
+  cp -r "./lua/dt-lua-sdk/" "$target_path/tmp/$archive_folder"
+  cp -f "./target/$5/release/$6" "$target_path/tmp/$archive_folder/$7"
+  cd "$target_path/tmp"
+  tar czpf "$archive_folder.tar.gz" "./$archive_folder/"
+  name=$(sh ./gen_rockspec.sh "$4" "$2")
+  luarocks pack "$name"
+  rock_file=$(basename $(find . -maxdepth 1 -mindepth 1 -type f -name "*.rock" | head -1))
+  prefix="$1-$2-$3"
+  mv "$rock_file" "../$prefix-$rock_file"
+  cd ../        # ./xxx/lua
+  rm -rf ./tmp/
+  cd ../../        # .
+}
+
+
 version_check() {
     common_version=$(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
     echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     printf "┃ version: \t\033[1;35m%s\033[0m\n" "$common_version"
     echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
 }
 
 
@@ -102,9 +135,9 @@ version_check() {
 # Build
 ####################################
 version_check
-build_lua lua54
-build_lua lua53
-build_lua lua52
-build_lua lua51
-build_lua luajit
-build_lua luau
+build_lua lua54 5.4
+build_lua lua53 5.3
+build_lua lua52 5.2
+build_lua lua51 5.1
+#build_lua luajit
+#build_lua luau
