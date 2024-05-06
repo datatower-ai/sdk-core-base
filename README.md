@@ -1,9 +1,3 @@
-<style>
-.header_text a {
-    font-weight: bold;
-}
-</style>
-
 [![Node.js CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_nodejs.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_nodejs.yaml)
 [![Python CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_python.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_python.yaml)
 [![Golang CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_golang.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_golang.yaml)
@@ -18,15 +12,15 @@
     </a>
 </p>
 
-<p align="center" class="header_text">
+<p align="center">
     <span>Available in</span><br />
-    <a href="">Golang</a>
+    <a href="" style="font-weight: bold">Golang</a>
     <span>-</span>
-    <a href="">Java</a>
+    <a href="" style="font-weight: bold">Java</a>
     <span>-</span>
-    <a href="">Lua</a>
+    <a href="" style="font-weight: bold">Lua</a>
     <span>-</span>
-    <a href="">Node.js</a>
+    <a href="" style="font-weight: bold">Node.js</a>
 </p>
 
 # DataTower.ai SDK Core (server-side)
