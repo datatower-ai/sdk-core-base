@@ -90,9 +90,10 @@ jobs:
           merge-multiple: true
       - name: Clone, Update, Push
         run: |
+          branch="main"
           echo "Cloning..."
           mkdir target_repo && cd target_repo
-          git clone -b main https://github.com/datatower-ai/dt-java-sdk.git
+          git clone -b "$branch" https://github.com/datatower-ai/dt-java-sdk.git
           cd ../
 
           echo "Resetting..."
@@ -116,5 +117,5 @@ jobs:
           git add .
           git commit -m "GitHub Action Bot: Syncing with v$version"
           git tag "v$version"
-          git push -f origin main --tags
+          git push -f origin "$branch" --tags
         shell: bash

@@ -37,12 +37,10 @@ update() {
   sed -i '' -e "s/$1/$2/g" "$3" || echo "! Failed for $3"
 }
 
-# Common
+# Common, Golang
 update "^version = \".*\"$" "version = \"$std_ver\"" "$base_path/common/Cargo.toml"
 # Clib
 update "^version = \".*\"$" "version = \"$std_ver\"" "$base_path/clib/Cargo.toml"
-# Golang
-# ...
 # Java
 update "^version = \".*\"$" "version = \"$std_ver\"" "$base_path/java/Cargo.toml"
 update "^version = \".*\"$" "version = \"$std_ver\"" "./java/java/lib/build.gradle"
