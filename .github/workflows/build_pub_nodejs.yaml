@@ -263,6 +263,7 @@ jobs:
         run: ls -R ./npm
         shell: bash
       - name: Publish
+        if: startsWith(github.event.ref, 'refs/tags/')
         run: |
           npm config set provenance true
           ver=$(grep -oE "^ *\"version\": \".*\", *$" "./package.json" | sed -ne "s/.*\"version\": \"\(.*\)\",.*/\1/p")

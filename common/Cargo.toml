@@ -1,6 +1,6 @@
 [package]
 name = "common"
-version = "1.0.0-alpha3"
+version = "1.0.0-alpha4"
 edition = "2021"
 build = "build/main.rs"
 
