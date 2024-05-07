@@ -55,25 +55,31 @@ static PRESET_EVENT_PROPS_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::fro
     ("#memory_used", TypeConstraint::String), ("#storage_used", TypeConstraint::String),
     ("#network_type", TypeConstraint::String), ("#simulator", TypeConstraint::Bool),
     ("#fps", TypeConstraint::Number), ("#scene", TypeConstraint::String),
-    ("#mp_platform", TypeConstraint::String)
+    ("#mp_platform", TypeConstraint::String), ("#gaid", TypeConstraint::String)
 ]));
 static PRESET_PROPS_USER_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#active_device_model", TypeConstraint::String), ("#active_network_type", TypeConstraint::String),
     ("#active_os_version_name", TypeConstraint::String), ("#active_os", TypeConstraint::String),
     ("#active_os_lang_code", TypeConstraint::String), ("#firebase_iid", TypeConstraint::String),
+    ("#active_bundle_id", TypeConstraint::String), ("#active_device_manufacturer", TypeConstraint::String),
+    ("#active_screen_width", TypeConstraint::Number), ("#active_mcc", TypeConstraint::String),
+    ("#active_os_country_code", TypeConstraint::String), ("#active_mnc", TypeConstraint::String),
+    ("#active_storage_used", TypeConstraint::String), ("#active_user_agent", TypeConstraint::String),
+    ("#active_app_version_code", TypeConstraint::Number), ("#active_sdk_type", TypeConstraint::String),
+    ("#active_device_brand", TypeConstraint::String), ("#active_memory_used", TypeConstraint::String),
+    ("#active_sdk_version_name", TypeConstraint::String), ("#active_screen_height", TypeConstraint::Number),
+    ("#active_app_version_name", TypeConstraint::String), ("#active_simulator", TypeConstraint::Bool),
 ]));
 static PRESET_PROPS_AD: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#ad_seq", TypeConstraint::String), ("#ad_id", TypeConstraint::String),
     ("#ad_type_code", TypeConstraint::Integer), ("#ad_platform_code", TypeConstraint::Integer),
-    ("#ad_entrance", TypeConstraint::String), ("#ad_result", TypeConstraint::Bool),
-    ("#ad_duration", TypeConstraint::Integer), ("#ad_location", TypeConstraint::String),
+    ("#ad_entrance", TypeConstraint::String), ("#load_result", TypeConstraint::String),
+    ("#load_duration", TypeConstraint::Number), ("#ad_location", TypeConstraint::String),
+    ("#error_code", TypeConstraint::Integer), ("#error_message", TypeConstraint::String),
     ("#ad_value", TypeConstraint::Number), ("#ad_currency", TypeConstraint::String),
     ("#ad_precision", TypeConstraint::String), ("#ad_country_code", TypeConstraint::String),
     ("#ad_mediation_code", TypeConstraint::Integer), ("#ad_mediation_id", TypeConstraint::String),
-    ("#ad_conversion_source", TypeConstraint::String), ("#ad_click_gap", TypeConstraint::String),
-    ("#ad_return_gap", TypeConstraint::String), ("#error_code", TypeConstraint::Integer),
-    ("#error_message", TypeConstraint::String), ("#load_result", TypeConstraint::String),
-    ("#load_duration", TypeConstraint::String)
+    ("#ad_conversion_source", TypeConstraint::String)
 ]));
 static PRESET_PROPS_IAS: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#ias_original_order", TypeConstraint::String), ("#ias_order", TypeConstraint::String),
@@ -82,7 +88,8 @@ static PRESET_PROPS_IAS: PropsConstraintMap = Lazy::new(|| HashMap::from([
 ]));
 static PRESET_PROPS_APP_INSTALL: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#referrer_url", TypeConstraint::String), ("#referrer_click_time", TypeConstraint::Integer),
-    ("#app_install_time", TypeConstraint::Integer), ("#instant_experience_launched", TypeConstraint::Bool),
+    ("#referrer_click_time_server", TypeConstraint::Integer), ("#app_install_time", TypeConstraint::Integer),
+    ("#app_install_time_server", TypeConstraint::Integer), ("#instant_experience_launched", TypeConstraint::Bool),
     ("#failed_reason", TypeConstraint::String), ("#cnl", TypeConstraint::String)
 ]));
 static PRESET_PROPS_SESSION_START: PropsConstraintMap = Lazy::new(|| HashMap::from([
@@ -111,8 +118,6 @@ static PRESET_EVENTS: Lazy<HashMap<&str, (&'static PropsConstraintMap, &'static 
     ("#ad_show_failed", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
     ("#ad_close", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
     ("#ad_click", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
-    ("#ad_left_app", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
-    ("#ad_return_app", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
     ("#ad_rewarded", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
     ("#ad_conversion", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
     ("#ad_paid", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
