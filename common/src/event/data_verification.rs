@@ -73,13 +73,7 @@ static PRESET_PROPS_USER_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::from
 static PRESET_PROPS_AD: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#ad_seq", TypeConstraint::String), ("#ad_id", TypeConstraint::String),
     ("#ad_type_code", TypeConstraint::Integer), ("#ad_platform_code", TypeConstraint::Integer),
-    ("#ad_entrance", TypeConstraint::String), ("#load_result", TypeConstraint::String),
-    ("#load_duration", TypeConstraint::Number), ("#ad_location", TypeConstraint::String),
-    ("#error_code", TypeConstraint::Integer), ("#error_message", TypeConstraint::String),
-    ("#ad_value", TypeConstraint::Number), ("#ad_currency", TypeConstraint::String),
-    ("#ad_precision", TypeConstraint::String), ("#ad_country_code", TypeConstraint::String),
     ("#ad_mediation_code", TypeConstraint::Integer), ("#ad_mediation_id", TypeConstraint::String),
-    ("#ad_conversion_source", TypeConstraint::String)
 ]));
 static PRESET_PROPS_IAS: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#ias_original_order", TypeConstraint::String), ("#ias_order", TypeConstraint::String),
@@ -103,27 +97,39 @@ static PRESET_PROPS_IAP_PURCHASE_SUCCESS: PropsConstraintMap = Lazy::new(|| Hash
     ("#iap_order", TypeConstraint::String), ("#iap_sku", TypeConstraint::String),
     ("#iap_price", TypeConstraint::Number), ("#iap_currency", TypeConstraint::String)
 ]));
-
-static EMPTY_PROPS_LIST: PropsConstraintMap = Lazy::new(|| HashMap::new());
-static EMPTY_PROPS_LIST_TUPLE: (&'static PropsConstraintMap, &'static PropsConstraintMap) = (&EMPTY_PROPS_LIST, &EMPTY_PROPS_LIST);
-// { Event name: (Shared properties, Extra event-specific properties) }
-static PRESET_EVENTS: Lazy<HashMap<&str, (&'static PropsConstraintMap, &'static PropsConstraintMap)>> = Lazy::new(|| HashMap::from([
-    ("#app_install", (&PRESET_PROPS_APP_INSTALL, &EMPTY_PROPS_LIST)),
-    ("#session_start", (&PRESET_PROPS_SESSION_START, &EMPTY_PROPS_LIST)),
-    ("#session_end", (&PRESET_PROPS_SESSION_END, &EMPTY_PROPS_LIST)),
-    ("#ad_load_begin", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
-    ("#ad_load_end", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
-    ("#ad_to_show", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
-    ("#ad_show", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
-    ("#ad_show_failed", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
-    ("#ad_close", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
-    ("#ad_click", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
-    ("#ad_rewarded", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
-    ("#ad_conversion", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
-    ("#ad_paid", (&PRESET_PROPS_AD, &EMPTY_PROPS_LIST)),
-    ("#iap_purchase_success", (&PRESET_PROPS_IAP_PURCHASE_SUCCESS, &EMPTY_PROPS_LIST)),
-    ("#ias_subscribe_success", (&PRESET_PROPS_IAS, &EMPTY_PROPS_LIST)),
-    ("#ias_subscribe_notify", (&PRESET_PROPS_IAS, &EMPTY_PROPS_LIST)),
+static PRESET_PROPS_AD_EXCEPT_BEGIN_END: PropsConstraintMap = Lazy::new(|| HashMap::from([
+    ("#ad_entrance", TypeConstraint::String), ("#ad_location", TypeConstraint::String)
+]));
+static PRESET_PROPS_AD_LOAD_END: PropsConstraintMap = Lazy::new(|| HashMap::from([
+    ("#load_result", TypeConstraint::String), ("#load_duration", TypeConstraint::Number),
+]));
+static PRESET_PROPS_AD_FAILED_END: PropsConstraintMap = Lazy::new(|| HashMap::from([
+    ("#error_code", TypeConstraint::Integer), ("#error_message", TypeConstraint::String),
+]));
+static PRESET_PROPS_AD_PAID: PropsConstraintMap = Lazy::new(|| HashMap::from([
+    ("#ad_value", TypeConstraint::Number), ("#ad_currency", TypeConstraint::String),
+    ("#ad_precision", TypeConstraint::String), ("#ad_country_code", TypeConstraint::String),
+]));
+static PRESET_PROPS_AD_CONVERSION: PropsConstraintMap = Lazy::new(|| HashMap::from([
+    ("#ad_conversion_source", TypeConstraint::String)
+]));
+static PRESET_EVENTS: Lazy<HashMap<&str, Vec<&PropsConstraintMap>>> = Lazy::new(|| HashMap::from([
+    ("#app_install", vec![&PRESET_PROPS_APP_INSTALL]),
+    ("#session_start", vec![&PRESET_PROPS_SESSION_START]),
+    ("#session_end", vec![&PRESET_PROPS_SESSION_END]),
+    ("#ad_load_begin", vec![&PRESET_PROPS_AD]),
+    ("#ad_load_end", vec![&PRESET_PROPS_AD, &PRESET_PROPS_AD_LOAD_END, &PRESET_PROPS_AD_FAILED_END]),
+    ("#ad_to_show", vec![&PRESET_PROPS_AD, &PRESET_PROPS_AD_EXCEPT_BEGIN_END]),
+    ("#ad_show", vec![&PRESET_PROPS_AD, &PRESET_PROPS_AD_EXCEPT_BEGIN_END]),
+    ("#ad_show_failed", vec![&PRESET_PROPS_AD, &PRESET_PROPS_AD_EXCEPT_BEGIN_END, &PRESET_PROPS_AD_FAILED_END]),
+    ("#ad_close", vec![&PRESET_PROPS_AD, &PRESET_PROPS_AD_EXCEPT_BEGIN_END]),
+    ("#ad_click", vec![&PRESET_PROPS_AD, &PRESET_PROPS_AD_EXCEPT_BEGIN_END]),
+    ("#ad_rewarded", vec![&PRESET_PROPS_AD, &PRESET_PROPS_AD_EXCEPT_BEGIN_END]),
+    ("#ad_conversion", vec![&PRESET_PROPS_AD, &PRESET_PROPS_AD_EXCEPT_BEGIN_END, &PRESET_PROPS_AD_CONVERSION]),
+    ("#ad_paid", vec![&PRESET_PROPS_AD, &PRESET_PROPS_AD_EXCEPT_BEGIN_END, &PRESET_PROPS_AD_PAID]),
+    ("#iap_purchase_success", vec![&PRESET_PROPS_IAP_PURCHASE_SUCCESS]),
+    ("#ias_subscribe_success", vec![&PRESET_PROPS_IAS]),
+    ("#ias_subscribe_notify", vec![&PRESET_PROPS_IAS]),
 ]));
 
 pub(super) fn init() -> Result<()> {
@@ -168,8 +174,8 @@ pub(crate) fn verify_event(event_map: &Event) -> Result<()> {
 
     if event_type == "track" {
         if is_preset(event_name) {
-            if let Some(props_tuple) = PRESET_EVENTS.get(event_name.as_str()) {
-                verify_preset_event(event_name, properties, props_tuple)
+            if let Some(props_list) = PRESET_EVENTS.get(event_name.as_str()) {
+                verify_preset_event(event_name, properties, props_list)
             } else {
                 return verify_error!("event_name (\"{}\") is out of scope (preset)!", event_name);
             }
@@ -225,10 +231,10 @@ fn check_meta_is_string_and_nonempty(event_map: &Event, key: String) -> Result<(
 fn verify_preset_event(
     event_name: &String,
     properties: &Map<String, Value>,
-    props_tuple: &(&PropsConstraintMap, &PropsConstraintMap)
+    props_list: &Vec<&PropsConstraintMap>
 ) -> Result<()> {
     for (key, value) in properties {
-        verify_properties(event_name, key, value, find_constraint_for_event(key, props_tuple))?
+        verify_properties(event_name, key, value, find_constraint_for_event(key, props_list))?
     }
     Ok(())
 }
@@ -274,15 +280,14 @@ fn find_constraint_for_user_event<'a>(
 
 fn find_constraint_for_event<'a>(
     prop_name: &str,
-    (props1, props2): &'a (&PropsConstraintMap, &PropsConstraintMap)
+    constraints: &'a Vec<&PropsConstraintMap>
 ) -> Option<&'a TypeConstraint> {
-    PRESET_EVENT_PROPS_COMMON.get(prop_name).or(
-        props1.get(prop_name).or(
-            props2.get(prop_name).or(
-                COMMON_PROPS.get(prop_name)
-            )
-        )
-    )
+    for map in constraints {
+        if let Some(constraint) = map.get(prop_name) {
+            return Some(constraint)
+        }
+    }
+    PRESET_EVENT_PROPS_COMMON.get(prop_name).or(COMMON_PROPS.get(prop_name))
 }
 
 fn verify_user_event(event_name: &String, properties: &Map<String, Value>) -> Result<()> {
@@ -301,7 +306,7 @@ fn verify_user_event(event_name: &String, properties: &Map<String, Value>) -> Re
 
 fn verify_custom_event(event_name: &String, properties: &Map<String, Value>) -> Result<()> {
     for (k, v) in properties {
-        verify_properties(event_name, k, v, find_constraint_for_event(k, &EMPTY_PROPS_LIST_TUPLE))?
+        verify_properties(event_name, k, v, find_constraint_for_event(k, &Vec::with_capacity(0)))?
     }
     Ok(())
 }
