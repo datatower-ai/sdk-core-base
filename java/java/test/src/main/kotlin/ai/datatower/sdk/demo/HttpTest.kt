@@ -2,6 +2,8 @@ package ai.datatower.sdk.demo
 
 import ai.datatower.sdk.DTAnalytics
 import ai.datatower.sdk.DTLogConsumer
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.ktor.http.*
@@ -127,8 +129,13 @@ fun genResponseByResult(api: String, result: Boolean?): String {
     } ?: "Received $api, but sdk not initialized\n"
 }
 
+val mapper = ObjectMapper()
+val typeRef = object: TypeReference<Map<String, Any?>>() {}
 suspend fun ApplicationCall.getJson(): Map<String, Any?> = try {
-    gson.fromJson(receive<String>(), object : TypeToken<Map<String, Any?>>() {}.type)
+    val body = receive<String>()
+    println(body)
+    mapper.readValue(body, typeRef)
+//    gson.fromJson(receive<String>(), object : TypeToken<Map<String, Any?>>() {}.type)
 } catch (t: Throwable) {
     mapOf()
 }

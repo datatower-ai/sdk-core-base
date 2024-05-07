@@ -1,6 +1,8 @@
+[![Golang CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_golang.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_golang.yaml)
+[![Java CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_java.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_java.yaml)
+[![Lua CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_lua.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_lua.yaml)
 [![Node.js CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_nodejs.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_nodejs.yaml)
 [![Python CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_python.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_python.yaml)
-[![Golang CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_golang.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_golang.yaml)
 
 <p align="center">
     <a href="https://datatower.ai/" target="_blank">
@@ -21,6 +23,8 @@
     <a href="" style="font-weight: bold">Lua</a>
     <span>-</span>
     <a href="" style="font-weight: bold">Node.js</a>
+    <span>-</span>
+    <a href="" style="font-weight: bold">Python</a>
 </p>
 
 # DataTower.ai SDK Core (server-side)
