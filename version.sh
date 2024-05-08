@@ -1,5 +1,5 @@
 base_path=$(dirname "$0")
-raw_version=$(echo "$1" | sed -nE "s/^(v?([0-9]+)\.([0-9]+)\.([0-9]+)[-._]?(([a|A])lpha|([b|B])eta)?([0-9]*))$/\2.\3.\4 \5 \8/p")
+raw_version=$(echo "$1" | sed -nE "s/^(v?([0-9]+)\.([0-9]+)\.([0-9]+)[-._]?(([a|A])lpha|([b|B])eta|SNAPSHOT)?([0-9]*))$/\2.\3.\4 \5 \8/p")
 
 arr=($raw_version)
 version=${arr[0]}

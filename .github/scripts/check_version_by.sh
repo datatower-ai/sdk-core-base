@@ -8,10 +8,10 @@ print() {
 }
 
 if [[ -z "$2" ]]; then
-  latest=$(git tag -l | sed -nE "s/^(v([0-9]+)\.([0-9]+)\.([0-9]+)[-._]?(([a|A])lpha|([b|B])eta)?([0-9]*))$/\2.\3.\4.\8\6\7 \1 \2.\3.\4 \5 \8/p" | sort --version-sort -r -s -k1,1 | head -1)
+  latest=$(git tag -l | sed -nE "s/^(v([0-9]+)\.([0-9]+)\.([0-9]+)[-._]?(([a|A])lpha|([b|B])eta|SNAPSHOT)?([0-9]*))$/\2.\3.\4.\8\6\7 \1 \2.\3.\4 \5 \8/p" | sort --version-sort -r -s -k1,1 | head -1)
   echo_out=true
 else
-  latest=$(echo "$2" | sed -nE "s/^(v?([0-9]+)\.([0-9]+)\.([0-9]+)[-._]?(([a|A])lpha|([b|B])eta)?([0-9]*))$/\2.\3.\4.\8\6\7 \1 \2.\3.\4 \5 \8/p")
+  latest=$(echo "$2" | sed -nE "s/^(v?([0-9]+)\.([0-9]+)\.([0-9]+)[-._]?(([a|A])lpha|([b|B])eta|SNAPSHOT)?([0-9]*))$/\2.\3.\4.\8\6\7 \1 \2.\3.\4 \5 \8/p")
   echo_out=false
 fi
 arr=($latest)
