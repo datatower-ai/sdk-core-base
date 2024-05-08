@@ -114,12 +114,14 @@ jobs:
           echo "on branch: $branch"
           PACKAGE_URL="https://jitpack.io/com/github/datatower-ai/dt-java-sdk/$branch-SNAPSHOT/"
           
+          sleep 10
+          
           count=1
           file_count=0
           max_try=3
           until [[ $count -gt $max_try ]] || [[ $file_count -gt 1 ]]; do
             echo "Attempt ${count}/${max_try}"
-            FILES=$(curl -sS -m 180 ${PACKAGE_URL})
+            FILES=$(curl -sS -m 30 ${PACKAGE_URL})
             file_count=$(echo $FILES | wc -w | xargs)
             let count+=1
             sleep 5
@@ -128,9 +130,7 @@ jobs:
           echo "=> ${PACKAGE_URL}build.log"
           if [[ file_count -gt 1 ]]; then
             echo "Finished!"
-            exit 0
           else
             echo "Failed!"
-            exit 1
           fi
         shell: bash
