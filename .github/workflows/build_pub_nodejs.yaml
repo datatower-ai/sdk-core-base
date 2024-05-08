@@ -33,6 +33,7 @@ jobs:
           ./.github/scripts/check_version_by.sh $(grep -oE "^ *\"version\": \".*\", *$" "./nodejs/package.json" | sed -ne "s/.*\"version\": \"\(.*\)\",.*/\1/p")
         shell: bash
         working-directory: ./
+
   build:
     strategy:
       fail-fast: false
@@ -134,7 +135,7 @@ jobs:
       matrix:
         settings:
           - host: macos-latest
-            target: x86_64-apple-darwin
+            target: aarch64-apple-darwin
           - host: windows-latest
             target: x86_64-pc-windows-msvc
         node:
@@ -264,13 +265,17 @@ jobs:
         shell: bash
       - name: Publish
         run: |
-          npm config set provenance true
           ver=$(grep -oE "^ *\"version\": \".*\", *$" "./package.json" | sed -ne "s/.*\"version\": \"\(.*\)\",.*/\1/p")
           if echo "$ver" | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+$";
           then
             echo "Publishing Release"
             echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
             npm publish --access public
+          elif echo "$ver" | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+-SNAPSHOT";
+          then
+            echo "Publishing SNAPSHOT"
+            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+            npm publish --tag snapshot --access public
           elif echo "$ver" | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+";
           then
             echo "Publishing Beta Release"
