@@ -101,7 +101,7 @@ static PRESET_PROPS_AD_EXCEPT_BEGIN_END: PropsConstraintMap = Lazy::new(|| HashM
     ("#ad_entrance", TypeConstraint::String), ("#ad_location", TypeConstraint::String)
 ]));
 static PRESET_PROPS_AD_LOAD_END: PropsConstraintMap = Lazy::new(|| HashMap::from([
-    ("#load_result", TypeConstraint::String), ("#load_duration", TypeConstraint::Number),
+    ("#load_result", TypeConstraint::Bool), ("#load_duration", TypeConstraint::Number),
 ]));
 static PRESET_PROPS_AD_FAILED_END: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#error_code", TypeConstraint::Integer), ("#error_message", TypeConstraint::String),

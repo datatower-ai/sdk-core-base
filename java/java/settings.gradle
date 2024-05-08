@@ -17,7 +17,8 @@ plugins {
 }
 
 rootProject.name = 'dt_server_sdk_java'
-include('lib')
-include 'demo'
-include 'test'
+include 'lib'
+if (!System.env.JITPACK)
+    include 'demo'
+    include 'test'
 
