@@ -14,7 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        if: ${{ github.base_ref == 'main' }}
       - name: Run version_test.sh
+        if: ${{ github.base_ref == 'main' }}
         run: |
           chmod +x ./.github/scripts/version_check.sh 
           ./.github/scripts/version_check.sh

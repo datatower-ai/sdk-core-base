@@ -35,5 +35,9 @@ check "$ver" "Node.js"
 ver_python=$(grep -oE "^version = .*$" "./python/Cargo.toml" | sed -ne "s/^version = \"\(.*\)\" *$/\1/p")
 check "$ver_python" "Python"
 
+# Clib
+ver_clib=$(grep -oE "^version = .*$" "./clib/Cargo.toml" | sed -ne "s/^version = \"\(.*\)\" *$/\1/p")
+check "$ver_clib" "Clib"
+
 
 exit $((failed))
