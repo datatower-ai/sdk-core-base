@@ -1,0 +1,24 @@
+{
+  "name": "http_test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@datatower-ai/sdk-core-nodejs": "file:../../nodejs"
+  },
+  "override": {
+    "@datatower-ai/sdk-core-nodejs": {
+      "@datatower-ai/sdk-core-nodejs-win32-x64-msvc": "file:built-artifacts/win32-x64-msvc",
+      "@datatower-ai/sdk-core-nodejs-win32-arm64-msvc": "file:built-artifacts/win32-arm64-msvc",
+      "@datatower-ai/sdk-core-nodejs-darwin-x64": "file:built-artifacts/darwin-x64",
+      "@datatower-ai/sdk-core-nodejs-darwin-arm64": "file:built-artifacts/darwin-arm64",
+      "@datatower-ai/sdk-core-nodejs-linux-x64-gnu": "file:built-artifacts/linux-x64-gnu",
+      "@datatower-ai/sdk-core-nodejs-linux-arm64-gnu": "file:built-artifacts/linux-arm64-gnu"
+    }
+  }
+}
