@@ -26,7 +26,14 @@ const onReceived = (req, res, body) => {
     let result = "success"
     let map = new Map();
     if (body.length !== 0) {
-        map = new Map(Object.entries(JSON.parse(body)))
+        try {
+            map = new Map(Object.entries(JSON.parse(body)))
+        } catch (e) {
+            console.error(e)
+            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.end(`received ${parsedUrl.path}, but failed when parsing json. \nError: ${e}\n`);
+            return
+        }
     }
 
     switch (parsedUrl.path) {
