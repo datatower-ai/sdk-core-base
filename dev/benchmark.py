@@ -1,17 +1,13 @@
 import time
 from dt_python_sdk import *
 
-consumer = DTLogConsumer("log", 200, "dt_py", 10*1024*1024)
+consumer = DTLogConsumer("log", 1000, "dt_py", 10*1024*1024)
 dt = DTAnalytics(consumer, True)
 
 DTAnalytics.enable_log()
 
 dt_id = "1234567890987654321"
 acid = None
-
-dt.user_unset("xx", "xxxx", {"#app_id": "aaa", "#bundle_id": "123", "bb": 2, "cc": "ss", "#is_foreground": True})
-dt.user_delete("xx", "xxxx", {"#app_id": "aaa", "#bundle_id": "123", "bb": 2, "cc": "ss"})
-dt.flush()
 
 DTAnalytics.disable_log()
 
@@ -24,7 +20,7 @@ properties["#os"] = "1.1.1.1"
 properties["sex"] = 'female'
 properties["#app_id"] = "appid_1234567890"
 properties["#bundle_id"] = "com.example"
-for i in range(5):
+for i in range(20):
     properties["a" + str(i)] = "asd" * i
 
 n = 100000

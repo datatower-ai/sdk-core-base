@@ -12,7 +12,7 @@ import (
 
 func main() {
 	dtAnalytics.ToggleLogger(true)
-	consumer := dtAnalytics.NewDTLogConsumer("log", 200, "dt_go_demo", 0)
+	consumer := dtAnalytics.NewDTLogConsumer("log", 1000, "dt_go_demo", 0)
 	dt, _ := dtAnalytics.New(consumer, true)
 	dtAnalytics.ToggleLogger(false)
 
@@ -27,11 +27,11 @@ func main() {
 		"#bundle_id":   "com.example",
 	}
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 20; i++ {
 		properties[fmt.Sprintf("a%d", i)] = strings.Repeat("asd", i)
 	}
 
-	n := 100
+	n := 100000
 	start := time.Now()
 	tm := int64(0)
 	lst := []int64{}

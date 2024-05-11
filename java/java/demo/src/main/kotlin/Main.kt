@@ -19,7 +19,7 @@ fun main() {
     properties["#app_id"] = "appid_1234567890"
     properties["#bundle_id"] = "com.example"
 
-    for (i in 0..4) {
+    for (i in 0..20) {
         properties["a$i"] = "asd".repeat(i)
     }
 

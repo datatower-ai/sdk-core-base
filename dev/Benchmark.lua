@@ -19,7 +19,7 @@ table.sum = function(tb)
 end
 
 local function getLogConsumer()
-return dtAnalytics.DTLogConsumer("log", 200, 10 * 1024 * 1024)
+return dtAnalytics.DTLogConsumer("log", 1000, 10 * 1024 * 1024)
 end
 
 dtAnalytics.enableLog(true)
@@ -32,8 +32,6 @@ local sdk = dtAnalytics(consumer, false)
 local dtId = "1234567890987654321"
 local acId = nil
 
-sdk:userSet("xx", "xxxx", { ["#app_id"] = "aaa", ["#bundle_id"] = "123", ["bb"] = 2, ["cc"] = "ss" })
-sdk:flush()
 dtAnalytics.enableLog(false)
 
 local properties = {}
@@ -45,7 +43,7 @@ properties["#os"] = "1.1.1.1"
 properties["sex"] = 'female'
 properties["#app_id"] = "appid_1234567890"
 properties["#bundle_id"] = "com.example"
-for i = 0, 5, 1
+for i = 0, 20, 1
 do
    properties["a" .. tostring(i)] = string.rep("asd", i)
 end

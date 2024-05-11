@@ -36,7 +36,7 @@ test('tack simple', (t) => {
 //     properties["sex"] = 'female'
 //     properties["#app_id"] = "appid_1234567890"
 //     properties["#bundle_id"] = "com.example"
-//     for (let i = 0; i < 5; i++) {
+//     for (let i = 0; i < 20; i++) {
 //         properties["a" + i.toString()] = "asd".repeat(i)
 //     }
 //
