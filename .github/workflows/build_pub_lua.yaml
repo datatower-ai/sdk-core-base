@@ -17,7 +17,7 @@ jobs:
       - name: Check Version With Tag
         run: |
           chmod +x ./.github/scripts/check_version_by.sh
-          ./.github/scripts/check_version_by.sh $(grep -oE "^version = .*$" "./lua/dt-lua-sdk/lib/build.gradle" | sed -ne "s/^version = \"\(.*\)\"$/\1/p")
+          ./.github/scripts/check_version_by.sh $(grep -oE "^version = .*$" "./lua/Cargo.toml" | sed -ne "s/^version = \"\(.*\)\"$/\1/p")
         shell: bash
         working-directory: ./
   
