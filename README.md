@@ -1,8 +1,9 @@
-[![Golang CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_golang.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_golang.yaml)
-[![Java CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_java.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_java.yaml)
-[![Lua CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_lua.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_lua.yaml)
-[![Node.js CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_nodejs.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_nodejs.yaml)
-[![Python CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_python.yaml/badge.svg?branch=main&event=push)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_python.yaml)
+[![Golang CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_golang.yaml/badge.svg)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_golang.yaml)
+[![Java CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_java.yaml/badge.svg)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_java.yaml)
+[![Lua CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_lua.yaml/badge.svg)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_lua.yaml)
+[![Node.js CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_nodejs.yaml/badge.svg)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_nodejs.yaml)
+[![Python CI](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_python.yaml/badge.svg)](https://github.com/datatower-ai/sdk-core-base/actions/workflows/build_pub_python.yaml)
+
 
 <p align="center">
     <a href="https://datatower.ai/" target="_blank">
@@ -15,19 +16,23 @@
 </p>
 
 <p align="center">
-    <span>Available in</span><br />
-    <a href="" style="font-weight: bold">Golang</a>
-    <span>-</span>
-    <a href="" style="font-weight: bold">Java</a>
-    <span>-</span>
-    <a href="" style="font-weight: bold">Lua</a>
-    <span>-</span>
-    <a href="" style="font-weight: bold">Node.js</a>
-    <span>-</span>
-    <a href="" style="font-weight: bold">Python</a>
+    <img src="https://img.shields.io/github/v/release/datatower-ai/sdk-core-base?style=for-the-badge&logo=aHR0cHM6Ly9wcml2YXRlLmRhdGF0b3dlci5haS9mYXZpY29uX3YyLmljbw%3D%3D&label=DT%20SDK%20(Server)&labelColor=FFD406&color=4934C9">
 </p>
 
-# DataTower.ai SDK Core (server-side)
+<p align="center">
+    <span>Available in</span><br />
+    <a href="https://github.com/datatower-ai/dt-golang-sdk/" style="font-weight: bold">Golang</a>
+    <span>-</span>
+    <a href="https://jitpack.io/#datatower-ai/dt-java-sdk" style="font-weight: bold">Java</a>
+    <span>-</span>
+    <a href="https://github.com/datatower-ai/sdk-core-lua/releases/latest/" style="font-weight: bold">Lua</a>
+    <span>-</span>
+    <a href="https://www.npmjs.com/package/@datatower-ai/sdk-core-nodejs" style="font-weight: bold">Node.js</a>
+    <span>-</span>
+    <a href="https://pypi.org/project/dt-python-sdk/" style="font-weight: bold">Python</a>
+</p>
+
+# DataTower.ai SDK (Server-side)
 
 > Check out our [API Docs](https://docs.datatower.ai/docs/wb9UC1) to getting started!
 
