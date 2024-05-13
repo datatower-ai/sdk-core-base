@@ -132,5 +132,5 @@ jobs:
           git add .
           git commit -m "GitHub Action Bot: Syncing with v$version"
           git tag "v$version"
-          git push -f main dt_test --tags
+          git push -f origin main --tags
         shell: bash
