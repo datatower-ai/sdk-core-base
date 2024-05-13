@@ -2,6 +2,8 @@ name: Java CI (4Test)
 
 on:
   push:
+    branches:
+      - 'test*'
     paths:
       - 'common/**'
       - 'java/**'
