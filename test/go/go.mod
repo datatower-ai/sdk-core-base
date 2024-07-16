@@ -2,7 +2,7 @@ module example/hello
 
 go 1.22.1
 
-require github.com/datatower-ai/dt-golang-sdk v1.0.0-beta8
+require github.com/datatower-ai/dt-golang-sdk v1.0.0
 
 require (
 	github.com/json-iterator/go v1.1.12 // indirect
