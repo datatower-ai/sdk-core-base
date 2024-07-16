@@ -43,7 +43,7 @@ static COMMON_PROPS: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#sdk_type", TypeConstraint::String), ("#sdk_version_name", TypeConstraint::String)
 ]));
 static PRESET_EVENT_PROPS_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::from([
-    ("#bundle_id", TypeConstraint::String), ("#zone_offset", TypeConstraint::Integer),
+    ("#bundle_id", TypeConstraint::String), ("#zone_offset", TypeConstraint::Number),
     ("#session_id", TypeConstraint::String), ("#device_manufacturer", TypeConstraint::String),
     ("#is_foreground", TypeConstraint::Bool), ("#mcc", TypeConstraint::String),
     ("#mnc", TypeConstraint::String), ("#os_country_code", TypeConstraint::String),

@@ -24,7 +24,7 @@ jobs:
   build:
     name: Build ${{ matrix.settings.target }}
     runs-on: ${{ matrix.settings.host }}
-    needs: [ check-version-with-tag ]
+#    needs: [ check-version-with-tag ]
     strategy:
       matrix:
         settings:
@@ -124,7 +124,7 @@ jobs:
           mv artifacts/* target_repo/dt-golang-sdk/lib/
           
           echo "Pushing..."
-          version=1.0.1-alpha3
+          version=1.0.1-alpha5
           cd target_repo/dt-golang-sdk/
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
