@@ -55,7 +55,10 @@ static PRESET_EVENT_PROPS_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::fro
     ("#memory_used", TypeConstraint::String), ("#storage_used", TypeConstraint::String),
     ("#network_type", TypeConstraint::String), ("#simulator", TypeConstraint::Bool),
     ("#fps", TypeConstraint::Number), ("#scene", TypeConstraint::String),
-    ("#mp_platform", TypeConstraint::String), ("#gaid", TypeConstraint::String)
+    ("#mp_platform", TypeConstraint::String), ("#gaid", TypeConstraint::String),
+    ("#build_device", TypeConstraint::String), ("#duration", TypeConstraint::String),
+    ("#firebase_iid", TypeConstraint::String), ("#appsflyer_id", TypeConstraint::String),
+    ("#adjust_id", TypeConstraint::String), ("#kochava_id", TypeConstraint::String),
 ]));
 static PRESET_PROPS_USER_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#active_device_model", TypeConstraint::String), ("#active_network_type", TypeConstraint::String),

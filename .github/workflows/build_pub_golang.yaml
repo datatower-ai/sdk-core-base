@@ -2,8 +2,6 @@ name: Golang CI
 
 on:
   push:
-    tags:
-      - 'v*'
     paths:
       - ".github/workflows/build_pub_golang.yaml"
 
@@ -126,7 +124,7 @@ jobs:
           mv artifacts/* target_repo/dt-golang-sdk/lib/
           
           echo "Pushing..."
-          version=$(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
+          version=1.0.1-alpha3
           cd target_repo/dt-golang-sdk/
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
