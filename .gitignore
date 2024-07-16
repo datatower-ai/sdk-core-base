@@ -8,3 +8,4 @@
 **/*.log
 **/*.jar
 /.cargo
+**/.DS_STORE
