@@ -17,7 +17,7 @@ pub fn process_event(event_map: Event) -> Result<Event> {
     fulfill_metas(&mut event);
     inject_sdk_base_info(&mut event);
     fulfill_by_comm_props(&mut event)?;
-    let verify_result = Ok(());//verify_event(&mut event);
+    let verify_result = verify_event(&mut event);
 
     match verify_result {
         Err(e) => if let DTError::VerifyError(_) = e {
