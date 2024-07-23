@@ -37,7 +37,7 @@ class DTBase {
         String soName = System.mapLibraryName(String.format("dt_core_java-%s-%s", os, arch));
         try (InputStream inputStream = DTBase.class.getResourceAsStream("/ai/datatower/sdk/" + soName)) {
             int i = soName.lastIndexOf(".");
-            String ext = soName.substring(i + 1);
+            String ext = soName.substring(i);
             File file = File.createTempFile("lib", ext);
             file.deleteOnExit();        // register for auto deletion.
             OutputStream outputStream = Files.newOutputStream(file.toPath());
