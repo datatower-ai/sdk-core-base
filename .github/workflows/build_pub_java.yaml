@@ -47,11 +47,11 @@ jobs:
           - target: x86_64-pc-windows-msvc
             host: windows-latest
             so_name: dt_core_java.dll
-            target_name: libdt_core_java-windows-amd64.dll
+            target_name: dt_core_java-windows-amd64.dll
           - target: aarch64-pc-windows-msvc
             host: windows-latest
             so_name: dt_core_java.dll
-            target_name: libdt_core_java-windows-arm64.dll
+            target_name: dt_core_java-windows-arm64.dll
     steps:
       - uses: actions/checkout@v4
       - name: Build Library
