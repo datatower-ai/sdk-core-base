@@ -45,7 +45,6 @@ func New(consumer DTConsumer, isDebug bool) (DTAnalytics, error) {
 	defer C.free(unsafe.Pointer(configCStr))
 
 	ret := C.dt_init(configCStr)
-	clear(configMap)
 	if ret != 0 {
 		return DTAnalytics{}, nil
 	} else {
@@ -141,7 +140,6 @@ func (_ DTAnalytics) add(dtId string, acId string, eventName string, eventType s
 	eventJson := string(b)
 	cEventJson := C.CString(eventJson)
 	ret := C.dt_add_event(cEventJson)
-	clear(event)
 
 	if ret != 0 {
 		return nil

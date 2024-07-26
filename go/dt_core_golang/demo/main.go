@@ -4,7 +4,7 @@ import (
 	"fmt"
 	dtAnalytics "github.com/datatower-ai/dt-golang-sdk"
 	"log"
-	"slices"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -48,7 +48,7 @@ func main() {
 	}
 	log.Printf("Time elapsed: %fms", float64(time.Since(start).Microseconds())/1000)
 	log.Printf("Time elapsed avg: %fms", float64(tm)/float64(n)/1000)
-	slices.Sort(lst)
+	sort.Slice(lst, func(i, j int) bool { return lst[i] < lst[j] })
 	println(fmt.Sprintf("min: %fms", float64(lst[0])/1000.0))
 	println(fmt.Sprintf("max: %fms", float64(lst[len(lst)-1])/1000.0))
 	println(fmt.Sprintf("50': %fms", float64(lst[(len(lst)-1)/2])/1000.0))

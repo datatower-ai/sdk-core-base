@@ -1,6 +1,6 @@
 module github.com/datatower-ai/dt-golang-sdk
 
-go 1.22
+go 1.18
 
 // CGO_ENABLED=1 go build .
 
