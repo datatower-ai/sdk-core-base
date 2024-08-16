@@ -27,7 +27,7 @@ func (c DTMmapLogConsumer) getConfig() map[string]interface{} {
 		"consumer":             "mlog",
 		"path":                 c.path,
 		"name_prefix":          c.namePrefix,
-		"file_size":            c.maxFileSizeBytes
+		"file_size":            c.maxFileSizeBytes,
 		"flush_size":           c.flushSizeBytes,
 	}
 }

@@ -12,7 +12,8 @@ import (
 
 func main() {
 	dtAnalytics.ToggleLogger(true)
-	consumer := dtAnalytics.NewDTLogConsumer("log", 1000, "dt_go_demo", 0)
+// 	consumer := dtAnalytics.NewDTLogConsumer("log", 1000, "dt_go_demo", 0)
+	consumer := dtAnalytics.NewDTMmapLogConsumer("log", "dt_go_test", 10 * 1024 * 1024, 1 * 1024 * 1024)
 	dt, _ := dtAnalytics.New(consumer, true)
 	dtAnalytics.ToggleLogger(false)
 
@@ -74,16 +75,3 @@ func sumArr(numbers []int64) int64 {
 	}
 	return sum
 }
-
-/*
-Benchmark:
-** 2024.04.10 **
-QPS: 5700~6000
-average: 0.173ms
-average (except write): 0.056ms
-average (write only): 23.375ms
-80': 0.077ms
-90': 0.116ms
-95': 0.158ms
-99': 0.332ms
-*/
