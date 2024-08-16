@@ -1,8 +1,8 @@
 import test from 'ava'
 
 import dt, { Consumer as DTConsumer } from '../index.js'
-//import dt, { Consumer as DTConsumer } from '../../output/nodejs/dt_core_nodejs/index.js'
-//import dt, { Consumer as DTConsumer } from '../../output-benchmark/nodejs/dt_core_nodejs/index.js'
+// import dt, { Consumer as DTConsumer } from '../../output/nodejs/dt_core_nodejs/index.js'
+// import dt, { Consumer as DTConsumer } from '../../output-benchmark/nodejs/dt_core_nodejs/index.js'
 
 test('tack simple', (t) => {
     dt.toggleLogger(true);
@@ -20,7 +20,8 @@ test('tack simple', (t) => {
 
 // test('bench', (t) => {
 //     dt.toggleLogger(true);
-//     let consumer = DTConsumer.DTLogConsumer("log", 1000, "dt_nodejs", 10*1024*1024)
+//     // let consumer = DTConsumer.DTLogConsumer("log", 1000, "dt_nodejs", 10*1024*1024)
+//     let consumer = DTConsumer.DTMmapLogConsumer("log", "dt_nodejs", 10*1024*1024, 1024*1024)
 //     dt.init(consumer);
 //     dt.toggleLogger(false);
 //

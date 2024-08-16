@@ -5,7 +5,8 @@ import ai.datatower.sdk.*
 fun main() {
     DTAnalytics.preload()
     DTAnalytics.toggleLogger(true)
-    val consumer = DTLogConsumer("log", 1000, "dt_java", (10 * 1024 * 1024).toLong())
+//    val consumer = DTLogConsumer("log", 1000, "dt_java", (10 * 1024 * 1024).toLong())
+    val consumer = DTMmapLogConsumer("log", "dt_java_test", 10 * 1024 * 1024L, 1024 * 1024L)
     val dt: DTAnalytics = DTAnalytics.init(consumer, true)
     DTAnalytics.toggleLogger(false)
 

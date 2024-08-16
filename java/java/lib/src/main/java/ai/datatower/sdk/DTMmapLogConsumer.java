@@ -21,8 +21,8 @@ public class DTMmapLogConsumer extends Consumer {
      * @param flushSize [Nullable] Flush will be triggered automatically when un-flushed size is equals to or over
      * flush_size in Byte. Default behaviour is flush once per file is full when 'None' or '0' is provided.
      */
-    public DTLogConsumer(
-            String path, String namePrefix, long fileSize, long flushSize
+    public DTMmapLogConsumer(
+        String path, String namePrefix, long fileSize, long flushSize
     ) {
         this.path = path;
         this.namePrefix = namePrefix;
