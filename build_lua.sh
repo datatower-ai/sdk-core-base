@@ -54,11 +54,8 @@ build_macos() {
     cargo rustc --release --package lua --no-default-features --features "$1" --target aarch64-apple-darwin -- -C link-arg=-undefined -C link-arg=dynamic_lookup
   fi
 
-  #cp -f "./target/x86_64-apple-darwin/release/libdt_core_lua.dylib" "$target_path/dt_core_lua-$1-macos-x86_64.so"
-  #cp -f "./target/aarch64-apple-darwin/release/libdt_core_lua.dylib" "$target_path/dt_core_lua-$1-macos-aarch64.so"
-
   build_rock "$1" macosx x86_64 "$2" x86_64-apple-darwin libdt_core_lua.dylib dt_core_lua.so
-  build_rock "$1" macosx aarch64 "$2" aarch64-apple-darwin libdt_core_lua.dylib dt_core_lua.so
+#  build_rock "$1" macosx aarch64 "$2" aarch64-apple-darwin libdt_core_lua.dylib dt_core_lua.so
 }
 
 build_linux() {
@@ -104,7 +101,7 @@ build_windows() {
 build_rock() {
   mkdir -p "$target_path/tmp"
   version=$(grep -oE "^version = \".*\"$" "./lua/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
-  version=$(echo "$version" | sed -nE "s/^(v?([0-9]+)\.([0-9]+)\.([0-9]+)[-._]?(([a|A])lpha|([b|B])eta|SNAPSHOT)?([0-9]*))$/\2.\3.\4.\5\8/p")
+  version=$(echo "$version" | sed -nE "s/^(v?([0-9]+)\.([0-9]+)\.([0-9]+)([-._]?)(([a|A])lpha|([b|B])eta|SNAPSHOT)?([0-9]*))$/\2.\3.\4\5\6\9/p")
   cp -f "./lua/gen_rockspec.sh" "$target_path/tmp/"
   cp -f "./lua/Cargo.toml" "$target_path/tmp/"
   archive_folder="dt-lua-sdk-$version"
@@ -118,7 +115,7 @@ build_rock() {
   prefix="$1-$2-$3"
   mv "$rock_file" "../$prefix-$rock_file"
   cd ../        # ./xxx/lua
-  rm -rf ./tmp/
+#  rm -rf ./tmp/
   cd ../../        # .
 }
 
@@ -136,8 +133,8 @@ version_check() {
 ####################################
 version_check
 build_lua lua54 5.4
-build_lua lua53 5.3
-build_lua lua52 5.2
-build_lua lua51 5.1
+#build_lua lua53 5.3
+#build_lua lua52 5.2
+#build_lua lua51 5.1
 #build_lua luajit
 #build_lua luau

@@ -8,6 +8,7 @@ use crate::base::mem;
 use crate::base::MemValue::Consumer as MemConsumer;
 use crate::consumer::Consumer;
 use crate::consumer::log::LogConsumer;
+use crate::consumer::mmap_log::MmapLogConsumer;
 use crate::event::common_properties::{clear_static_comm_props, Props, set_static_comm_props};
 use crate::event::Event;
 use crate::event::processing::{DEBUG, process_event};
@@ -39,6 +40,7 @@ pub fn init_by_config(mut config: Map<String, Value>) -> Result<()> {
     };
     let consumer: Result<Box<dyn Consumer>> = match cn.to_lowercase().as_str() {
         "log" => LogConsumer::from_config(&mut config),
+        "mlog" => MmapLogConsumer::from_config(&mut config),
         _ => return host_error!("Initialization config has 'consumer' but it's out of domain!")
     };
 

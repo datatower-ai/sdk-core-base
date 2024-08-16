@@ -9,6 +9,8 @@ pub mod database_cache;
 
 #[cfg(feature = "async-upload-server")]
 pub mod async_upload;
+#[cfg(feature = "log-consumer-server")]
+pub mod mmap_log;
 
 pub(crate) const MEM_KEY: &'static str = "consumer";
 

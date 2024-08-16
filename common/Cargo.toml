@@ -31,3 +31,4 @@ uuid = { version = "1.8.0", features = ["v4"] }
 chrono = "0.4.38"
 rusqlite = { version = "0.31.0", features = ["bundled", "serde_json"], optional = true }
 reqwest = { version = "0.12.3", features = ["blocking", "json"], optional = true }
+memmap2 = "0.9.4"

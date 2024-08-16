@@ -11,7 +11,7 @@ halt() {
 cd "$base" || halt "Failed to cd base: $base"
 
 version=$(grep -oE "^version = \".*\"$" "./Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
-version=$(echo "$version" | sed -nE "s/^(v?([0-9]+)\.([0-9]+)\.([0-9]+)[-._]?(([a|A])lpha|([b|B])eta|SNAPSHOT)?([0-9]*))$/\2.\3.\4.\5\8/p")
+version=$(echo "$version" | sed -nE "s/^(v?([0-9]+)\.([0-9]+)\.([0-9]+)([-._]?)(([a|A])lpha|([b|B])eta|SNAPSHOT)?([0-9]*))$/\2.\3.\4\5\6\9/p")
 
 if [[ -z $version ]]; then
   halt "Cannot get the version"

@@ -22,6 +22,8 @@ if [ "$f_benchmark" = true ]; then
 fi
 mkdir -p "$target_path"
 
+vversion=$(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
+
 # Naming of artifacts:
 #   dt_core_{package}[-{package_specific}]-{platform}-{architecture}.so
 # E.g.
@@ -31,7 +33,7 @@ mkdir -p "$target_path"
 # Build Python
 ####################################
 find_name_4_whl() {
-  find ../target/wheels/ -name "dt_python_sdk-*-*$1*$2*.whl" -type f -exec basename {} \; | head -1
+  find ../target/wheels/ -name "dt_python_sdk-$vversion-*$1*$2*.whl" -type f -exec basename {} \; | head -1
 }
 
 # target, platform, architecture

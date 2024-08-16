@@ -17,4 +17,5 @@ export function close(): void
 export function toggleLogger(enable: boolean): void
 export class Consumer {
   static DTLogConsumer(path: string, maxBatchLen: number, namePrefix?: string | undefined | null, maxFileSizeBytes?: number | undefined | null): Consumer
+  static DTMmapLogConsumer(path: string, namePrefix?: string | undefined | null, maxFileSizeBytes?: number | undefined | null, flushSizeBytes?: number | undefined | null): Consumer
 }

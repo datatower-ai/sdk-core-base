@@ -1,7 +1,8 @@
 import time
 from dt_python_sdk import *
 
-consumer = DTLogConsumer("log", 1000, "dt_py", 10*1024*1024)
+#consumer = DTLogConsumer("log", 1000, "dt_py", 10*1024*1024)
+consumer = DTMmapLogConsumer("log", "dt_py")
 dt = DTAnalytics(consumer, True)
 
 DTAnalytics.enable_log()

@@ -29,4 +29,4 @@ benchmark = ["common/benchmark"]
 [dependencies]
 common = { path = "../common", default-features = false, features = ["log-consumer-server"] }
 serde_json = { workspace = true }
-mlua = { version = "0.9.6", features = ["module"] }
+mlua = { version = "0.9.7", features = ["module"] }

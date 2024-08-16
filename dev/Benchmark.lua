@@ -19,7 +19,8 @@ table.sum = function(tb)
 end
 
 local function getLogConsumer()
-return dtAnalytics.DTLogConsumer("log", 1000, 10 * 1024 * 1024)
+--     return dtAnalytics.DTLogConsumer("log", 1000, 10 * 1024 * 1024)
+    return dtAnalytics.DTMmapLogConsumer("log", "dt-test", 10 * 1024 * 1024)
 end
 
 dtAnalytics.enableLog(true)

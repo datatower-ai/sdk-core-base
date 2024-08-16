@@ -180,3 +180,30 @@ class DTLogConsumer(Consumer):
 
     def _get_config(self):
         return self.__config
+
+
+class DTMmapLogConsumer(Consumer):
+    def __init__(self, path, name_prefix, file_size=None, flush_size=None):
+        """ Creates an DTConsumer to log the events with mmap enhanced.
+        Event logs will be stored in the path with name_prefix.
+        Also, the event log is sharding by either of these circumstances:
+            - Every hour,
+            - File size is over approximated maximum file size.
+
+        :param path: The path/directory to store event logs, will be created if not exist.
+        :param name_prefix: prefix of log file.
+        :param file_size: Maximum size of log file in Byte. File is guarantee to not exceed this size, thus single
+        event will be rejected if its size is over file_size. Default value is 2 MB when 'None' or '0' is provided.
+        :param flush_size: Flush will be triggered automatically when un-flushed size is equals to or over flush_size
+        in Byte. Default behaviour is flush once per file is full when 'None' or '0' is provided.
+        """
+        self.__config = {
+            "consumer": "mlog",
+            "path": path,
+            "name_prefix": name_prefix,
+            "file_size": file_size,
+            "flush_size": flush_size,
+        }
+
+    def _get_config(self):
+        return self.__config

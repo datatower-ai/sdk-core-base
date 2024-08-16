@@ -115,4 +115,22 @@ impl Consumer {
 
         Self { config }
     }
+
+    #[napi(factory, js_name="DTMmapLogConsumer")]
+    pub fn dt_mlog_consumer(path: String, name_prefix: Option<String>, max_file_size_bytes: Option<u32>, flush_size_bytes: Option<u32>) -> Self {
+        let mut config = Map::with_capacity(5);
+        config.insert("consumer".to_string(), Value::from("mlog"));
+        config.insert("path".to_string(), Value::from(path));
+        if let Some(name_prefix) = name_prefix {
+            config.insert("name_prefix".to_string(), Value::from(name_prefix));
+        }
+        if let Some(max_file_size_bytes) = max_file_size_bytes {
+            config.insert("file_size".to_string(), Value::from(max_file_size_bytes));
+        }
+        if let Some(flush_size_bytes) = flush_size_bytes {
+            config.insert("flush_size".to_string(), Value::from(flush_size_bytes));
+        }
+
+        Self { config }
+    }
 }

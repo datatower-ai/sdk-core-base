@@ -272,10 +272,10 @@ end
 
 --- Construct LogConsumer
 ---@param self any
----@param logPath string
----@param batchNum number
----@param fileSize number
----@param fileNamePrefix string
+---@param logPath string, The path/directory to store event logs, will be created if not exist.
+---@param batchNum number, maximum number of events to be written to log once.
+---@param fileSize number, approximated maximum file size in bytes. (will be exceeded if the actual event size is larger)
+---@param fileNamePrefix string, prefix of log file.
 DTAnalytics.DTLogConsumer = class(function(self, logPath, batchNum, fileSize, fileNamePrefix)
     self.consumerProps = {
         ["consumer"] = "log",
@@ -283,6 +283,23 @@ DTAnalytics.DTLogConsumer = class(function(self, logPath, batchNum, fileSize, fi
         ["max_batch_len"] = batchNum,
         ["name_prefix"] = fileNamePrefix,
         ["max_file_size_bytes"] = fileSize
+    }
+end)
+
+
+--- Construct LogConsumer (MMAP)
+---@param self any
+---@param logPath string, The path/directory to store event logs, will be created if not exist.
+---@param batchNum number, prefix of log file.
+---@param fileSize number, Maximum size of log file in Byte. File is guarantee to not exceed this size, thus single event will be rejected if its size is over file_size. Default value is 2 MB when 'None' or '0' is provided.
+---@param flushSize number, Flush will be triggered automatically when un-flushed size is equals to or over flush_size in Byte. Default behaviour is flush once per file is full when 'None' or '0' is provided.
+DTAnalytics.DTMmapLogConsumer = class(function(self, logPath, fileNamePrefix, fileSize, flushSize)
+    self.consumerProps = {
+        ["consumer"] = "mlog",
+        ["path"] = logPath,
+        ["name_prefix"] = fileNamePrefix,
+        ["file_size"] = fileSize,
+        ["flush_size"] = flushSize
     }
 end)
 
