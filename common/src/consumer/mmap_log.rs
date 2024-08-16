@@ -6,6 +6,7 @@ use regex::Regex;
 use serde_json::{Map, Value};
 use crate::consumer::Consumer;
 use crate::event::BoxedEvent;
+use crate::log_info;
 use crate::util::datetime::get_hour_since_epoch;
 use crate::util::error::{ macros::runtime_error, Result };
 use crate::util::error::macros::host_error;
@@ -108,6 +109,8 @@ impl MmapLogConsumer {
     }
 
     fn flush(&mut self, is_async: bool) -> Result<()> {
+        #[cfg(feature = "benchmark")]
+        let st = std::time::Instant::now();
         let length = self.offset - self.flush_offset;
         if length <= 0 {
             return Ok(());
@@ -128,8 +131,18 @@ impl MmapLogConsumer {
                 self.flush_offset + length,
                 e
             )
+        } else {
+            self.flush_offset = self.offset;
+            log_info!("Flushed {} bytes!", length);
         };
-        self.flush_offset = self.offset;
+
+        #[cfg(feature = "benchmark")]
+        if is_async {
+            (&crate::util::benchmark_tracer::BM_TRACER).add("Time used to flush (async)", st.elapsed().as_micros());
+        } else {
+            (&crate::util::benchmark_tracer::BM_TRACER).add("Time used to flush (sync)", st.elapsed().as_micros());
+        }
+
         Ok(())
     }
 
