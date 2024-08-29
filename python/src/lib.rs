@@ -7,7 +7,7 @@ use common::util::result::{dissolve, dissolve_bool};
 /// A Python module implemented in Rust.
 #[pymodule]
 #[pyo3(name="dt_core_base_py")]
-fn dt_core_python(_py: Python, m: &PyModule) -> PyResult<()> {
+fn dt_core_python(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(init, m)?)?;
     m.add_function(wrap_pyfunction!(add_event, m)?)?;
     m.add_function(wrap_pyfunction!(flush, m)?)?;
@@ -62,7 +62,7 @@ fn clear_static_common_properties() -> PyResult<()> {
 struct MyMap(Map<String, Value>);
 
 impl<'py> FromPyObject<'py> for MyMap {
-    fn extract(ob: &'py PyAny) -> PyResult<Self> {
+    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
         match depythonize(ob.downcast().unwrap()) {
             Ok(map) => Ok(MyMap(map)),
             Err(e) => Err(PyErr::from(e))
