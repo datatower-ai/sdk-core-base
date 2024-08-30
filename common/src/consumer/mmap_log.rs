@@ -4,37 +4,43 @@ use std::path::Path;
 use memmap2::MmapMut;
 use regex::Regex;
 use serde_json::{Map, Value};
+
 use crate::consumer::Consumer;
 use crate::event::BoxedEvent;
 use crate::log_info;
 use crate::util::datetime::get_hour_since_epoch;
-use crate::util::error::{ macros::runtime_error, Result };
+use crate::util::error::{macros::runtime_error, Result};
 use crate::util::error::macros::host_error;
-use crate::util::system_util::LINE_ENDING;
+use crate::util::single_process_lock::{SingleProcessLock, SingleProcessLocked};
+use crate::util::system_util::{LINE_ENDING, LINE_ENDING_LENGTH};
 
 #[derive(Debug)]
 pub struct MmapLogConsumer {
     // set by user
-    path: String,
-    name_prefix: String,
-    size: u64,
-    flush_size: Option<u64>,
+    path: String,                   // log 所在文件夹路径
+    name_prefix: String,            // log 前缀
+    size: u64,                      // 文件大小
+    flush_size: Option<u64>,        // flush 触发大小
     // internal preserved
     mmap: MmapMut,
-    offset: usize,
-    file_time: u64,
-    revision: u16,
-    flush_offset: usize,
+    offset: usize,                  // 当前写入 mem 的位置
+    file_time: u64,                 // 当前 log 文件时间（精度到小时）
+    revision: u16,                  // 当前分片
+    flush_offset: usize,            // 最后一次 flush 的位置
+    _locked: SingleProcessLocked,   // 进程安全，只允许单进程访问（根据 path + file_prefix 区分）
 }
 
 impl MmapLogConsumer {
     fn new(
         path: Option<String>, name_prefix: String,
         file_size: u64, flush_size: Option<u64>,
-    ) -> Self {
+    ) -> Result<Self> {
         let file_time = get_hour_since_epoch();
         let path = path.unwrap_or(String::from("."));
         create_dir_all(path.clone()).unwrap();
+
+        let lock = SingleProcessLock::new(path.clone(), name_prefix.clone())?;
+        let locked = lock.lock()?;
 
         let mut revision: u16 = Self::get_init_revision(&path, &name_prefix, &file_time);
         let mut filename = Self::get_filename(&name_prefix, file_time, revision);
@@ -49,7 +55,7 @@ impl MmapLogConsumer {
         }
         let offset = offset.unwrap();
 
-        MmapLogConsumer {
+        Ok(MmapLogConsumer {
             mmap,
             offset,
             size: file_size,
@@ -59,7 +65,8 @@ impl MmapLogConsumer {
             name_prefix,
             path,
             flush_offset: offset,
-        }
+            _locked: locked,
+        })
     }
 
     pub fn from_config(config: &mut Map<String, Value>) -> Result<Box<dyn Consumer>> {
@@ -104,7 +111,7 @@ impl MmapLogConsumer {
 
         let consumer = MmapLogConsumer::new(
             Some(path), name_prefix, file_size, flush_size
-        );
+        )?;
         Ok(Box::new(consumer))
     }
 
@@ -146,13 +153,13 @@ impl MmapLogConsumer {
         Ok(())
     }
 
-    fn flush_rest_and_cut(&mut self, is_async: bool) -> Result<()> {
+    fn flush_rest_and_truncate(&mut self, is_async: bool) -> Result<()> {
         self.flush(is_async)?;
         if self.offset != self.size as usize {
             let file = Self::get_file(&self.path, Self::get_filename(&self.name_prefix, self.file_time, self.revision));
             if let Err(e) = file.set_len(self.offset as u64) {
                 return runtime_error!(
-                    "Failed to cut file ({}, {}) to its size, {}",
+                    "Failed to truncate file ({}, {}) to its size, {}",
                     self.path,
                     Self::get_filename(&self.name_prefix, self.file_time, self.revision),
                     e
@@ -165,14 +172,17 @@ impl MmapLogConsumer {
 
     fn append(&mut self, content: String, flush: bool) -> Result<()> {
         self.ensure_time_sep()?;
-        let content = if self.offset == 0 {
-            content
-        } else {
-            format!("{}{}", LINE_ENDING, content)
-        };
         let content = content.as_bytes();
         let length = content.len();
-        self.ensure_can_append(length)?;
+        let extra_length = if self.offset == 0 { 0 } else { LINE_ENDING_LENGTH };
+        self.ensure_can_append(length + extra_length)?;
+
+        if self.offset != 0 {
+            // appending to existing file.
+            self.mmap[self.offset..self.offset+LINE_ENDING_LENGTH].copy_from_slice(LINE_ENDING.as_bytes());
+            self.offset += LINE_ENDING_LENGTH;
+        }
+
         self.mmap[self.offset..self.offset+length].copy_from_slice(content);
         self.offset += length;
 
@@ -200,13 +210,14 @@ impl MmapLogConsumer {
         Ok(())
     }
 
-    fn ensure_can_append(&mut self, content_length: usize) -> Result<bool> {
-        if content_length > self.size as usize {
+    fn ensure_can_append(&mut self, append_length: usize) -> Result<bool> {
+        if append_length > self.size as usize {
             Ok(false)
-        } else if content_length + self.offset > self.size as usize {
+        } else if append_length + self.offset > self.size as usize {
             // new file
             self.update_mmap(2)?;
-            Ok(true)
+            // recurrently find/create file with enough room.
+            self.ensure_can_append(append_length)
         } else {
             Ok(true)
         }
@@ -216,7 +227,7 @@ impl MmapLogConsumer {
     ///   1: time changes.
     ///   2: revision changes.
     fn update_mmap(&mut self, reason: u8) -> Result<()> {
-        self.flush_rest_and_cut(true)?;
+        self.flush_rest_and_truncate(true)?;
 
         match reason {
             2 => {
@@ -228,7 +239,7 @@ impl MmapLogConsumer {
             }
         }
         let filename = Self::get_filename(&self.name_prefix, self.file_time, self.revision);
-        self.mmap = Self::open_or_create_file(&self.path, filename, self.size);
+        self.mmap = Self::open_or_create_file(&self.path, filename.clone(), self.size);
         if let Some(offset) = Self::calc_offset(&self.mmap) {
             self.offset = offset;
             self.flush_offset = offset;
@@ -305,6 +316,6 @@ impl Consumer for MmapLogConsumer {
     }
 
     fn close(self: &mut Self) -> Result<()> {
-        self.flush_rest_and_cut(false)
+        self.flush_rest_and_truncate(false)
     }
 }

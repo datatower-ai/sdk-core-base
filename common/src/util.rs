@@ -8,3 +8,4 @@ pub mod result;
 #[cfg(feature = "benchmark")]
 pub mod benchmark_tracer;
 pub(crate) mod system_util;
+pub(crate) mod single_process_lock;
