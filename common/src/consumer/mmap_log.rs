@@ -1,6 +1,7 @@
 use std::fs;
 use std::fs::{create_dir_all, File, OpenOptions};
 use std::path::Path;
+use std::sync::Mutex;
 use memmap2::MmapMut;
 use regex::Regex;
 use serde_json::{Map, Value};
@@ -14,61 +15,13 @@ use crate::util::error::macros::host_error;
 use crate::util::single_process_lock::{SingleProcessLock, SingleProcessLocked};
 use crate::util::system_util::{LINE_ENDING, LINE_ENDING_LENGTH};
 
+// Empty wrapper for thread-safe accessing of MMAP Log Consumer.
 #[derive(Debug)]
 pub struct MmapLogConsumer {
-    // set by user
-    path: String,                   // log 所在文件夹路径
-    name_prefix: String,            // log 前缀
-    size: u64,                      // 文件大小
-    flush_size: Option<u64>,        // flush 触发大小
-    // internal preserved
-    mmap: MmapMut,
-    offset: usize,                  // 当前写入 mem 的位置
-    file_time: u64,                 // 当前 log 文件时间（精度到小时）
-    revision: u16,                  // 当前分片
-    flush_offset: usize,            // 最后一次 flush 的位置
-    _locked: SingleProcessLocked,   // 进程安全，只允许单进程访问（根据 path + file_prefix 区分）
+    mmap_log_consumer_impl: Mutex<MmapLogConsumerImpl>
 }
 
 impl MmapLogConsumer {
-    fn new(
-        path: Option<String>, name_prefix: String,
-        file_size: u64, flush_size: Option<u64>,
-    ) -> Result<Self> {
-        let file_time = get_hour_since_epoch();
-        let path = path.unwrap_or(String::from("."));
-        create_dir_all(path.clone()).unwrap();
-
-        let lock = SingleProcessLock::new(path.clone(), name_prefix.clone())?;
-        let locked = lock.lock()?;
-
-        let mut revision: u16 = Self::get_init_revision(&path, &name_prefix, &file_time);
-        let mut filename = Self::get_filename(&name_prefix, file_time, revision);
-        let mut mmap = Self::open_or_create_file(&path, filename, file_size);
-        let mut offset = Self::calc_offset(&mmap);
-        while offset.is_none() {
-            // case of file is full already.
-            revision += 1;
-            filename = Self::get_filename(&name_prefix, file_time, revision);
-            mmap = Self::open_or_create_file(&path, filename, file_size);
-            offset = Self::calc_offset(&mmap);
-        }
-        let offset = offset.unwrap();
-
-        Ok(MmapLogConsumer {
-            mmap,
-            offset,
-            size: file_size,
-            flush_size,
-            file_time,
-            revision,
-            name_prefix,
-            path,
-            flush_offset: offset,
-            _locked: locked,
-        })
-    }
-
     pub fn from_config(config: &mut Map<String, Value>) -> Result<Box<dyn Consumer>> {
         let Some(Value::String(path)) = config.remove("path") else {
             return host_error!("Failed to initialize: missing \"path\"!");
@@ -109,10 +62,72 @@ impl MmapLogConsumer {
             None
         };
 
-        let consumer = MmapLogConsumer::new(
+        let consumer = MmapLogConsumerImpl::new(
             Some(path), name_prefix, file_size, flush_size
         )?;
-        Ok(Box::new(consumer))
+        Ok(
+            Box::new(
+                MmapLogConsumer {
+                    mmap_log_consumer_impl: Mutex::new(consumer)
+                }
+            )
+        )
+    }
+}
+
+#[derive(Debug)]
+struct MmapLogConsumerImpl {
+    // set by user
+    path: String,                   // log 所在文件夹路径
+    name_prefix: String,            // log 前缀
+    size: u64,                      // 文件大小
+    flush_size: Option<u64>,        // flush 触发大小
+    // internal preserved
+    mmap: MmapMut,
+    offset: usize,                  // 当前写入 mem 的位置
+    file_time: u64,                 // 当前 log 文件时间（精度到小时）
+    revision: u16,                  // 当前分片
+    flush_offset: usize,            // 最后一次 flush 的位置
+    _locked: SingleProcessLocked,   // 进程安全，只允许单进程访问（根据 path + file_prefix 区分）
+}
+
+impl MmapLogConsumerImpl {
+    fn new(
+        path: Option<String>, name_prefix: String,
+        file_size: u64, flush_size: Option<u64>,
+    ) -> Result<Self> {
+        let file_time = get_hour_since_epoch();
+        let path = path.unwrap_or(String::from("."));
+        create_dir_all(path.clone()).unwrap();
+
+        let lock = SingleProcessLock::new(path.clone(), name_prefix.clone())?;
+        let locked = lock.lock()?;
+
+        let mut revision: u16 = Self::get_init_revision(&path, &name_prefix, &file_time);
+        let mut filename = Self::get_filename(&name_prefix, file_time, revision);
+        let mut mmap = Self::open_or_create_file(&path, filename, file_size);
+        let mut offset = Self::calc_offset(&mmap);
+        while offset.is_none() {
+            // case of file is full already.
+            revision += 1;
+            filename = Self::get_filename(&name_prefix, file_time, revision);
+            mmap = Self::open_or_create_file(&path, filename, file_size);
+            offset = Self::calc_offset(&mmap);
+        }
+        let offset = offset.unwrap();
+
+        Ok(MmapLogConsumerImpl {
+            mmap,
+            offset,
+            size: file_size,
+            flush_size,
+            file_time,
+            revision,
+            name_prefix,
+            path,
+            flush_offset: offset,
+            _locked: locked,
+        })
     }
 
     fn flush(&mut self, is_async: bool) -> Result<()> {
@@ -305,17 +320,38 @@ impl MmapLogConsumer {
 impl Consumer for MmapLogConsumer {
     fn add(self: &mut Self, event: BoxedEvent) -> Result<()> {
         if let Ok(json) = serde_json::to_string(&event) {
-            self.append(json, false)
+            match self.mmap_log_consumer_impl.lock() {
+                Ok(mut it) => {
+                    it.append(json, false)
+                },
+                Err(err) => {
+                    runtime_error!("Failed to flush, {err}")
+                }
+            }
         } else {
             runtime_error!("Failed to jsonify this event: {event:?}")
         }
     }
 
     fn flush(self: &mut Self) -> Result<()> {
-        self.flush(true)
+        match self.mmap_log_consumer_impl.lock() {
+            Ok(mut it) => {
+                it.flush(true)
+            },
+            Err(err) => {
+                runtime_error!("Failed to flush, {err}")
+            }
+        }
     }
 
     fn close(self: &mut Self) -> Result<()> {
-        self.flush_rest_and_truncate(false)
+        match self.mmap_log_consumer_impl.lock() {
+            Ok(mut it) => {
+                it.flush_rest_and_truncate(false)
+            },
+            Err(err) => {
+                runtime_error!("Failed to flush, {err}")
+            }
+        }
     }
 }
