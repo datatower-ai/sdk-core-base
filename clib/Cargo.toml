@@ -17,4 +17,5 @@ common = { path = "../common", default-features = false, features = ["log-consum
 serde_json = { workspace = true }
 
 [build-dependencies]
-cbindgen = "0.26.0"
+cbindgen = "0.27.0"
+csbindgen = "1.9.3"

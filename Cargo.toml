@@ -1,7 +1,8 @@
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [workspace]
 resolver = "2"
-members = ["common", "clib", "java", "lua", "python", "nodejs"]
+members = ["common", "clib", "java", "lua", "python", "nodejs", "rs-test"]
+# "clib" is applicable for Golang, C#,
 
 [workspace.dependencies]
 serde_json = "1.0.125"

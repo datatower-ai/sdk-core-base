@@ -16,9 +16,9 @@ while getopts bmwl opt; do
   esac
 done
 
-target_path="$BASEDIR/output/go/"
+target_path="$BASEDIR/output/clib/"
 if [ "$f_benchmark" = true ]; then
-  target_path="$BASEDIR/output-benchmark/go/"
+  target_path="$BASEDIR/output-benchmark/clib/"
 fi
 mkdir -p "$target_path"
 
@@ -28,9 +28,9 @@ mkdir -p "$target_path"
 #   dt_core_lua-lua54-macos-aarch64.so
 
 ####################################
-# Build Golang
+# Build Clib
 ####################################
-build_golang() {
+build_clib() {
   version_check
 
   if [ "$f_has_macos" = true ]; then
@@ -92,14 +92,34 @@ build_windows() {
   mv "$BASEDIR/.cargo/blocked.config.toml" "$BASEDIR/.cargo/config.toml"
 }
 
+copy_for_golang() {
+  # shellcheck disable=SC2038
+  find "$target_path" -maxdepth 1 -type f | xargs -I {} cp {} "$BASEDIR/go/dt_core_golang/lib/"
+  rm -f "$BASEDIR/go/dt_core_golang/lib/dt_core_clib.h"
+  cp "$target_path/dt_core_clib.h" "$BASEDIR/go/dt_core_golang/include/"
+  echo "Copied for Golang!"
+}
+
+copy_for_csharp() {
+  # shellcheck disable=SC2038
+  find "$target_path" -maxdepth 1 -type f | xargs -I {} cp {} "$BASEDIR/csharp/DTCore/DTCore/runtimes/native/"
+  rm -f "$BASEDIR/csharp/DTCore/DTCore/runtimes/native/dt_core_clib.h"
+  echo "Copied for C#!"
+}
+
 version_check() {
     common_version=$(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
+    csharp_version=$(grep "<Version>" "./csharp/DTCore/DTCore/DTCore.csproj" | sed -ne "s/ *<Version>\(.*\)<\/Version>/\1/p")
     echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    printf "┃ version: \t\033[1;35m%s\033[0m\n" "$common_version"
+    printf "┃ version: \t\t\033[1;35m%s\033[0m\n" "$common_version"
+    printf "┃ Golang version: \t\033[1;35m%s\033[0m\n" "$common_version"
+    printf "┃ C# version: \t\t\033[1;35m%s\033[0m\n" "$csharp_version"
     echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 }
 
 ####################################
 # Build
 ####################################
-build_golang
+build_clib
+copy_for_golang
+copy_for_csharp

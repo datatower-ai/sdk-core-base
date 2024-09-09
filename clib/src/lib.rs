@@ -50,6 +50,23 @@ pub extern "C" fn dt_add_event(raw_event: *const c_char) -> i8 {
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn dt_add_event_bytes(utf8_str: *const u8, len: i32) -> i8 {
+    let slice = std::slice::from_raw_parts(utf8_str, len as usize);
+    let map  = if let Ok(map) =  serde_json::from_slice(slice) {
+        map
+    } else {
+        return 0
+    };
+
+    let success = dissolve_bool::<(), DTError>(common::add(map)).unwrap();
+    if success {
+        1
+    } else {
+        0
+    }
+}
+
+#[no_mangle]
 pub extern "C" fn dt_flush() {
     dissolve::<(), DTError>(common::flush()).unwrap();
 }

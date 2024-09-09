@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Version>1.0.2</Version>
+        <Authors>DataTower.ai</Authors>
+        <Description>DataTower.ai Core SDK for C#</Description>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>DataTower.ai - Core - C#</Title>
+        <PublicSign>false</PublicSign>
+        <TargetFramework>net8.0</TargetFramework>
+        <PackRelease>true</PackRelease>
+        <PublishRelease>true</PublishRelease>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <None Pack="true" PackagePath="runtimes/native/libdt_core_clib-macos-amd64.dylib" Update="runtimes/native/libdt_core_clib-macos-amd64.dylib">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Pack="true" PackagePath="runtimes/native/libdt_core_clib-macos-arm64.dylib" Update="runtimes/native/libdt_core_clib-macos-arm64.dylib">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Pack="true" PackagePath="runtimes/native/libdt_core_clib-linux-arm64.so" Update="runtimes/native/libdt_core_clib-linux-arm64.so">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Pack="true" PackagePath="runtimes/native/libdt_core_clib-linux-arm64.so" Update="runtimes/native/libdt_core_clib-linux-arm64.so">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Pack="true" PackagePath="runtimes/native/dt_core_clib-windows-arm64.dll" Update="runtimes/native/dt_core_clib-windows-arm64.dll">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Pack="true" PackagePath="runtimes/native/dt_core_clib-windows-arm64.dll" Update="runtimes/native/dt_core_clib-windows-arm64.dll">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+</Project>

@@ -51,5 +51,7 @@ update "^version = \".*\"$" "version = \"$std_ver\"" "$base_path/nodejs/Cargo.to
 update "^  \"version\": \".*\",$" "  \"version\": \"$var_ver\"," "$base_path/nodejs/package.json"
 # Python
 update "^version = \".*\"$" "version = \"$std_ver\"" "$base_path/python/Cargo.toml"
+# C#
+update "^\( *\)<Version>.*<\/Version>$" "\1<Version>$std_ver<\/Version>" "$base_path/csharp/DTCore/DTCore/DTCore.csproj"
 
 echo "Finished!"

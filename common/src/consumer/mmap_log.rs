@@ -1,5 +1,6 @@
 use std::fs;
 use std::fs::{create_dir_all, File, OpenOptions};
+// use std::io::Write;
 use std::path::Path;
 use std::sync::Mutex;
 use memmap2::MmapMut;
@@ -187,6 +188,7 @@ impl MmapLogConsumerImpl {
 
     fn append(&mut self, content: String, flush: bool) -> Result<()> {
         self.ensure_time_sep()?;
+        self.ensure_file_exist();
         let content = content.as_bytes();
         let length = content.len();
         let extra_length = if self.offset == 0 { 0 } else { LINE_ENDING_LENGTH };
@@ -194,10 +196,16 @@ impl MmapLogConsumerImpl {
 
         if self.offset != 0 {
             // appending to existing file.
+            // if let Err(e) = (&mut self.mmap[self.offset..self.offset+LINE_ENDING_LENGTH]).write(LINE_ENDING.as_bytes()) {
+            //     return runtime_error!("Failed to write, {e}");
+            // }
             self.mmap[self.offset..self.offset+LINE_ENDING_LENGTH].copy_from_slice(LINE_ENDING.as_bytes());
             self.offset += LINE_ENDING_LENGTH;
         }
 
+        // if let Err(e) = (&mut self.mmap[self.offset..self.offset+length]).write(&content) {
+        //     return runtime_error!("Failed to write, {e}");
+        // }
         self.mmap[self.offset..self.offset+length].copy_from_slice(content);
         self.offset += length;
 
@@ -242,16 +250,17 @@ impl MmapLogConsumerImpl {
     ///   1: time changes.
     ///   2: revision changes.
     fn update_mmap(&mut self, reason: u8) -> Result<()> {
-        self.flush_rest_and_truncate(true)?;
+        self.flush_rest_and_truncate(false)?;
 
         match reason {
-            2 => {
-                self.revision += 1;
-            }
-            _ => {
+            1 => {
                 self.file_time = get_hour_since_epoch();
                 self.revision = 0;
             }
+            2 => {
+                self.revision += 1;
+            }
+            _ => return runtime_error!("invalid reason ({reason}) is passed into update_mmap!")
         }
         let filename = Self::get_filename(&self.name_prefix, self.file_time, self.revision);
         self.mmap = Self::open_or_create_file(&self.path, filename.clone(), self.size);
@@ -262,6 +271,14 @@ impl MmapLogConsumerImpl {
             self.update_mmap(2)?;
         }
         Ok(())
+    }
+
+    /// Create file and mmap it if it is not exist.
+    fn ensure_file_exist(&mut self) {
+        if !Path::new(&self.path).exists() {
+            let filename = Self::get_filename(&self.name_prefix, self.file_time, self.revision);
+            self.mmap = Self::open_or_create_file(&self.path, filename, self.size);
+        }
     }
 
     fn get_init_revision(path: &String, name_prefix: &String, file_time: &u64) -> u16 {
@@ -296,6 +313,7 @@ impl MmapLogConsumerImpl {
     }
 
     fn open_or_create_file(path: &String, filename: String, size: u64) -> MmapMut {
+        create_dir_all(path.clone()).unwrap();
         let file = Self::get_file(path, filename);
         file.set_len(size).expect("Failed to set file length");      // 2 MB
         unsafe { MmapMut::map_mut(&file).unwrap() }

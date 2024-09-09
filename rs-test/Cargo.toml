@@ -1,0 +1,10 @@
+[package]
+name = "rs-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+common = { path = "../common", default-features = false, features = ["log-consumer-server"] }
+serde_json = { workspace = true }
+cap = { version = "0.1.2", features = ["stats"] }
+sysinfo = "0.31.4"
