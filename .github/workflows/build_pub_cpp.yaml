@@ -1,0 +1,142 @@
+name: C++ CI
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  check-version-with-tag:
+    name: Check Version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Version With Tag
+        run: |
+          chmod +x ./.github/scripts/check_version_by.sh
+          ./.github/scripts/check_version_by.sh $(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
+        shell: bash
+        working-directory: ./
+
+  build:
+    name: Build ${{ matrix.settings.target }}
+    runs-on: ${{ matrix.settings.host }}
+    needs: [ check-version-with-tag ]
+    strategy:
+      matrix:
+        settings:
+          - target: x86_64-unknown-linux-gnu
+            host: ubuntu-20.04
+            so_name: libdt_core_clib.so
+            target_name: libdt_core_clib-linux-amd64.so
+          - target: aarch64-unknown-linux-gnu
+            host: ubuntu-20.04
+            so_name: libdt_core_clib.so
+            target_name: libdt_core_clib-linux-arm64.so
+          - target: x86_64-apple-darwin
+            host: macOS-latest
+            so_name: libdt_core_clib.dylib
+            target_name: libdt_core_clib-macos-amd64.dylib
+            post_built: |
+              cd artifacts
+              install_name_tool -id @rpath/libdt_core_clib-macos-amd64.dylib libdt_core_clib-macos-amd64.dylib
+          - target: aarch64-apple-darwin
+            host: macOS-latest
+            so_name: libdt_core_clib.dylib
+            target_name: libdt_core_clib-macos-arm64.dylib
+            post_built: |
+              cd artifacts
+              install_name_tool -id @rpath/libdt_core_clib-macos-arm64.dylib libdt_core_clib-macos-arm64.dylib
+          - target: x86_64-pc-windows-msvc
+            host: windows-latest
+            so_name: dt_core_clib.dll
+            target_name: libdt_core_clib-windows-amd64.dll
+          - target: aarch64-pc-windows-msvc
+            host: windows-latest
+            so_name: dt_core_clib.dll
+            target_name: libdt_core_clib-windows-arm64.dll
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9.x"
+
+      - name: Setup Conan
+        uses: actions/setup-cpp@v4
+        run: |
+          pip install conan
+
+      - name: Build Library
+        uses: houseabsolute/actions-rust-cross@v0
+        with:
+          command: build
+          target: ${{ matrix.settings.target }}
+          args: "--release --package clib"
+      - name: Get Artifacts
+        run: |
+          mkdir artifacts 
+          mv ./target/${{ matrix.settings.target }}/release/${{ matrix.settings.so_name }} artifacts/${{ matrix.settings.target_name }}
+        shell: bash
+      - name: Post-built
+        if: ${{ matrix.settings.post_built }}
+        run: ${{ matrix.settings.post_built }}
+        shell: bash
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.settings.target }}
+          path: ./artifacts/${{ matrix.settings.target_name }}
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dt_core_clib_header
+          path: ./clib/dt_core_clib.h
+          overwrite: true
+
+  publish:
+    name: Publish
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Clone, Update, Push
+        run: |
+          echo "Cloning..."
+          mkdir target_repo && cd target_repo
+          git clone -b main https://github.com/datatower-ai/dt-cpp-sdk.git
+          cd ../
+          
+          echo "Resetting..."
+          find target_repo/dt-cpp-sdk/ -mindepth 1 -maxdepth 1 -type f -exec rm -f {} +
+          find target_repo/dt-cpp-sdk/ -mindepth 1 -maxdepth 1 ! -name '.git' -type d -exec rm -rf {} +
+          
+          echo "Updating..."
+          mv cpp/dt_core_cpp/* target_repo/dt-cpp-sdk/
+          find cpp/dt_core_cpp/ -mindepth 1 -maxdepth 1 -type f -name '.*' -exec mv -f {} target_repo/dt-cpp-sdk/ \;
+          find cpp/dt_core_cpp/ -mindepth 1 -maxdepth 1 -type d -name '.*' ! -name "." ! -name ".." -exec mv -rf {} target_repo/dt-cpp-sdk/ \;
+          mv target_repo/dt-cpp-sdk/.gitignore_sub target_repo/dt-cpp-sdk/.gitignore
+          mkdir -p target_repo/dt-cpp-sdk/include/
+          mv artifacts/dt_core_clib.h target_repo/dt-cpp-sdk/include/
+          mkdir -p target_repo/dt-cpp-sdk/lib/
+          mv artifacts/* target_repo/dt-cpp-sdk/lib/
+          
+          echo "Pushing..."
+          version=$(grep -oE "^version = \".*\"$" "./common/Cargo.toml" | sed -ne "s/version = \"\(.*\)\"$/\1/p")
+          cd target_repo/dt-golang-sdk/
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git config url."https://${{ secrets.SERVER_SDK_GOLANG_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          git add .
+          git commit -m "GitHub Action Bot: Syncing with v$version"
+          git tag "v$version"
+          git push -f origin main --tags
+        shell: bash
