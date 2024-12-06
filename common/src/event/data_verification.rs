@@ -59,6 +59,7 @@ static PRESET_EVENT_PROPS_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::fro
     ("#build_device", TypeConstraint::String), ("#duration", TypeConstraint::String),
     ("#firebase_iid", TypeConstraint::String), ("#appsflyer_id", TypeConstraint::String),
     ("#adjust_id", TypeConstraint::String), ("#kochava_id", TypeConstraint::String),
+    ("#ip", TypeConstraint::String),
 ]));
 static PRESET_PROPS_USER_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#active_device_model", TypeConstraint::String), ("#active_network_type", TypeConstraint::String),
