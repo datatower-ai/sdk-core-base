@@ -74,6 +74,9 @@ static PRESET_PROPS_USER_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::from
     ("#active_sdk_version_name", TypeConstraint::String), ("#active_screen_height", TypeConstraint::Number),
     ("#active_app_version_name", TypeConstraint::String), ("#active_simulator", TypeConstraint::Bool),
 ]));
+static PRESET_PROPS_USER_SET_ONCE_EXTRA_COMMON: PropsConstraintMap = Lazy::new(|| HashMap::from([
+    ("#ip", TypeConstraint::String),
+]));
 static PRESET_PROPS_AD: PropsConstraintMap = Lazy::new(|| HashMap::from([
     ("#ad_seq", TypeConstraint::String), ("#ad_id", TypeConstraint::String),
     ("#ad_type_code", TypeConstraint::Integer), ("#ad_platform_code", TypeConstraint::Integer),
@@ -275,11 +278,16 @@ fn verify_properties(
 }
 
 fn find_constraint_for_user_event<'a>(
+    event_name: &str,
     prop_name: &str
 ) -> Option<&'a TypeConstraint> {
-    PRESET_PROPS_USER_COMMON.get(prop_name).or(
-        COMMON_PROPS.get(prop_name)
-    )
+    if let Some(constraint) = PRESET_PROPS_USER_COMMON.get(prop_name).or(COMMON_PROPS.get(prop_name)) {
+        Some(constraint)
+    } else if event_name == "#user_set_once" {
+        PRESET_PROPS_USER_SET_ONCE_EXTRA_COMMON.get(prop_name)
+    } else {
+        None
+    }
 }
 
 fn find_constraint_for_event<'a>(
@@ -296,7 +304,7 @@ fn find_constraint_for_event<'a>(
 
 fn verify_user_event(event_name: &String, properties: &Map<String, Value>) -> Result<()> {
     for (k, v) in properties {
-        verify_properties(event_name, k, v, find_constraint_for_user_event(k))?
+        verify_properties(event_name, k, v, find_constraint_for_user_event(event_name, k))?
     }
 
     if event_name == "#user_append" || event_name == "#user_uniq_append" {
